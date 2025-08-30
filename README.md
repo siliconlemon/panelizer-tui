@@ -10,11 +10,11 @@ A CLI tool for laying out portrait or landscape images into clean, instagram-rea
 
 ## Pricing
 
-panelizer-cli is open source and free — forever.
+This project is open-source and free, forever.
 
 ## Contributions
 
-Open to issues and pull requests. If you’ve got an idea, improvement, or weird edge case, bring it on. No elaborate contributing guide — just try to keep your PR tight and focused.
+Open to issues and pull requests. If you’ve got an idea, improvement, or a weird edge case, let me know.
 
 ## License
 
