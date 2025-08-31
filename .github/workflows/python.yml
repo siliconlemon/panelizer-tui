@@ -30,7 +30,7 @@ jobs:
           pyinstaller --onefile --name panelizer panelizer/app.py
 
       - name: Archive built executable (optional upload)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: panelizer-${{ matrix.python-version }}-bin
           path: dist/panelizer*
