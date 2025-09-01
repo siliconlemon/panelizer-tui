@@ -28,15 +28,7 @@ for this to work properly.
 
 - **Install dependencies:** In your project's root directory, run `pip install .` to install all required packages.
 - **Run as a module:** Open a new, external terminal and execute `python -m panelizer.app`.
-
-Reminder:
-
-- **Check Path**: Don't be a dummy and make sure that your interpreter is added to Windows' system *Path* variable. 
-
-    Otherwise, you'll get something like this: `Python was not found; run without arguments to install from the Microsoft Store, 
-      or disable this shortcut from...`
       
-
 ## License
 
 MIT License ([@siliconlemon](https://github.com/siliconlemon)) — see the [LICENSE](LICENSE) file for full text.
