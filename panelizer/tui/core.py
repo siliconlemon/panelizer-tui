@@ -34,7 +34,9 @@ class PanelizerTui(App[str]):
 
     @work
     async def show_file_picker(self) -> None:
-        self.selected_input_dir = await self.push_screen_wait(SelectDirectory(location=Path.home() / "Pictures"))
+        self.selected_input_dir = await self.push_screen_wait(
+            SelectDirectory(location=Path.home() / "Pictures")
+        )
         if self.selected_input_dir:
             self.exit(self.selected_input_dir)
         else:
