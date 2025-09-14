@@ -1,13 +1,13 @@
 """
-Main CLI entrypoint for panelizer-cli
+Main TUI entrypoint for panelizer-tui
 Run this directly to launch the app.
 """
 
-from panelizer.cli import PanelizerCli
+from panelizer.tui import PanelizerTui
 
-def cli_entry():
-    app = PanelizerCli()
+def terminal_entry():
+    app = PanelizerTui()
     app.run()
 
 if __name__ == "__main__":
-    cli_entry()
+    terminal_entry()

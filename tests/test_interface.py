@@ -1,4 +1,4 @@
-from panelizer.cli import pick_directory
+from panelizer.tui import pick_directory
 
 
 def test_pick_directory_valid(monkeypatch, tmp_path):
