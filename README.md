@@ -2,13 +2,13 @@
   <img src="assets/icon.svg" width="180" alt="panelizer-cli logo" />
 </p>
 
-# panelizer-cli
+# Panelizer TUI
 
-A CLI tool for laying out pictures onto clean, instagram-ready carousel panels. 
+A TUI (text user interface) tool for laying out pictures onto clean, instagram-ready carousel panels. 
 
 ## Features
 
-- A fast and lightweight `textual-based` CLI 
+- A fast and lightweight `textual-based` TUI 
 - Works with all common aspect ratios like 3:4, 4:5, 3:2, and anything between 16:9 and 5:2
 - Fits every picture onto one or two 2000×2500px portrait mode panels, based on proportional padding for both the horizontal and vertical axis
 
