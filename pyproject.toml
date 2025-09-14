@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "panelizer-tui"
 version = "0.1.0"
-description = "A CLI tool for laying out instagram-ready carousel panels"
+description = "A TUI (text user interface) tool for laying out instagram-ready carousel panels"
 authors = [
     { name = "Your Name", email = "you@example.com" }
 ]
