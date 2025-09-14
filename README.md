@@ -4,7 +4,7 @@
 
 # panelizer-cli
 
-A CLI tool for laying out picturess onto clean, instagram-ready carousel panels. 
+A CLI tool for laying out pictures onto clean, instagram-ready carousel panels. 
 
 ## Features
 
