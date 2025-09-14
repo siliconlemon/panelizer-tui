@@ -5,7 +5,7 @@ from textual_fspicker import SelectDirectory
 from pathlib import Path
 
 
-class PanelizerTui(App):
+class PanelizerTui(App[str]):
     CSS_PATH = None
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
@@ -34,10 +34,8 @@ class PanelizerTui(App):
 
     @work
     async def show_file_picker(self) -> None:
-        await self.push_screen_wait(SelectDirectory(location=Path.home() / "Pictures"))
+        self.selected_input_dir = await self.push_screen_wait(SelectDirectory(location=Path.home() / "Pictures"))
         if self.selected_input_dir:
-            self.console.print(f"[green]Selected:[/green] {self.selected_input_dir}")
-            self.exit()
+            self.exit(self.selected_input_dir)
         else:
-            self.console.print("[red]No directory selected.")
-            self.exit()
+            self.exit(self.selected_input_dir)
