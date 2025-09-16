@@ -1,9 +1,0 @@
-# UI framework for TUI
-textual>=0.40.0
-textual-fspicker>=0.6.0
-
-# Image manipulation
-pillow>=10.0.0
-
-# Rich text in console/logs
-rich>=13.0.0
