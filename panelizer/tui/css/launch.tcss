@@ -1,0 +1,29 @@
+LaunchScreen {
+    align: center middle;
+}
+
+#launch-container {
+    width: auto;
+    height: auto;
+    align: center middle;
+    margin: 1 0;
+}
+
+#ascii-art-label {
+    margin-bottom: 2;
+    text-align: center;
+    color: #98c379; /* A green color for the ASCII art */
+    text-style: bold;
+}
+
+#button-container {
+    layout: horizontal;
+    width: auto;
+    height: auto;
+    align: center middle;
+    margin-top: 2;
+}
+
+Button {
+    width: 25;
+}

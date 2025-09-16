@@ -1,8 +1,12 @@
-from textual import work
-from textual.app import App, ComposeResult
-from textual.widgets import Welcome
-from textual_fspicker import SelectDirectory
+# panelizer/app.py
+
 from pathlib import Path
+
+from textual import work
+from textual.app import App
+
+from .screens.launch import LaunchScreen
+from .widgets.picker import pick_directory
 
 
 class PanelizerTUI(App[str]):
@@ -22,20 +26,21 @@ class PanelizerTUI(App[str]):
         "aqua",
     ]
 
+    SCREENS = {
+        "launch": LaunchScreen,
+    }
+
     def __init__(self):
         super().__init__()
         self.selected_input_dir: Path | None = None
 
-    def compose(self) -> ComposeResult:
-        yield Welcome()
-
-    def on_button_pressed(self) -> None:
-        self.show_file_picker()
+    def on_mount(self) -> None:
+        self.push_screen("launch")
 
     @work
-    async def show_file_picker(self) -> None:
+    async def show_file_picker(self, location: Path) -> None:
         self.selected_input_dir = await self.push_screen_wait(
-            SelectDirectory(location=Path.home() / "Pictures")
+            pick_directory()
         )
         if self.selected_input_dir:
             self.exit(self.selected_input_dir)
