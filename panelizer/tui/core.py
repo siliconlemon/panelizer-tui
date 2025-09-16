@@ -5,7 +5,7 @@ from textual_fspicker import SelectDirectory
 from pathlib import Path
 
 
-class PanelizerTui(App[str]):
+class PanelizerTUI(App[str]):
     CSS_PATH = None
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"

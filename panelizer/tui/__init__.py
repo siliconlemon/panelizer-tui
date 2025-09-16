@@ -10,7 +10,7 @@ Public tui:
 - pick_directory()
 """
 
-from .core import PanelizerTui
+from .core import PanelizerTUI
 from .dir_picker import pick_directory
 
-__all__ = ["PanelizerTui", "pick_directory"]
+__all__ = ["PanelizerTUI", "pick_directory"]
