@@ -8,7 +8,7 @@ from panelizer.tui import PanelizerTUI
 def terminal_entry():
     app = PanelizerTUI()
     response = app.run()
-    print(response)
+    print(f"Response: {response}")
 
 if __name__ == "__main__":
     terminal_entry()

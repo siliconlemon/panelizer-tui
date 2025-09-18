@@ -1,48 +1,50 @@
-# panelizer/app.py
-
 from pathlib import Path
 
 from textual import work
 from textual.app import App
+from textual.theme import Theme
 
 from .screens.launch import LaunchScreen
-from .widgets.picker import pick_directory
 
 
-class PanelizerTUI(App[str]):
-    CSS_PATH = None
+class PanelizerTUI(App[Path]):
+    CSS_PATH = "./css/globals.tcss"
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
-    COLORS = [
-        "white",
-        "maroon",
-        "red",
-        "purple",
-        "fuchsia",
-        "olive",
-        "yellow",
-        "navy",
-        "teal",
-        "aqua",
-    ]
-
     SCREENS = {
         "launch": LaunchScreen,
     }
+    DEFAULT_THEME = Theme(
+        name="default",
+        primary="#88c0d0",
+        secondary="#81a1c1",
+        accent="#b48ead",
+        foreground="#d8dee9",
+        background="#1e222a",
+        success="#a3be8c",
+        warning="#ebcb8b",
+        error="#ea4b4b",
+        surface="#3b4252",
+        panel="#292f3a",
+        dark=True,
+        variables={
+            "block-cursor-text-style": "none",
+            "footer-key-foreground": "#88c0d0",
+        },
+    )
 
     def __init__(self):
         super().__init__()
         self.selected_input_dir: Path | None = None
 
-    def on_mount(self) -> None:
-        self.push_screen("launch")
+    def set_themes(self):
+        for light_theme in ("textual-light", "catppuccin-latte", "solarized-lite"):
+            self.unregister_theme(light_theme)
+        self.register_theme(self.DEFAULT_THEME)
+        self.theme = "default"
 
     @work
-    async def show_file_picker(self, location: Path) -> None:
-        self.selected_input_dir = await self.push_screen_wait(
-            pick_directory()
-        )
-        if self.selected_input_dir:
-            self.exit(self.selected_input_dir)
-        else:
-            self.exit(self.selected_input_dir)
+    async def on_mount(self) -> None:
+        self.set_themes()
+        path = await self.push_screen_wait("launch")
+        self.exit(path)

@@ -11,6 +11,5 @@ Public tui:
 """
 
 from .core import PanelizerTUI
-from .widgets.picker import pick_directory
 
 __all__ = ["PanelizerTUI"]

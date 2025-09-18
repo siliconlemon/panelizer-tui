@@ -1,29 +1,51 @@
-LaunchScreen {
+ /*
+
+* Don't mind the dollar sign assignment warnings, pycharm just doesnt have a textual plugin yet.
+* Just disable all inspections for this file, also use scopes to enable css highlighting,
+* with no css inspections for the textual css scope.
+* The "term expected" warning is the only one that the scope can't suppress right now,
+* awaiting a fix from jetbrains.
+
+*/
+
+Screen {
     align: center middle;
+    layout: vertical;
 }
 
 #launch-container {
-    width: auto;
-    height: auto;
     align: center middle;
-    margin: 1 0;
+    width: 100%;
+    height: 1fr;
+    layout: vertical;
+    /*background: #222233;*/
 }
 
-#ascii-art-label {
-    margin-bottom: 2;
+#alignment-container {
+    width: 100%;
+    height: 1fr;
+    padding: 3;
+    layout: horizontal;
+    align: center middle;
+}
+
+#ascii-art-container {
+    align: center middle;
+    /*background: #223377;*/
+}
+
+#ascii-art {
     text-align: center;
-    color: #98c379; /* A green color for the ASCII art */
-    text-style: bold;
 }
 
 #button-container {
     layout: horizontal;
-    width: auto;
-    height: auto;
+    height: 3;
+    min-height: 3;
+    max-height: 3;
+    width: 100%;
     align: center middle;
-    margin-top: 2;
+    margin-bottom: 2;
+    /*background: #661a1a;*/
 }
 
-Button {
-    width: 25;
-}

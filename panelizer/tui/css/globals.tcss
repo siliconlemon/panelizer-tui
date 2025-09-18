@@ -1,0 +1,22 @@
+ /*
+
+* Don't mind the dollar sign assignment warnings, pycharm just doesnt have a textual plugin yet.
+* Just disable all inspections for this file, also use scopes to enable css highlighting,
+* with no css inspections for the textual css scope.
+* The "term expected" warning is the only one that the scope can't suppress right now,
+* awaiting a fix from jetbrains.
+
+*/
+
+Button {
+    background: transparent;
+    border: round $secondary;
+    color: $primary;
+    min-width: 25;
+    margin: 0 2;
+}
+
+Button:hover {
+    color: $primary-darken-2;
+    border: round $primary-darken-3;
+}
