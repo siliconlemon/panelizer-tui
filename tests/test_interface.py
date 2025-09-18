@@ -1,4 +1,5 @@
-from panelizer.tui import pick_directory
+from pathlib import Path
+from textual_fspicker import SelectDirectory
 
 
 def test_pick_directory_valid(monkeypatch, tmp_path):
@@ -6,6 +7,7 @@ def test_pick_directory_valid(monkeypatch, tmp_path):
     test_input = str(tmp_path)
 
     monkeypatch.setattr("builtins.input", lambda: test_input)
-    result = pick_directory("Select test directory")
+    start_directory = Path.home() / "Pictures"
+    result = SelectDirectory(location=start_directory, double_click_directories=False)
 
     assert result == test_input
