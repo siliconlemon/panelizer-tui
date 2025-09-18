@@ -6,6 +6,8 @@
 
 A TUI (text user interface) tool for laying out pictures onto clean, instagram-ready carousel panels. 
 
+<img width="688" alt="launch-screen" src="https://github.com/user-attachments/assets/858d7021-103e-4128-84d1-25f4a125316e" />
+
 ## Features
 
 - A fast and lightweight `textual-based` TUI 
