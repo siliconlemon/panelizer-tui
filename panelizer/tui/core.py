@@ -20,7 +20,7 @@ class PanelizerTUI(App[Path]):
         secondary="#81a1c1",
         accent="#b48ead",
         foreground="#d8dee9",
-        background="#1e222a",
+        background="#1e1e1e",
         success="#a3be8c",
         warning="#ebcb8b",
         error="#ea4b4b",

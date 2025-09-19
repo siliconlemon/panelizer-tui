@@ -36,7 +36,7 @@ class LaunchScreen(Screen[ScreenResultType]):
                 "*": "#b2b2b2",
                 "@": "#ffffff",
                 "%": "#a8d6e5",
-                "=": "#6b92bb",
+                "i": "#6b92bb",
                 ":": "#577f7e",
             }
             asset_dir = Path(__file__).parent.parent.parent.parent / "assets"
