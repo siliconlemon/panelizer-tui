@@ -1,22 +1,17 @@
 from pathlib import Path
-
-from textual import work
+from typing import Optional
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.events import Resize
 from textual.geometry import Size
-from textual.screen import Screen, ScreenResultType
+from textual.screen import Screen
 from textual.widgets import Header, Label, Button
 from textual_fspicker import SelectDirectory
-
 from ...utils.ascii_painter import paint
-from ..widgets.too_small import TooSmall
 
+class LaunchScreen(Screen[Optional[Path]]):
+    CSS_PATH = ["../css/launch.tcss"]
 
-class LaunchScreen(Screen[ScreenResultType]):
-    CSS_PATH = ["../css/launch.tcss", "../css/too_small.tcss"]
-    HEADER_HEIGHT = 1
-    BUTTON_AREA_HEIGHT = 2
     ASCII_ART_VARIANTS = [
         (30, 16, "icon-grayscale-40.txt"),
         (40, 22, "icon-grayscale-40.txt"),
@@ -25,12 +20,11 @@ class LaunchScreen(Screen[ScreenResultType]):
         (70, 38, "icon-grayscale-70.txt"),
     ]
     DEFAULT_ASCII_ART = (40, 21, "icon-grayscale-40.txt")
-    ASCII_ART_CACHE = {}
-    MIN_HEIGHT_ROWS = 35
-    MIN_WIDTH_COLS = 60
+    ASCII_ART_CACHE: dict[str, str] = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Preload ASCII art once
         if not self.ASCII_ART_CACHE:
             color_map = {
                 "*": "#b2b2b2",
@@ -46,35 +40,30 @@ class LaunchScreen(Screen[ScreenResultType]):
                     try:
                         with asset_path.open("r", encoding="utf-8") as f:
                             raw_art = f.read()
-                            colorized_art = paint(ascii_string=raw_art, color_map=color_map)
-                            self.ASCII_ART_CACHE[filename] = colorized_art
-                    except FileNotFoundError:
-                        self.ASCII_ART_CACHE[filename] = f"Error: File not found at {asset_path}"
+                        colorized_art = paint(ascii_string=raw_art, color_map=color_map)
+                        self.ASCII_ART_CACHE[filename] = colorized_art
                     except Exception as e:
-                        self.ASCII_ART_CACHE[filename] = f"Error: {e}"
-
+                        self.ASCII_ART_CACHE[filename] = f"[Error loading {filename}: {e}]"
 
     async def _handle_directory_selection(self, start_directory: Path) -> None:
+        """Open directory picker and dismiss with selected path or None."""
         selected_directory = await self.app.push_screen_wait(
             SelectDirectory(location=start_directory, double_click_directories=False)
         )
-        if selected_directory:
-            await self.dismiss(selected_directory)
-        else:
-            await self.dismiss(None)
+        await self.dismiss(selected_directory or None)
 
-
-    @work(exclusive=True)
     async def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "pick-dir":
-            start_directory = Path.home() / "Pictures"
-            await self._handle_directory_selection(start_directory)
-        elif event.button.id == "current-dir":
-            start_directory = Path.cwd()
-            await self._handle_directory_selection(start_directory)
+        """Handle directory selection buttons."""
+        # Map button IDs to directories
+        lookup = {
+            "pick-dir": Path.home() / "Pictures",
+            "current-dir": Path.cwd()
+        }
+        if event.button.id in lookup:
+            await self._handle_directory_selection(lookup[event.button.id])
 
-
-    def _pick_fitting_ascii(self, cols, rows):
+    def _pick_fitting_ascii(self, cols: int, rows: int) -> tuple[int, int, str]:
+        """Pick the largest ASCII art that will fit in cols×rows."""
         best = self.DEFAULT_ASCII_ART
         for width, height, filename in self.ASCII_ART_VARIANTS:
             if width <= cols and height <= rows:
@@ -83,18 +72,17 @@ class LaunchScreen(Screen[ScreenResultType]):
                 break
         return best
 
-    def _update_ascii_art(self, filename):
-        new_art = self.ASCII_ART_CACHE.get(filename)
-
-        if new_art is not None:
-            self.query_one("#ascii-art", Label).update(new_art)
+    def _update_ascii_art(self, filename: str) -> None:
+        """Update ASCII art label with new ASCII art."""
+        art = self.ASCII_ART_CACHE.get(filename)
+        ascii_label = self.query_one("#ascii-art", Label)
+        if art:
+            ascii_label.update(art)
         else:
-            self.query_one("#ascii-art", Label).update(
-                f"Error: ASCII art for file '{filename}' not found inside cache."
-            )
-
+            ascii_label.update(f"[Error: ASCII for '{filename}' not cached!]")
 
     def _update_layout(self, size: Size) -> None:
+        """Update sizes/layout of the ASCII art area after a resize."""
         button_container = self.query_one("#button-container")
         button_height = button_container.size.height
         button_margin = button_container.styles.margin
@@ -103,19 +91,10 @@ class LaunchScreen(Screen[ScreenResultType]):
         alignment_container = self.query_one("#alignment-container")
         container_padding = alignment_container.styles.padding
         padding_height = container_padding.top + container_padding.bottom
-
-        available_height = (
-                size.height
-                - self.HEADER_HEIGHT
-                - button_height
-                - button_margin_height
-                - padding_height
-        )
-        available_height = max(0, available_height)
-
         padding_width = container_padding.left + container_padding.right
-        available_width = size.width - padding_width
-        available_width = max(0, available_width)
+
+        available_height = max(0, size.height - button_height - button_margin_height - padding_height - 1)
+        available_width = max(0, size.width - padding_width)
 
         width, height, filename = self._pick_fitting_ascii(available_width, available_height)
         art_container = self.query_one("#ascii-art-container")
@@ -123,27 +102,12 @@ class LaunchScreen(Screen[ScreenResultType]):
         art_container.styles.height = height
         self._update_ascii_art(filename)
 
-
-    def _check_terminal_size(self, cols, rows):
-        overlay = self.query_one(TooSmall)
-        overlay.set_size(cols, rows)
-        if rows < self.MIN_HEIGHT_ROWS or cols < self.MIN_WIDTH_COLS:
-            overlay.display = True
-        else:
-            overlay.display = False
-
-
     def on_mount(self) -> None:
-        ascii_art = self.query_one("#ascii-art", Label)
-        ascii_art.can_focus = False
+        self.query_one("#ascii-art", Label).can_focus = False
         self._update_layout(self.size)
-        self._check_terminal_size(self.size.width, self.size.height)
-
 
     def on_resize(self, event: Resize) -> None:
         self._update_layout(event.size)
-        self._check_terminal_size(event.size.width, event.size.height)
-
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -154,9 +118,4 @@ class LaunchScreen(Screen[ScreenResultType]):
             with Container(id="button-container"):
                 yield Button("Pick a Directory", id="pick-dir", variant="primary")
                 yield Button("Current Directory", id="current-dir")
-        yield TooSmall(
-            min_height=self.MIN_HEIGHT_ROWS,
-            min_width=self.MIN_WIDTH_COLS,
-            classes="terminal-too-small",
-            id="terminal-too-small"
-        )
+
