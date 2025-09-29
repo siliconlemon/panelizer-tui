@@ -9,9 +9,11 @@ from textual.widgets import Header, Label, Button
 from textual_fspicker import SelectDirectory
 from ...utils.ascii_painter import paint
 
+
 class LaunchScreen(Screen[Optional[Path]]):
     CSS_PATH = ["../css/launch.tcss"]
-
+    DEFAULT_ASCII_ART = (40, 21, "icon-grayscale-40.txt")
+    ASCII_ART_CACHE: dict[str, str] = {}
     ASCII_ART_VARIANTS = [
         (28, 15, "icon-grayscale-28.txt"),
         (30, 16, "icon-grayscale-30.txt"),
@@ -20,8 +22,6 @@ class LaunchScreen(Screen[Optional[Path]]):
         (60, 33, "icon-grayscale-60.txt"),
         (70, 38, "icon-grayscale-70.txt"),
     ]
-    DEFAULT_ASCII_ART = (40, 21, "icon-grayscale-40.txt")
-    ASCII_ART_CACHE: dict[str, str] = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,6 +44,23 @@ class LaunchScreen(Screen[Optional[Path]]):
                         self.ASCII_ART_CACHE[filename] = colorized_art
                     except Exception as e:
                         self.ASCII_ART_CACHE[filename] = f"[Error loading {filename}: {e}]"
+
+    def on_mount(self) -> None:
+        self.query_one("#ascii-art", Label).can_focus = False
+        self._update_layout(self.size)
+
+    def on_resize(self, event: Resize) -> None:
+        self._update_layout(event.size)
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        with Container(id="launch-container"):
+            with Container(id="alignment-container"):
+                with Container(id="ascii-art-container"):
+                    yield Label(id="ascii-art")
+            with Container(id="button-container"):
+                yield Button("Pick a Directory", id="pick-dir", variant="primary")
+                yield Button("Current Directory", id="current-dir")
 
     async def _handle_directory_selection(self, start_directory: Path) -> None:
         """Opens directory picker and dismiss with selected path or None."""
@@ -101,21 +118,3 @@ class LaunchScreen(Screen[Optional[Path]]):
         art_container.styles.width = width
         art_container.styles.height = height
         self._update_ascii_art(filename)
-
-    def on_mount(self) -> None:
-        self.query_one("#ascii-art", Label).can_focus = False
-        self._update_layout(self.size)
-
-    def on_resize(self, event: Resize) -> None:
-        self._update_layout(event.size)
-
-    def compose(self) -> ComposeResult:
-        yield Header()
-        with Container(id="launch-container"):
-            with Container(id="alignment-container"):
-                with Container(id="ascii-art-container"):
-                    yield Label(id="ascii-art")
-            with Container(id="button-container"):
-                yield Button("Pick a Directory", id="pick-dir", variant="primary")
-                yield Button("Current Directory", id="current-dir")
-

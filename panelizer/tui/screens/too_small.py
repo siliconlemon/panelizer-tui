@@ -5,6 +5,7 @@ from textual.events import Resize
 from textual.screen import Screen
 from textual.widgets import Static
 
+
 class TooSmallScreen(Screen[None]):
     CSS_PATH = ["../css/too_small.tcss"]
     MODAL = True
@@ -17,21 +18,31 @@ class TooSmallScreen(Screen[None]):
         self._pending_height = height
 
     def on_mount(self):
+        """Updates the labels with the current terminal size when the screen is mounted."""
         self._update_labels()
 
     def on_show(self):
+        """Updates the labels when the screen becomes visible."""
         self._update_labels()
 
     def on_resize(self, event: Resize) -> None:
+        """Handles terminal resize events and updates the modal labels accordingly."""
         self.set_size(event.size.width, event.size.height)
 
+    def compose(self) -> ComposeResult:
+        with VerticalGroup(id="msg_group"):
+            yield Static("Current window size is too small", id="msg_err", markup=True)
+            yield Static("Awaiting live update values", id="msg_size", markup=True)
+
     def set_size(self, width, height):
+        """Sets the current terminal size for display and updates the labels if mounted."""
         self._pending_width = width
         self._pending_height = height
         if self.is_mounted:
             self._update_labels()
 
     def _update_labels(self):
+        """Updates the error and size labels displayed in the modal."""
         width = self._pending_width or 0
         height = self._pending_height or 0
         try:
@@ -45,8 +56,3 @@ class TooSmallScreen(Screen[None]):
             )
         except NoMatches:
             pass
-
-    def compose(self) -> ComposeResult:
-        with VerticalGroup(id="msg_group"):
-            yield Static("", id="msg_err", markup=True)
-            yield Static("", id="msg_size", markup=True)
