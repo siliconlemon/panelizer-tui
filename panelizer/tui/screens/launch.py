@@ -13,7 +13,8 @@ class LaunchScreen(Screen[Optional[Path]]):
     CSS_PATH = ["../css/launch.tcss"]
 
     ASCII_ART_VARIANTS = [
-        (30, 16, "icon-grayscale-40.txt"),
+        (28, 15, "icon-grayscale-28.txt"),
+        (30, 16, "icon-grayscale-30.txt"),
         (40, 22, "icon-grayscale-40.txt"),
         (50, 27, "icon-grayscale-50.txt"),
         (60, 33, "icon-grayscale-60.txt"),
@@ -24,7 +25,6 @@ class LaunchScreen(Screen[Optional[Path]]):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Preload ASCII art once
         if not self.ASCII_ART_CACHE:
             color_map = {
                 "*": "#b2b2b2",
@@ -46,15 +46,15 @@ class LaunchScreen(Screen[Optional[Path]]):
                         self.ASCII_ART_CACHE[filename] = f"[Error loading {filename}: {e}]"
 
     async def _handle_directory_selection(self, start_directory: Path) -> None:
-        """Open directory picker and dismiss with selected path or None."""
+        """Opens directory picker and dismiss with selected path or None."""
         selected_directory = await self.app.push_screen_wait(
             SelectDirectory(location=start_directory, double_click_directories=False)
         )
-        await self.dismiss(selected_directory or None)
+        # noinspection PyAsyncCall
+        self.dismiss(selected_directory or None)
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle directory selection buttons."""
-        # Map button IDs to directories
+        """Handles directory selection buttons."""
         lookup = {
             "pick-dir": Path.home() / "Pictures",
             "current-dir": Path.cwd()
@@ -63,7 +63,7 @@ class LaunchScreen(Screen[Optional[Path]]):
             await self._handle_directory_selection(lookup[event.button.id])
 
     def _pick_fitting_ascii(self, cols: int, rows: int) -> tuple[int, int, str]:
-        """Pick the largest ASCII art that will fit in cols×rows."""
+        """Picks the largest ASCII art that will fit in cols×rows."""
         best = self.DEFAULT_ASCII_ART
         for width, height, filename in self.ASCII_ART_VARIANTS:
             if width <= cols and height <= rows:
@@ -73,7 +73,7 @@ class LaunchScreen(Screen[Optional[Path]]):
         return best
 
     def _update_ascii_art(self, filename: str) -> None:
-        """Update ASCII art label with new ASCII art."""
+        """Updates ASCII art label with new ASCII art."""
         art = self.ASCII_ART_CACHE.get(filename)
         ascii_label = self.query_one("#ascii-art", Label)
         if art:
@@ -82,7 +82,7 @@ class LaunchScreen(Screen[Optional[Path]]):
             ascii_label.update(f"[Error: ASCII for '{filename}' not cached!]")
 
     def _update_layout(self, size: Size) -> None:
-        """Update sizes/layout of the ASCII art area after a resize."""
+        """Updates sizes/layout of the ASCII art area after a resize."""
         button_container = self.query_one("#button-container")
         button_height = button_container.size.height
         button_margin = button_container.styles.margin
