@@ -1,11 +1,13 @@
 from pathlib import Path
-from typing import Callable, Awaitable, Any
+from typing import Callable, Any
 from textual import work
 from textual.app import App
 from textual.events import Resize
 from textual.theme import Theme
 from .screens.launch import LaunchScreen
 from .screens.too_small import TooSmallScreen
+from .state_machine import StateMachine
+
 
 class PanelizerTUI(App[Any]):
     CSS_PATH = ["./css/globals.tcss"]
@@ -38,12 +40,12 @@ class PanelizerTUI(App[Any]):
     def __init__(self) -> None:
         super().__init__()
         self.set_themes()
-        self._launch_started: bool = False
-        self._too_small_modal_open: bool = False
+        self._launch_started = False
+        self._too_small_modal_open = False
         self.selected_input_dir: Path | None = None
+        self.state_machine = StateMachine(ui=self)
 
     async def on_resize(self, event: Resize) -> None:
-        """Handles terminal resize events, showing or closing the 'too small' modal as needed."""
         await self.handle_too_small_on_resize(event.size.width, event.size.height)
 
     def set_themes(self) -> None:
