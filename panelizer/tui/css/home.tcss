@@ -25,12 +25,12 @@
 #path-btn {
     overflow-x: hidden;
     text-align: center;
-    color: $accent-darken-3;
+    color: $text;
     border: round $secondary;
 }
 
 #path-btn:focus, #path-btn:hover {
-    color: $accent-lighten-2;
+    color: $text;
     border: round $secondary-lighten-2;
 }
 
