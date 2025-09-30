@@ -1,5 +1,6 @@
 #home-vertical {
     height: 100%;
+    max-height: 50;
     min-width: 80;
     max-width: 120;
     padding: 2 3;

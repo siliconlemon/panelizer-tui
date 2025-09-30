@@ -68,8 +68,8 @@ class HomeScreen(Screen[str]):
     def _set_all_files_btn_label(self) -> str:
         """Returns the label for the 'all-files-btn' button based on if it's selected."""
         if self.file_mode == "all":
-            return self._highlight_selected_text("All files")
-        return "All files"
+            return self._highlight_selected_text("All Files")
+        return "All Files"
 
     def _set_select_files_btn_label(self) -> str:
         """Returns the label for 'select files' button based on if it and any files are selected."""
@@ -79,11 +79,11 @@ class HomeScreen(Screen[str]):
                 label_text = f"1 file: {Path(self.selected_files[0]).name}"
             elif count <= 3:
                 file_names = ', '.join(Path(f).name for f in self.selected_files)
-                label_text = f"{count} files: {file_names}"
+                label_text = f"{count} Files: {file_names}"
             else:
-                label_text = f"{count} files selected"
+                label_text = f"{count} Files Selected"
             return self._highlight_selected_text(label_text)
-        return "Select files"
+        return "Select Files"
 
     async def on_mount(self) -> None:
         self._update_path_display()
