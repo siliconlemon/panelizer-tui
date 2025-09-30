@@ -1,0 +1,119 @@
+#home-vertical {
+    height: 100%;
+    min-width: 80;
+    max-width: 120;
+    padding: 2 3;
+}
+
+#path-row {
+    height: auto;
+    layout: horizontal;
+    align-horizontal: center;
+    align-vertical: middle;
+    margin-bottom: 1;
+}
+
+#icon {
+    color: $accent-darken-3 !important;
+    width: 2;
+    min-width: 2;
+}
+
+#path-btn {
+    width: 1fr;
+    min-height: 3;
+    overflow-x: hidden;
+    text-align: center;
+    padding: 0 2;
+    margin: 0 0;
+    border: round $secondary-darken-3;
+    color: $secondary-darken-2;
+}
+
+#path-btn:hover {
+    text-style: underline;
+    color: $accent-lighten-1;
+    border: round $secondary;
+}
+
+#path-btn:focus {
+    color: $accent-lighten-1;
+    border: round $secondary;
+}
+
+#pad-row-1, #pad-row-2 {
+    margin-bottom: 1;
+    layout: horizontal;
+    align-horizontal: left;
+    align-vertical: middle;
+}
+
+#pad-row-2 {
+    margin-bottom: 2;
+}
+
+.gap-left {
+    margin-left: 1;
+    margin-right: 0;
+}
+
+.gap-right {
+    margin-left: 0;
+    margin-right: 1;
+}
+
+.pad-entry {
+    width: 8;
+    min-width: 6;
+    text-align: right;
+    background: $surface;
+    color: $text;
+}
+
+.pad-entry:focus {
+    background: $accent-lighten-1;
+}
+
+.spacer {
+    height: 1fr;
+}
+
+#file-select-row {
+    width: 1fr;
+    height: auto;
+    layout: grid;
+    grid-size: 2;
+    grid-columns: 1fr 1fr;
+    margin-bottom: 1;
+}
+
+.file-select-btn {
+    width: 1fr;
+    min-height: 3;
+    min-width: 14;
+    padding: 0;
+    color: $accent-darken-3;
+    border: round $secondary-darken-3;
+}
+
+.file-select-btn:hover {
+    color: $accent-lighten-1;
+    border: round $secondary;
+}
+
+.file-select-btn.selected {
+    color: $accent-lighten-1;
+    border: round $secondary;
+}
+
+.file-select-btn.selected:hover {
+    color: $accent-darken-1;
+    border: round $secondary-darken-2;
+}
+
+#start-btn {
+    width: 100%;
+    min-height: 3;
+    margin-top: 0;
+    margin-bottom: 0;
+}

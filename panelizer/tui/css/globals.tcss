@@ -10,8 +10,8 @@
 
 Button {
     background: transparent;
-    border: round $secondary;
-    color: $primary;
+    border: round $primary;
+    color: $primary-lighten-1;
     min-width: 25;
     margin: 0 2;
 }

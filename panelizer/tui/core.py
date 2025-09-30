@@ -15,7 +15,7 @@ class PanelizerTUI(App[Any]):
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
     MIN_ROWS: int = 28
-    MIN_COLS: int = 50
+    MIN_COLS: int = 80
     SCREENS = {
         "launch": LaunchScreen,
         "home": HomeScreen,
@@ -23,10 +23,10 @@ class PanelizerTUI(App[Any]):
     }
     DEFAULT_THEME = Theme(
         name="default",
-        primary="#88c0d0",
-        secondary="#81a1c1",
-        accent="#b48ead",
-        foreground="#d8dee9",
+        primary="#72b9cf",
+        secondary="#acb6bf",
+        accent="#9fb0b4",
+        foreground="#dfe5ef",
         background="#1e1e1e",
         success="#a3be8c",
         warning="#ebcb8b",
