@@ -12,6 +12,7 @@ from ...utils.ascii_painter import paint
 
 class LaunchScreen(Screen[Optional[Path]]):
     CSS_PATH = ["../css/launch.tcss"]
+    ESCAPE_TO_MINIMIZE = True
     DEFAULT_ASCII_ART = (40, 21, "icon-grayscale-40.txt")
     ASCII_ART_CACHE: dict[str, str] = {}
     ASCII_ART_VARIANTS = [
@@ -46,7 +47,6 @@ class LaunchScreen(Screen[Optional[Path]]):
                         self.ASCII_ART_CACHE[filename] = f"[Error loading {filename}: {e}]"
 
     def on_mount(self) -> None:
-        self.query_one("#ascii-art", Label).can_focus = False
         self._update_layout(self.size)
 
     def on_resize(self, event: Resize) -> None:
