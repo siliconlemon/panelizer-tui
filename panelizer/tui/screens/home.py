@@ -29,47 +29,42 @@ class HomeScreen(Screen[str]):
         yield Header()
         with Vertical(id="home-vertical"):
             with Horizontal(id="path-row"):
-                yield Button(self.selected_path.as_posix(), id="path-btn", classes="highlight hoverable")
-            with Horizontal(id="pad-row-1", classes="pad-entry"):
-                yield Input(str(self.padding_left), placeholder="Left %", id="pad-left", type="number")
-                yield Input(
-                    str(self.padding_right), placeholder="Right %", id="pad-right", classes="gap-left", type="number"
-                )
-            with Horizontal(id="pad-row-2", classes="pad-entry"):
-                yield Input(
-                    str(self.padding_top), placeholder="Top %", id="pad-top", classes="pad-entry", type="number"
-                )
-                yield Input(
-                    str(self.padding_bottom),
-                    placeholder="Bottom %",
-                    id="pad-bottom",
-                    classes="pad-entry",
-                    type="number"
-                )
-            yield Container(classes="spacer")
-            with Horizontal(id="file-select-row"):
+                yield Button(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
+            with Horizontal(id="main-row"):
+                with Vertical(id="pad-grid"):
+                    yield Input(str(self.padding_left), placeholder="Left %",
+                                id="pad-left", classes="pad-entry", type="number")
+                    yield Input(str(self.padding_right), placeholder="Right %",
+                                id="pad-right", classes="pad-entry", type="number")
+                    yield Input(str(self.padding_top), placeholder="Top %",
+                                id="pad-top", classes="pad-entry", type="number")
+                    yield Input(str(self.padding_bottom), placeholder="Bottom %",
+                                id="pad-bottom", classes="pad-entry", type="number")
+                yield Vertical(id="future-feature")
+            yield Container(classes="dynamic-spacer")
+            with Horizontal(id="file-select-grid"):
                 yield Button(
                     label=self._set_all_files_btn_label(), id="all-files-btn",
-                    classes="file-select-btn gap-right selected"
+                    classes="toggle-btn gap-right toggled"
                         if self.file_mode == "all"
-                        else "file-select-btn gap-right"
+                        else "toggle-btn gap-right"
                 )
                 yield Button(
                     label=self._set_select_files_btn_label(), id="select-files-btn",
-                    classes="file-select-btn selected  gap-left"
+                    classes="toggle-btn toggled gap-left"
                         if self.file_mode == "select"
-                        else "file-select-btn gap-left"
+                        else "toggle-btn gap-left"
                 )
-            yield Button("Start Processing", id="start-btn", variant="primary")
+            yield Button("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
 
     @staticmethod
-    def _highlight_selected_text(text: str) -> str:
+    def _highlight_toggled_text(text: str) -> str:
         return f"\\[ {text} ]"
 
     def _set_all_files_btn_label(self) -> str:
-        """Returns the label for the 'all-files-btn' button based on if it's selected."""
+        """Returns the label for the 'all-files-btn' button based on if it's toggled."""
         if self.file_mode == "all":
-            return self._highlight_selected_text("All Files")
+            return self._highlight_toggled_text("All Files")
         return "All Files"
 
     def _set_select_files_btn_label(self) -> str:
@@ -83,7 +78,7 @@ class HomeScreen(Screen[str]):
                 label_text = f"{count} Files: {file_names}"
             else:
                 label_text = f"{count} Files Selected"
-            return self._highlight_selected_text(label_text)
+            return self._highlight_toggled_text(label_text)
         return "Select Files"
 
     async def on_mount(self) -> None:
@@ -123,8 +118,8 @@ class HomeScreen(Screen[str]):
     def _update_file_mode_buttons(self) -> None:
         all_btn = self.query_one("#all-files-btn", Button)
         sel_btn = self.query_one("#select-files-btn", Button)
-        all_btn.set_class(self.file_mode == "all", "selected")
-        sel_btn.set_class(self.file_mode == "select", "selected")
+        all_btn.set_class(self.file_mode == "all", "toggled")
+        sel_btn.set_class(self.file_mode == "select", "toggled")
         sel_btn.label = self._set_select_files_btn_label()
 
     def _update_numbers(self) -> None:

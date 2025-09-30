@@ -1,18 +1,19 @@
 /*
+ * Don't mind the dollar sign assignment warnings, pycharm just doesnt have a textual plugin yet.
+ * Just disable all inspections for this file, also use scopes to enable css highlighting,
+ * with no css inspections for the textual css scope.
+ * The "term expected" warning is the only one that the scope can't suppress right now,
+ * awaiting a fix from jetbrains.
+ */
 
-* Don't mind the dollar sign assignment warnings, pycharm just doesnt have a textual plugin yet.
-* Just disable all inspections for this file, also use scopes to enable css highlighting,
-* with no css inspections for the textual css scope.
-* The "term expected" warning is the only one that the scope can't suppress right now,
-* awaiting a fix from jetbrains.
-
-*/
+/* Generic elements */
 
 Button {
-    border: round $primary;
     color: $primary-lighten-1;
+    border: round $primary;
     background: transparent;
-    min-width: 25;
+    min-width: 14;
+    padding: 0 2;
     margin: 0 2;
 }
 
@@ -27,13 +28,13 @@ Input {
     background: transparent;
 }
 
-Input:focus {
+Input:focus, Input:hover {
     color: $text;
     border: round $accent-lighten-2;
     background: transparent;
 }
 
-/* These are nto defined inside Textual - they are a part of the textual_fspicker package */
+/* textual_fspicker package elements */
 
 CurrentDirectory {
     color: $text;
@@ -41,7 +42,61 @@ CurrentDirectory {
     margin-left: 2;
 }
 
-CurrentDirectory:hover {
+CurrentDirectory:focus, CurrentDirectory:hover {
     color: $text;
     border: round $accent-lighten-2;
+}
+
+/* Custom element classes for common use caes */
+
+.wide-btn {
+    width: 100;
+    min-width: 20;
+    max-width: 36;
+    padding: 0 3;
+    margin: 0 3;
+}
+
+.extra-wide-btn {
+    width: 100%;
+    min-width: 20;
+    padding: 0 3;
+    margin: 0;
+}
+
+.toggle-btn {
+    width: 1fr;
+    min-height: 3;
+    min-width: 14;
+    padding: 0;
+    color: $accent-darken-2;
+    border: round $secondary-darken-1;
+}
+
+.toggle-btn.toggled {
+    color: $text;
+    border: round $accent;
+}
+
+.toggle-btn:hover,
+.toggle-btn.toggled:hover,
+.toggle-btn:focus,
+.toggle-btn.toggled:focus {
+    color: $text;
+    border: round $secondary-darken-2;
+}
+
+.gap-left {
+    margin-left: 1;
+    margin-right: 0;
+}
+
+.gap-right {
+    margin-left: 0;
+    margin-right: 1;
+}
+
+.dynamic-spacer {
+    height: 1fr;
+    width: 1fr;
 }

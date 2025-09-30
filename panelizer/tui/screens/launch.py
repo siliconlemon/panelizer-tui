@@ -59,8 +59,8 @@ class LaunchScreen(Screen[Optional[Path]]):
                 with Container(id="ascii-art-container"):
                     yield Label(id="ascii-art")
             with Container(id="button-container"):
-                yield Button("Pick a Directory", id="pick-dir", variant="primary")
-                yield Button("Current Directory", id="current-dir")
+                yield Button("Pick a Directory", id="pick-dir", classes="wide-btn", variant="primary")
+                yield Button("Current Directory", id="current-dir", classes="wide-btn")
 
     async def _handle_directory_selection(self, start_directory: Path) -> None:
         """Opens directory picker and dismiss with selected path or None."""
