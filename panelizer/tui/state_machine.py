@@ -8,6 +8,7 @@ class StateMachine:
     """
     Manages the screen and workflow state transitions for the PanelizerTUI application.
     Each state is implemented as a coroutine and referenced by a string key.
+    Extends the PanelizerTUI functionality with a parent reference.
     """
 
     def __init__(self, *, ui: "PanelizerTUI"):

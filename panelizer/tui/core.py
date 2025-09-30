@@ -4,10 +4,10 @@ from textual import work
 from textual.app import App
 from textual.events import Resize
 from textual.theme import Theme
+from .screen_size import ScreenSize
 from .screens.launch import LaunchScreen
 from .screens.too_small import TooSmallScreen
 from .state_machine import StateMachine
-
 
 class PanelizerTUI(App[Any]):
     CSS_PATH = ["./css/globals.tcss"]
@@ -17,6 +17,7 @@ class PanelizerTUI(App[Any]):
     MIN_COLS: int = 50
     SCREENS = {
         "launch": LaunchScreen,
+        "too_small": TooSmallScreen,
     }
     DEFAULT_THEME = Theme(
         name="default",
@@ -36,17 +37,17 @@ class PanelizerTUI(App[Any]):
             "footer-key-foreground": "#88c0d0",
         },
     )
-
     def __init__(self) -> None:
         super().__init__()
         self.set_themes()
-        self._launch_started = False
-        self._too_small_modal_open = False
+        self.launch_started = False
+        self.too_small_modal_open = False
         self.selected_input_dir: Path | None = None
         self.state_machine = StateMachine(ui=self)
+        self.screen_size = ScreenSize(ui=self)
 
     async def on_resize(self, event: Resize) -> None:
-        await self.handle_too_small_on_resize(event.size.width, event.size.height)
+        await self.screen_size.handle_on_resize(event.size.width, event.size.height)
 
     def set_themes(self) -> None:
         """Registers the default theme and sets it as the current theme."""
@@ -54,35 +55,6 @@ class PanelizerTUI(App[Any]):
             self.unregister_theme(light_theme)
         self.register_theme(self.DEFAULT_THEME)
         self.theme = "default"
-
-    async def show_too_small_modal(self) -> None:
-        """Displays the 'TooSmallScreen' modal if it is not already open."""
-        if not self._too_small_modal_open:
-            self._too_small_modal_open = True
-            await self.push_screen(
-                TooSmallScreen(self.MIN_ROWS, self.MIN_COLS, width=self.size.width, height=self.size.height)
-            )
-
-    async def close_too_small_modal(self) -> None:
-        """Closes the 'TooSmallScreen' modal if it is open."""
-        if self._too_small_modal_open:
-            await self.pop_screen()
-            self._too_small_modal_open = False
-
-    async def handle_too_small_on_resize(self, width: int, height: int) -> None:
-        """
-        Shows or hides the 'too small' modal based on the terminal dimensions.
-        Runs the main state machine if the size permits, and it has not already started.
-        """
-        if height < self.MIN_ROWS or width < self.MIN_COLS:
-            if not self._too_small_modal_open:
-                await self.show_too_small_modal()
-        else:
-            if self._too_small_modal_open:
-                await self.close_too_small_modal()
-            if not self._launch_started:
-                self._launch_started = True
-                self.run_state_machine()
 
     @work
     async def run_state_machine(self) -> None:
