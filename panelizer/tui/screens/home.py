@@ -1,12 +1,13 @@
 import json
 from pathlib import Path
 from typing import Literal
+
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Container
-from textual.events import Click
 from textual.screen import Screen
-from textual.widgets import Button, Static, Input, Header
+from textual.widgets import Button, Input, Header
 from textual_fspicker import SelectDirectory
+
 from ..dialogs.file_select import FileSelectDialog
 
 

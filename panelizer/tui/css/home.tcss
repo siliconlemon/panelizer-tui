@@ -27,19 +27,19 @@
     text-align: center;
     padding: 0 2;
     margin: 0 0;
-    border: round $secondary-darken-3;
-    color: $secondary-darken-2;
+    color: $accent-darken-3;
+    border: round $secondary;
 }
 
 #path-btn:hover {
     text-style: underline;
-    color: $accent-lighten-1;
-    border: round $secondary;
+    color: $accent-lighten-2;
+    border: round $secondary-lighten-2;
 }
 
 #path-btn:focus {
-    color: $accent-lighten-1;
-    border: round $secondary;
+    color: $accent-lighten-2;
+    border: round $secondary-lighten-2;
 }
 
 #pad-row-1, #pad-row-2 {
@@ -66,13 +66,8 @@
 .pad-entry {
     width: 8;
     min-width: 6;
-    text-align: right;
-    background: $surface;
+    text-align: left;
     color: $text;
-}
-
-.pad-entry:focus {
-    background: $accent-lighten-1;
 }
 
 .spacer {
@@ -94,21 +89,21 @@
     min-width: 14;
     padding: 0;
     color: $accent-darken-3;
-    border: round $secondary-darken-3;
+    border: round $secondary;
 }
 
 .file-select-btn:hover {
-    color: $accent-lighten-1;
-    border: round $secondary;
+    color: $accent-lighten-2;
+    border: round $secondary-lighten-2;
 }
 
 .file-select-btn.selected {
     color: $accent-lighten-1;
-    border: round $secondary;
+    border: round $accent;
 }
 
 .file-select-btn.selected:hover {
-    color: $accent-darken-1;
+    color: $accent-darken-2;
     border: round $secondary-darken-2;
 }
 

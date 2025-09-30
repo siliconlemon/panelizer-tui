@@ -1,4 +1,4 @@
- /*
+/*
 
 * Don't mind the dollar sign assignment warnings, pycharm just doesnt have a textual plugin yet.
 * Just disable all inspections for this file, also use scopes to enable css highlighting,
@@ -9,9 +9,9 @@
 */
 
 Button {
-    background: transparent;
     border: round $primary;
     color: $primary-lighten-1;
+    background: transparent;
     min-width: 25;
     margin: 0 2;
 }
@@ -19,4 +19,29 @@ Button {
 Button:hover {
     color: $primary-darken-2;
     border: round $primary-darken-3;
+}
+
+Input {
+    color: $text;
+    border: round $secondary;
+    background: transparent;
+}
+
+Input:focus {
+    color: $text;
+    border: round $accent-lighten-2;
+    background: transparent;
+}
+
+/* These are nto defined inside Textual - they are a part of the textual_fspicker package */
+
+CurrentDirectory {
+    color: $text;
+    border: round $secondary;
+    margin-left: 2;
+}
+
+CurrentDirectory:hover {
+    color: $text;
+    border: round $accent-lighten-2;
 }

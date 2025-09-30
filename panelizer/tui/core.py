@@ -24,7 +24,7 @@ class PanelizerTUI(App[Any]):
     DEFAULT_THEME = Theme(
         name="default",
         primary="#72b9cf",
-        secondary="#acb6bf",
+        secondary="#757e82",
         accent="#9fb0b4",
         foreground="#dfe5ef",
         background="#1e1e1e",
