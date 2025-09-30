@@ -5,6 +5,7 @@ from textual.app import App
 from textual.events import Resize
 from textual.theme import Theme
 from .screen_size import ScreenSize
+from .screens.home import HomeScreen
 from .screens.launch import LaunchScreen
 from .screens.too_small import TooSmallScreen
 from .state_machine import StateMachine
@@ -17,6 +18,7 @@ class PanelizerTUI(App[Any]):
     MIN_COLS: int = 50
     SCREENS = {
         "launch": LaunchScreen,
+        "home": HomeScreen,
         "too_small": TooSmallScreen,
     }
     DEFAULT_THEME = Theme(
@@ -58,30 +60,4 @@ class PanelizerTUI(App[Any]):
 
     @work
     async def run_state_machine(self) -> None:
-        """
-        Runs the main state machine loop.
-        Each state's name is used to look up the next state.
-        """
-        state_map: dict[str, Callable] = {
-            "launch": self.launch_screen_state,
-            # "other": self.other_state_func,
-        }
-        state_name: str | None = "launch"
-        args = ()
-        while state_name is not None:
-            state_func = state_map.get(state_name)
-            if state_func is None:
-                break
-            state_name, args = await state_func(*args)
-        self.exit(args[0] if args else None)
-
-    async def launch_screen_state(self) -> tuple[str | None, tuple]:
-        """
-        Presents the LaunchScreen and determines the next state.
-        For now, always exits after completion.
-        """
-        path = await self.push_screen_wait("launch")
-        if isinstance(path, Path) and path.exists():
-            # In the future: return ("next_state_name", (path,))
-            return None, (path,)
-        return None, (path,)
+        await self.state_machine.run()
