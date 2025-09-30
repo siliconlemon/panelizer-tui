@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable, Any
+from typing import Any
 from textual import work
 from textual.app import App
 from textual.events import Resize

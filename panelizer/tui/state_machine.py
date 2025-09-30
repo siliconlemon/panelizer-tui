@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Awaitable, Any
+from typing import TYPE_CHECKING, Callable, Awaitable
 
 if TYPE_CHECKING:
     from . import PanelizerTUI
