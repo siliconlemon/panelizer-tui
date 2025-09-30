@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Callable, Awaitable, Any
 from textual import work
 from textual.app import App
 from textual.events import Resize
@@ -6,8 +7,7 @@ from textual.theme import Theme
 from .screens.launch import LaunchScreen
 from .screens.too_small import TooSmallScreen
 
-
-class PanelizerTUI(App[Path]):
+class PanelizerTUI(App[Any]):
     CSS_PATH = ["./css/globals.tcss"]
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
@@ -43,18 +43,18 @@ class PanelizerTUI(App[Path]):
         self.selected_input_dir: Path | None = None
 
     async def on_resize(self, event: Resize) -> None:
-        """React to terminal resize events and show or close the 'too small' modal as needed."""
+        """Handles terminal resize events, showing or closing the 'too small' modal as needed."""
         await self.handle_too_small_on_resize(event.size.width, event.size.height)
 
     def set_themes(self) -> None:
-        """Register the default theme and set it as the current theme."""
+        """Registers the default theme and sets it as the current theme."""
         for light_theme in ("textual-light", "catppuccin-latte", "solarized-lite"):
             self.unregister_theme(light_theme)
         self.register_theme(self.DEFAULT_THEME)
         self.theme = "default"
 
     async def show_too_small_modal(self) -> None:
-        """Display the 'TooSmallScreen' modal if it isn't already open."""
+        """Displays the 'TooSmallScreen' modal if it is not already open."""
         if not self._too_small_modal_open:
             self._too_small_modal_open = True
             await self.push_screen(
@@ -62,15 +62,15 @@ class PanelizerTUI(App[Path]):
             )
 
     async def close_too_small_modal(self) -> None:
-        """Close the 'TooSmallScreen' modal if it is open."""
+        """Closes the 'TooSmallScreen' modal if it is open."""
         if self._too_small_modal_open:
             await self.pop_screen()
             self._too_small_modal_open = False
 
     async def handle_too_small_on_resize(self, width: int, height: int) -> None:
         """
-        Show or hide the 'too small' modal based on current terminal dimensions.
-        Launch the main screen if size permits it and the launch screen has not already started.
+        Shows or hides the 'too small' modal based on the terminal dimensions.
+        Runs the main state machine if the size permits, and it has not already started.
         """
         if height < self.MIN_ROWS or width < self.MIN_COLS:
             if not self._too_small_modal_open:
@@ -80,10 +80,34 @@ class PanelizerTUI(App[Path]):
                 await self.close_too_small_modal()
             if not self._launch_started:
                 self._launch_started = True
-                self.launch_launch_screen()
+                self.run_state_machine()
 
     @work
-    async def launch_launch_screen(self) -> None:
-        """Push and wait for the launch screen to finish, then exit the app."""
+    async def run_state_machine(self) -> None:
+        """
+        Runs the main state machine loop.
+        Each state's name is used to look up the next state.
+        """
+        state_map: dict[str, Callable] = {
+            "launch": self.launch_screen_state,
+            # "other": self.other_state_func,
+        }
+        state_name: str | None = "launch"
+        args = ()
+        while state_name is not None:
+            state_func = state_map.get(state_name)
+            if state_func is None:
+                break
+            state_name, args = await state_func(*args)
+        self.exit(args[0] if args else None)
+
+    async def launch_screen_state(self) -> tuple[str | None, tuple]:
+        """
+        Presents the LaunchScreen and determines the next state.
+        For now, always exits after completion.
+        """
         path = await self.push_screen_wait("launch")
-        self.exit(path)
+        if isinstance(path, Path) and path.exists():
+            # In the future: return ("next_state_name", (path,))
+            return None, (path,)
+        return None, (path,)
