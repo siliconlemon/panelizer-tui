@@ -34,6 +34,10 @@ Input:focus, Input:hover {
     background: transparent;
 }
 
+Select {
+    height: 3;
+}
+
 SelectCurrent {
     color: $text;
     border: round $secondary;
@@ -52,6 +56,10 @@ SelectCurrent:focus, SelectCurrent:hover {
 OptionList {
     background: transparent;
     border: round $primary;
+}
+
+.option-list--option {
+    padding: 0 1;
 }
 
 Dialog {
@@ -75,6 +83,10 @@ CurrentDirectory {
 CurrentDirectory:focus, CurrentDirectory:hover {
     color: $text;
     border: round $accent-lighten-2;
+}
+
+SelectDirectory .option-list--option {
+    padding: 0;
 }
 
 /* Custom element classes for common use caes */
