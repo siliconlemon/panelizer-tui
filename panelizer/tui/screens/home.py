@@ -67,8 +67,8 @@ class HomeScreen(Screen[str]):
     def _set_all_files_btn_label(self) -> str:
         """Returns the label for the 'all-files-btn' button based on if it's toggled."""
         if self.file_mode == "all":
-            return self._highlight_toggled_text("All Files")
-        return "All Files"
+            return self._highlight_toggled_text("All Files in Dir")
+        return "All Files in Dir"
 
     def _set_select_files_btn_label(self) -> str:
         """Returns the label for 'select files' button based on if it and any files are selected."""
