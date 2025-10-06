@@ -40,23 +40,58 @@
 
 #main-row {
     width: 1fr;
-    padding: 2 0;
+    height: 1fr;
+    padding: 1 0;
     margin-bottom: 1;
+}
+
+#input-column {
+    width: 1fr;
+    height: 1fr;
+    padding-right: 0;
+    align-horizontal: left;
 }
 
 #pad-grid {
     width: 1fr;
+    height: auto;
     layout: grid;
     grid-size: 2;
-    grid-rows: 1fr 1fr;
     grid-columns: 1fr 1fr;
-    align-horizontal: left;
+    grid-rows: 4 4;
+    margin-bottom: 1;
+}
+
+.pad-grid-cell {
+    margin-right: 1;
+}
+
+.pad-label {
+    margin: 0 0 0 1;
+}
+
+.pad-entry-row {
+    layout: horizontal;
+    align-vertical: middle;
+    height: auto;
+    width: 1fr;
+    margin-bottom: 0;
+    padding: 0;
 }
 
 .pad-entry {
-    width: 1fr;
-    min-width: 6;
     color: $text;
+    width: 1fr;
+    min-width: 10;
+    min-height: 1;
+    padding: 0 1;
+    margin: 0;
+}
+
+.pad-suffix {
+    width: 3;
+    margin: 1 1 0 1;
+    color: $accent;
 }
 
 #file-select-grid {

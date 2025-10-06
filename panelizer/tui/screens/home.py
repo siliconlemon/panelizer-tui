@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Literal
 
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical, Container
+from textual.containers import Horizontal, Vertical, Container, Grid
 from textual.screen import Screen
-from textual.widgets import Button, Input, Header
+from textual.widgets import Button, Input, Header, Static
 from textual_fspicker import SelectDirectory
 
 from ..dialogs.file_select import FileSelectDialog
@@ -31,17 +31,20 @@ class HomeScreen(Screen[str]):
             with Horizontal(id="path-row"):
                 yield Button(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
             with Horizontal(id="main-row"):
-                with Vertical(id="pad-grid"):
-                    yield Input(str(self.padding_left), placeholder="Left %",
-                                id="pad-left", classes="pad-entry", type="number")
-                    yield Input(str(self.padding_right), placeholder="Right %",
-                                id="pad-right", classes="pad-entry", type="number")
-                    yield Input(str(self.padding_top), placeholder="Top %",
-                                id="pad-top", classes="pad-entry", type="number")
-                    yield Input(str(self.padding_bottom), placeholder="Bottom %",
-                                id="pad-bottom", classes="pad-entry", type="number")
+                with Vertical(id="input-column"):
+                    with Grid(id="pad-grid"):
+                        for element_id, value, label in [
+                            ("pad-left", self.padding_left, "Left"),
+                            ("pad-right", self.padding_right, "Right"),
+                            ("pad-top", self.padding_top, "Top"),
+                            ("pad-bottom", self.padding_bottom, "Bottom"),
+                        ]:
+                            with Vertical(classes="pad-grid-cell"):
+                                yield Static(label, classes="pad-label")
+                                with Horizontal(classes="pad-entry-row"):
+                                    yield Input(str(value), id=element_id, classes="pad-entry", type="number")
+                                    yield Static("%", classes="pad-suffix", disabled=True)
                 yield Vertical(id="future-feature")
-            yield Container(classes="dynamic-spacer")
             with Horizontal(id="file-select-grid"):
                 yield Button(
                     label=self._set_all_files_btn_label(), id="all-files-btn",
