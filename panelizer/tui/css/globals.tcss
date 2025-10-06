@@ -50,7 +50,7 @@ SelectCurrent:focus, SelectCurrent:hover {
 }
 
 OptionList {
-    background: $background;
+    background: transparent;
     border: round $primary;
 }
 
