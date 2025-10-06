@@ -36,6 +36,12 @@ Input:focus, Input:hover {
 
 Select {
     height: 3;
+    border: none;
+}
+
+Select:focus > SelectCurrent, Select:hover > SelectCurrent {
+    color: $text;
+    border: round $accent-lighten-2;
 }
 
 SelectCurrent {

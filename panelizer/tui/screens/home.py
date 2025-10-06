@@ -14,21 +14,20 @@ from ..dialogs.file_select import FileSelectDialog
 # TODO: make this have variable rows (and maybe columns)
 class GridInput(Grid):
     """
-    A grid widget for setting padding values (Left, Right, Top, Bottom).
+    A generic NxM grid widget with labels, suffixes and custom units.
+    Each cell is defined by the one entry in the parallel lists:
+    values, labels, suffixes and units.
     """
     DEFAULT_CSS = """
     GridInput {
         width: 100%;
-        height: 8;
+        height: auto;
         margin-bottom: 1;
         layout: grid;
-        grid-size: 2;
-        grid-columns: 1fr 1fr;
-        grid-rows: 4 4;
-        margin-bottom: 1;
-                
+        
         .grid-cell {
-            margin-right: 1;
+            margin-left: 0;
+            margin-right: 0;
         }
         .grid-row {
             layout: horizontal;
@@ -54,25 +53,65 @@ class GridInput(Grid):
     }
     """
 
-    def __init__(self, *, percentages: dict[str, int], **kwargs):
-        super().__init__(classes="grid-input", **kwargs)
-        self.percentages = percentages
+    def __init__(
+        self,
+        *,
+        rows: int,
+        columns: int,
+        values: list[int],
+        labels: list[str],
+        input_ids: list[str],
+        units: list[str],
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.rows = rows
+        self.columns = columns
+        self.ROW_HEIGHT = 4
+        self.COLUMN_WIDTH = "1fr"
+
+        expected = rows * columns
+        n_values = len(values)
+        n_labels = len(labels)
+        n_suffixes = len(input_ids)
+        n_units = len(units)
+
+        if not (n_values == n_labels == n_suffixes == n_units):
+            raise ValueError(
+                f"GridInput: Mismatched argument lengths: "
+                f"values={n_values}, labels={n_labels}, "
+                f"suffixes={n_suffixes}, units={n_units}"
+            )
+        if n_values != expected:
+            raise ValueError(
+                f"GridInput: Given rows={rows} columns={columns} → {expected} cells, "
+                f"but got {n_values} values (and similarly for other fields)."
+            )
+
+        self.values = values
+        self.labels = labels
+        self.input_ids = input_ids
+        self.units = units
+
+    async def on_mount(self):
+        self.styles.height = self.rows * self.ROW_HEIGHT
+        self.styles.grid_size_rows = self.rows
+        self.styles.grid_size_columns = self.columns
+        self.styles.grid_columns = [self.COLUMN_WIDTH] * self.columns
+        self.styles.grid_rows = [self.ROW_HEIGHT] * self.rows
+
 
     def compose(self) -> ComposeResult:
-        for element_id_suffix, label in [
-            ("left", "Left"),
-            ("right", "Right"),
-            ("top", "Top"),
-            ("bottom", "Bottom"),
-        ]:
-            element_id = f"pad-{element_id_suffix}"
-            value = self.percentages.get(element_id_suffix, 0)
-
+        for idx in range(self.rows * self.columns):
+            label = self.labels[idx]
+            element_id = self.input_ids[idx]
+            value = self.values[idx]
+            unit = self.units[idx]
             with Vertical(classes="grid-cell"):
                 yield Static(label, classes="input-label")
                 with Horizontal(classes="grid-row"):
                     yield Input(str(value), id=element_id, classes="input", type="number")
-                    yield Static("%", classes="unit", disabled=True)
+                    yield Static(unit, classes="unit", disabled=True)
 
 
 class SimpleSelect(Container):
@@ -80,7 +119,7 @@ class SimpleSelect(Container):
     DEFAULT_CSS = """
         SimpleSelect {
             height: 6;
-            margin-right: 6;
+            margin-right: 5;
             
             .simple-select-input {
                 min-height: 3;
@@ -105,7 +144,6 @@ class SimpleSelect(Container):
             classes="simple-select-input",
             value=self.initial_value,
             allow_blank=False,
-            compact=True,
             options=self.options,
         )
 
@@ -134,13 +172,13 @@ class HomeScreen(Screen[str]):
                 with Vertical(id="input-column"):
 
                     yield GridInput(
-                        percentages={
-                            "left": self.padding_left,
-                            "right": self.padding_right,
-                            "top": self.padding_top,
-                            "bottom": self.padding_bottom,
-                        },
-                        id="pad-grid",
+                        rows=2,
+                        columns=2,
+                        values=[self.padding_left, self.padding_right, self.padding_top, self.padding_bottom],
+                        labels=["Left", "Right", "Top", "Bottom"],
+                        input_ids=["pad-left", "pad-right", "pad-top", "pad-bottom"],
+                        units=["%", "%", "%", "%"],
+                        id="pad-grid"
                     )
 
                     yield SimpleSelect(
