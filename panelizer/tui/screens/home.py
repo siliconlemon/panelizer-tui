@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Literal
 
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical, Container, Grid
+from textual.containers import Horizontal, Vertical, Grid
 from textual.screen import Screen
-from textual.widgets import Button, Input, Header, Static
+from textual.widgets import Button, Input, Header, Static, Select
 from textual_fspicker import SelectDirectory
 
 from ..dialogs.file_select import FileSelectDialog
@@ -24,14 +24,28 @@ class HomeScreen(Screen[str]):
         self.padding_bottom: int = 0
         self.padding_left: int = 0
         self.padding_right: int = 0
+        self.background_color: str = "white"
 
     def compose(self) -> ComposeResult:
         yield Header()
-        with Vertical(id="home-vertical"):
+        with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
                 yield Button(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
             with Horizontal(id="main-row"):
                 with Vertical(id="input-column"):
+                    yield Static("Background Color", classes="input-label")
+                    with Horizontal(id="bg-select-row"):
+                        yield Select(
+                            id="bg-select",
+                            prompt="Select a background color",
+                            value=self.background_color,
+                            options=[
+                                ("White", "white"),
+                                ("Light Gray", "light gray"),
+                                ("Dark Gray", "dark gray"),
+                                ("Black", "black"),
+                            ],
+                        )
                     with Grid(id="pad-grid"):
                         for element_id, value, label in [
                             ("pad-left", self.padding_left, "Left"),
@@ -40,7 +54,7 @@ class HomeScreen(Screen[str]):
                             ("pad-bottom", self.padding_bottom, "Bottom"),
                         ]:
                             with Vertical(classes="pad-grid-cell"):
-                                yield Static(label, classes="pad-label")
+                                yield Static(label, classes="input-label")
                                 with Horizontal(classes="pad-entry-row"):
                                     yield Input(str(value), id=element_id, classes="pad-entry", type="number")
                                     yield Static("%", classes="pad-suffix", disabled=True)
@@ -113,6 +127,10 @@ class HomeScreen(Screen[str]):
                 self._update_path_display()
             event.stop()
 
+    async def on_select_changed(self, event: Select.Changed) -> None:
+        if event.select.id == "bg-select":
+            self.background_color = str(event.value)
+
     def _update_path_display(self) -> None:
         path_btn = self.query_one("#path-btn", Button)
         path = self.selected_path.as_posix()
@@ -154,11 +172,12 @@ class HomeScreen(Screen[str]):
         settings = {
             "path": str(self.selected_path),
             "files": self.selected_files if self.file_mode == "select" and self.selected_files else "ALL",
+            "background_color": self.background_color,
             "padding": {
                 "left": self.padding_left,
                 "right": self.padding_right,
                 "top": self.padding_top,
                 "bottom": self.padding_bottom,
-            }
+            },
         }
         self.dismiss(json.dumps(settings))

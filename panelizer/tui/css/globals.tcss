@@ -34,6 +34,36 @@ Input:focus, Input:hover {
     background: transparent;
 }
 
+SelectCurrent {
+    color: $text;
+    border: round $secondary;
+    background: transparent;
+    padding: 0 1;
+    margin: 0;
+    height: 3;
+}
+
+SelectCurrent:focus, SelectCurrent:hover {
+    color: $text;
+    border: round $accent-lighten-2;
+    background: transparent;
+}
+
+OptionList {
+    background: $background;
+    border: round $primary;
+}
+
+Dialog {
+    border: round $primary;
+    padding: 0;
+}
+
+InputBar {
+    padding: 0;
+    margin: 0;
+}
+
 /* textual_fspicker package elements */
 
 CurrentDirectory {
