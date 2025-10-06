@@ -52,57 +52,6 @@
     align: left top;
 }
 
-#pad-grid {
-    width: 1fr;
-    height: auto;
-    layout: grid;
-    grid-size: 2;
-    grid-columns: 1fr 1fr;
-    grid-rows: 4 4;
-    margin-bottom: 1;
-}
-
-.pad-grid-cell {
-    margin-right: 1;
-}
-
-.input-label {
-    margin: 0 0 0 1;
-}
-
-.pad-entry-row {
-    layout: horizontal;
-    align-vertical: middle;
-    height: auto;
-    width: 1fr;
-    margin-bottom: 0;
-    padding: 0;
-}
-
-.pad-entry {
-    color: $text;
-    width: 1fr;
-    min-width: 10;
-    min-height: 1;
-    padding: 0 1;
-    margin: 0;
-}
-
-.pad-suffix {
-    width: 3;
-    margin: 1 1 0 1;
-    color: $accent;
-}
-
-#bg-select-row {
-    height: auto;
-}
-
-#bg-select {
-    min-height: 3;
-    width: 1fr;
-}
-
 #future-feature {
     width: 1fr;
     height: auto;

@@ -3,12 +3,111 @@ from pathlib import Path
 from typing import Literal
 
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical, Grid
+from textual.containers import Horizontal, Vertical, Grid, Container
 from textual.screen import Screen
 from textual.widgets import Button, Input, Header, Static, Select
 from textual_fspicker import SelectDirectory
 
 from ..dialogs.file_select import FileSelectDialog
+
+
+# TODO: make this have variable rows (and maybe columns)
+class GridInput(Grid):
+    """
+    A grid widget for setting padding values (Left, Right, Top, Bottom).
+    """
+    DEFAULT_CSS = """
+    GridInput {
+        width: 100%;
+        height: 8;
+        margin-bottom: 1;
+        layout: grid;
+        grid-size: 2;
+        grid-columns: 1fr 1fr;
+        grid-rows: 4 4;
+        margin-bottom: 1;
+                
+        .grid-cell {
+            margin-right: 1;
+        }
+        .grid-row {
+            layout: horizontal;
+            align-vertical: middle;
+            height: auto;
+            width: 1fr;
+            margin-bottom: 0;
+            padding: 0;
+        }
+        .input {
+            color: $text;
+            width: 1fr;
+            min-width: 10;
+            min-height: 1;
+            padding: 0 1;
+            margin: 0;
+        }
+        .unit {
+            width: 3;
+            margin: 1 1 0 1;
+            color: $accent;
+        }
+    }
+    """
+
+    def __init__(self, *, percentages: dict[str, int], **kwargs):
+        super().__init__(classes="grid-input", **kwargs)
+        self.percentages = percentages
+
+    def compose(self) -> ComposeResult:
+        for element_id_suffix, label in [
+            ("left", "Left"),
+            ("right", "Right"),
+            ("top", "Top"),
+            ("bottom", "Bottom"),
+        ]:
+            element_id = f"pad-{element_id_suffix}"
+            value = self.percentages.get(element_id_suffix, 0)
+
+            with Vertical(classes="grid-cell"):
+                yield Static(label, classes="input-label")
+                with Horizontal(classes="grid-row"):
+                    yield Input(str(value), id=element_id, classes="input", type="number")
+                    yield Static("%", classes="unit", disabled=True)
+
+
+class SimpleSelect(Container):
+    """A container widget for selecting the background color."""
+    DEFAULT_CSS = """
+        SimpleSelect {
+            height: 6;
+            margin-right: 6;
+            
+            .simple-select-input {
+                min-height: 3;
+                width: 1fr;
+            }
+        }
+    """
+
+    def __init__(self, *, label: str, initial_value: str, **kwargs):
+        super().__init__()
+        self.initial_value = initial_value
+        self.options = [
+            ("White", "white"),
+            ("Light Gray", "light gray"),
+            ("Dark Gray", "dark gray"),
+            ("Black", "black"),
+        ]
+
+    def compose(self) -> ComposeResult:
+        yield Static("Background Color", classes="input-label")
+        yield Select(
+            classes="simple-select-input",
+            value=self.initial_value,
+            allow_blank=False,
+            compact=True,
+            options=self.options,
+        )
 
 
 class HomeScreen(Screen[str]):
@@ -20,10 +119,10 @@ class HomeScreen(Screen[str]):
         self.selected_path: Path = default_path
         self.file_mode: Literal["all", "select"] = "all"
         self.selected_files: list[str] = []
-        self.padding_top: int = 0
-        self.padding_bottom: int = 0
         self.padding_left: int = 0
         self.padding_right: int = 0
+        self.padding_top: int = 0
+        self.padding_bottom: int = 0
         self.background_color: str = "white"
 
     def compose(self) -> ComposeResult:
@@ -33,44 +132,36 @@ class HomeScreen(Screen[str]):
                 yield Button(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
             with Horizontal(id="main-row"):
                 with Vertical(id="input-column"):
-                    yield Static("Background Color", classes="input-label")
-                    with Horizontal(id="bg-select-row"):
-                        yield Select(
-                            id="bg-select",
-                            prompt="Select a background color",
-                            value=self.background_color,
-                            options=[
-                                ("White", "white"),
-                                ("Light Gray", "light gray"),
-                                ("Dark Gray", "dark gray"),
-                                ("Black", "black"),
-                            ],
-                        )
-                    with Grid(id="pad-grid"):
-                        for element_id, value, label in [
-                            ("pad-left", self.padding_left, "Left"),
-                            ("pad-right", self.padding_right, "Right"),
-                            ("pad-top", self.padding_top, "Top"),
-                            ("pad-bottom", self.padding_bottom, "Bottom"),
-                        ]:
-                            with Vertical(classes="pad-grid-cell"):
-                                yield Static(label, classes="input-label")
-                                with Horizontal(classes="pad-entry-row"):
-                                    yield Input(str(value), id=element_id, classes="pad-entry", type="number")
-                                    yield Static("%", classes="pad-suffix", disabled=True)
+
+                    yield GridInput(
+                        percentages={
+                            "left": self.padding_left,
+                            "right": self.padding_right,
+                            "top": self.padding_top,
+                            "bottom": self.padding_bottom,
+                        },
+                        id="pad-grid",
+                    )
+
+                    yield SimpleSelect(
+                        label="Background Color",
+                        initial_value=self.background_color,
+                        id="bg-select",
+                    )
+
                 yield Vertical(id="future-feature")
             with Horizontal(id="file-select-grid"):
                 yield Button(
                     label=self._set_all_files_btn_label(), id="all-files-btn",
                     classes="toggle-btn gap-right toggled"
-                        if self.file_mode == "all"
-                        else "toggle-btn gap-right"
+                    if self.file_mode == "all"
+                    else "toggle-btn gap-right"
                 )
                 yield Button(
                     label=self._set_select_files_btn_label(), id="select-files-btn",
                     classes="toggle-btn toggled gap-left"
-                        if self.file_mode == "select"
-                        else "toggle-btn gap-left"
+                    if self.file_mode == "select"
+                    else "toggle-btn gap-left"
                 )
             yield Button("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
 
@@ -101,6 +192,7 @@ class HomeScreen(Screen[str]):
     async def on_mount(self) -> None:
         self._update_path_display()
         self._update_file_mode_buttons()
+        # _update_numbers is still necessary to refresh Input values if state changes
         self._update_numbers()
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -143,12 +235,14 @@ class HomeScreen(Screen[str]):
         sel_btn.set_class(self.file_mode == "select", "toggled")
         sel_btn.label = self._set_select_files_btn_label()
 
+    # This still works because the Input IDs are global within the app's DOM.
     def _update_numbers(self) -> None:
         self.query_one("#pad-left", Input).value = str(self.padding_left)
         self.query_one("#pad-right", Input).value = str(self.padding_right)
         self.query_one("#pad-top", Input).value = str(self.padding_top)
         self.query_one("#pad-bottom", Input).value = str(self.padding_bottom)
 
+    # These input handlers are still on HomeScreen, managing the state variables.
     async def on_input_changed(self, event: Input.Changed) -> None:
         await self.on_input_submitted(Input.Submitted(event.input, event.value))
 

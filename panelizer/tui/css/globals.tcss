@@ -91,6 +91,10 @@ SelectDirectory .option-list--option {
 
 /* Custom element classes for common use caes */
 
+.input-label {
+    margin: 0 0 0 1;
+}
+
 .wide-btn {
     width: 100;
     min-width: 20;
