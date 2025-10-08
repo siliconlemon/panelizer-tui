@@ -26,12 +26,13 @@
     overflow-x: hidden;
     text-align: center;
     color: $text;
-    border: round $secondary;
+    border: round $accent;
 }
 
 #path-btn:focus, #path-btn:hover {
     color: $text;
-    border: round $secondary-lighten-2;
+    border: round $secondary-darken-2;
+
 }
 
 #path-btn:hover {
