@@ -69,29 +69,28 @@ Input:focus, Input:hover {
     background: transparent;
 }
 
-Select {
-    height: 3;
-    border: none;
+Select > SelectCurrent > #label {
+    color: $text;
+    padding: 0 1;
+    border: round $secondary;
+    background: transparent;
 }
 
-Select:focus > SelectCurrent, Select:hover > SelectCurrent {
+Select:focus > SelectCurrent > #label, Select > SelectCurrent > #label:hover {
     color: $text;
     border: round $accent;
+}
+
+Select > SelectCurrent > .arrow {
+    margin-top: 1;
 }
 
 SelectCurrent {
     color: $text;
-    border: round $secondary;
+    border: none;
     background: transparent;
-    padding: 0 1;
     margin: 0;
     height: 3;
-}
-
-SelectCurrent:focus, SelectCurrent:hover {
-    color: $text;
-    border: round $accent;
-    background: transparent;
 }
 
 OptionList {

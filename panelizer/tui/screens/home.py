@@ -4,8 +4,13 @@ from typing import Literal
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Grid, Container
+from textual.content import Content
+from textual.events import Click, Enter, Leave
+from textual.message import Message
+from textual.reactive import reactive
 from textual.screen import Screen
-from textual.widgets import Button, Input, Header, Static, Select
+from textual.widget import Widget
+from textual.widgets import Button, Input, Header, Static, Select, Switch, Label
 from textual_fspicker import SelectDirectory
 
 from ..dialogs.file_select import FileSelectDialog
@@ -114,38 +119,150 @@ class GridInput(Grid):
                     yield Static(unit, classes="unit", disabled=True)
 
 
-class SimpleSelect(Container):
-    """A container widget for selecting the background color."""
+class SimpleSelect(Widget):
+    """A widget for selecting the background color."""
     DEFAULT_CSS = """
         SimpleSelect {
-            height: 6;
-            margin-right: 5;
+            height: 5;
+            margin-right: 1;
+            border: none;
             
             .simple-select-input {
                 min-height: 3;
                 width: 1fr;
             }
+            
+            SelectCurrent {
+                color: $text;
+                border: none;
+            }
         }
     """
 
-    def __init__(self, *, label: str, initial_value: str, **kwargs):
-        super().__init__()
+    def __init__(self, *, label: str, initial_value: str, select_id: str, **kwargs):
+        if select_id:
+            self.select_id = select_id
+        super().__init__(**kwargs)
+        self.label = label
         self.initial_value = initial_value
         self.options = [
             ("White", "white"),
-            ("Light Gray", "light gray"),
-            ("Dark Gray", "dark gray"),
+            ("Light Gray", "lightgray"),
+            ("Dark Gray", "darkgray"),
             ("Black", "black"),
         ]
 
+    label_hovered = reactive(False)
+
     def compose(self) -> ComposeResult:
-        yield Static("Background Color", classes="input-label")
-        yield Select(
-            classes="simple-select-input",
-            value=self.initial_value,
-            allow_blank=False,
-            options=self.options,
-        )
+        yield Static(self.label, classes="input-label", id="label")
+        with Container(id="simple-select-container"):
+            yield Select(
+                id=self.select_id if self.select_id else None,
+                classes="simple-select-input",
+                compact=True,
+                value=self.initial_value,
+                allow_blank=False,
+                options=self.options,
+            )
+
+    def on_enter(self) -> None:
+        self.add_class("--hover")
+
+    def on_leave(self) -> None:
+        self.remove_class("--hover")
+
+
+class SwitchButton(Widget):
+    """A button emulation combining a Switch and a clickable label within a horizontal container."""
+
+    class Changed(Message):
+        """Posted when the switch's active state changes."""
+        def __init__(self, switch_button: "SwitchButton", active: bool) -> None:
+            super().__init__()
+            self.switch_button = switch_button
+            self.active = active
+
+    is_active: reactive[bool] = reactive(False)
+
+    DEFAULT_CSS = """
+        SwitchButton {
+            width: 100%;
+            height: auto;
+            padding: 0 1 0 0;
+            margin-right: 5;
+            layout: horizontal;
+            text-align: center;
+            border: round $secondary;
+        
+            &.--hover, &:focus-within {
+                border: round $accent;
+            }
+            
+            Label {
+                width: 1fr;
+                min-height: 1;
+                text-align: center;
+                padding: 0 1 0 1;
+                text-style: bold;
+                background: transparent;
+                color: $text;
+            }
+
+            Switch {
+                height: 1;
+                padding: 0;
+                margin: 0 2 0 1;
+                background: transparent;
+                border: none;
+            }
+            
+            Switch:focus {
+                background: $accent;
+                border: none;
+            }
+        }
+    """
+
+    def __init__(
+            self,
+            *,
+            text: str,
+            is_active: bool = False,
+            switch_id: str | None = None,
+            text_id: str | None = None,
+            **kwargs
+    ):
+        super().__init__(**kwargs)
+        self._original_text = text
+        self.text_id = text_id
+        self.is_active = is_active
+
+        self.switch = Switch(value=is_active, id=switch_id if switch_id else self.id)
+        self.text = Label(text, id=text_id)
+
+    def compose(self) -> ComposeResult:
+        yield self.switch
+        yield self.text
+
+    def on_switch_changed(self, event: Switch.Changed) -> None:
+        event.stop()
+        self.is_active = event.value
+        local_is_active = event.value
+        self.post_message(self.Changed(self, local_is_active))
+
+    def on_click(self, event: Click) -> None:
+        if event.widget is self.text or event.widget is self:
+            event.stop()
+            self.switch.toggle()
+        elif event.widget is self.switch:
+            event.stop()
+
+    def on_enter(self) -> None:
+        self.add_class("--hover")
+
+    def on_leave(self) -> None:
+        self.remove_class("--hover")
 
 
 class HomeScreen(Screen[str]):
@@ -162,6 +279,7 @@ class HomeScreen(Screen[str]):
         self.padding_top: int = 0
         self.padding_bottom: int = 0
         self.background_color: str = "white"
+        self.split_image_active: bool = False
 
     def compose(self) -> ComposeResult:
         yield Header(icon="●")
@@ -184,7 +302,12 @@ class HomeScreen(Screen[str]):
                     yield SimpleSelect(
                         label="Background Color",
                         initial_value=self.background_color,
-                        id="bg-select",
+                        select_id="bg-select",
+                    )
+
+                    yield SwitchButton(
+                        text="Split Wide Images",
+                        is_active=self.split_image_active
                     )
 
                 yield Vertical(id="future-feature")
@@ -230,7 +353,6 @@ class HomeScreen(Screen[str]):
     async def on_mount(self) -> None:
         self._update_path_display()
         self._update_file_mode_buttons()
-        # _update_numbers is still necessary to refresh Input values if state changes
         self._update_numbers()
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -273,14 +395,12 @@ class HomeScreen(Screen[str]):
         sel_btn.set_class(self.file_mode == "select", "toggled")
         sel_btn.label = self._set_select_files_btn_label()
 
-    # This still works because the Input IDs are global within the app's DOM.
     def _update_numbers(self) -> None:
         self.query_one("#pad-left", Input).value = str(self.padding_left)
         self.query_one("#pad-right", Input).value = str(self.padding_right)
         self.query_one("#pad-top", Input).value = str(self.padding_top)
         self.query_one("#pad-bottom", Input).value = str(self.padding_bottom)
 
-    # These input handlers are still on HomeScreen, managing the state variables.
     async def on_input_changed(self, event: Input.Changed) -> None:
         await self.on_input_submitted(Input.Submitted(event.input, event.value))
 
@@ -300,11 +420,19 @@ class HomeScreen(Screen[str]):
             setattr(self, mapping[event.input.id], val)
             self._update_numbers()
 
+    def on_switch_button_changed(self, event: SwitchButton.Changed) -> None:
+        """Handler for the custom message posted by the SwitchButton."""
+        if event.switch_button.id == "split-image-toggle":
+            self.split_image_active = event.active
+            self.log(f"Split Image active state set to: {self.split_image_active}")
+            event.stop()
+
     def _emit_settings_and_close(self) -> None:
         settings = {
             "path": str(self.selected_path),
             "files": self.selected_files if self.file_mode == "select" and self.selected_files else "ALL",
             "background_color": self.background_color,
+            "split_wide_images": self.split_image_active,
             "padding": {
                 "left": self.padding_left,
                 "right": self.padding_right,
