@@ -15,6 +15,7 @@ CommandPalette Vertical#--container {
 }
 
 CommandPalette Horizontal#--input {
+    max-height: 3;
     border: round $secondary !important;
 }
 
@@ -27,13 +28,14 @@ CommandPalette SearchIcon {
 }
 
 CommandInput {
-    border: blank !important;
+    border: none !important;
     margin: 0 !important;
     margin-left: 1;
 }
 
 CommandList {
-    border: blank !important;
+    border: none !important;
+    margin: 0 1 0 1;
     padding-bottom: 1 !important;
 }
 
