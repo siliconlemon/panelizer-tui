@@ -53,7 +53,7 @@ class LaunchScreen(Screen[Optional[Path]]):
         self._update_layout(event.size)
 
     def compose(self) -> ComposeResult:
-        yield Header()
+        yield Header(icon="●")
         with Container(id="launch-container"):
             with Container(id="alignment-container"):
                 with Container(id="ascii-art-container"):

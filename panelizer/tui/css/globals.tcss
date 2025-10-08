@@ -6,7 +6,40 @@
  * awaiting a fix from jetbrains.
  */
 
-/* Generic elements */
+/* Generic Textual Elements */
+
+CommandPalette Vertical#--container {
+    background: $background;
+    max-width: 80;
+    margin: 2;
+}
+
+CommandPalette Horizontal#--input {
+    border: round $secondary !important;
+}
+
+CommandPalette Vertical#--results {
+    margin-top: 0 !important;
+}
+
+CommandPalette SearchIcon {
+    display: none !important;
+}
+
+CommandInput {
+    border: blank !important;
+    margin: 0 !important;
+    margin-left: 1;
+}
+
+CommandList {
+    border: blank !important;
+    padding-bottom: 1 !important;
+}
+
+Header {
+    max-height: 1;
+}
 
 Button {
     color: $primary-lighten-1;
@@ -30,7 +63,7 @@ Input {
 
 Input:focus, Input:hover {
     color: $text;
-    border: round $accent-lighten-2;
+    border: round $accent;
     background: transparent;
 }
 
@@ -41,7 +74,7 @@ Select {
 
 Select:focus > SelectCurrent, Select:hover > SelectCurrent {
     color: $text;
-    border: round $accent-lighten-2;
+    border: round $accent;
 }
 
 SelectCurrent {
@@ -55,13 +88,13 @@ SelectCurrent {
 
 SelectCurrent:focus, SelectCurrent:hover {
     color: $text;
-    border: round $accent-lighten-2;
+    border: round $accent;
     background: transparent;
 }
 
 OptionList {
     background: transparent;
-    border: round $primary;
+    border: round $secondary;
 }
 
 .option-list--option {
@@ -78,7 +111,7 @@ InputBar {
     margin: 0;
 }
 
-/* textual_fspicker package elements */
+/* Textual FS Picker Package Elements */
 
 CurrentDirectory {
     color: $text;
@@ -88,7 +121,7 @@ CurrentDirectory {
 
 CurrentDirectory:focus, CurrentDirectory:hover {
     color: $text;
-    border: round $accent-lighten-2;
+    border: round $accent;
 }
 
 SelectDirectory .option-list--option {
@@ -121,7 +154,7 @@ SelectDirectory .option-list--option {
     min-height: 3;
     min-width: 14;
     padding: 0;
-    color: $accent-darken-2;
+    color: $secondary;
     border: round $secondary-darken-1;
 }
 

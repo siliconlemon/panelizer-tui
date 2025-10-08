@@ -164,7 +164,7 @@ class HomeScreen(Screen[str]):
         self.background_color: str = "white"
 
     def compose(self) -> ComposeResult:
-        yield Header()
+        yield Header(icon="●")
         with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
                 yield Button(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
