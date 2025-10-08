@@ -136,6 +136,10 @@ class SimpleSelect(Widget):
                 color: $text;
                 border: none;
             }
+            
+            OptionList {
+                margin-right: 3;
+            }
         }
     """
 
@@ -238,7 +242,7 @@ class SwitchButton(Widget):
         self.text_id = text_id
         self.is_active = is_active
 
-        self.switch = Switch(value=is_active, id=switch_id if switch_id else self.id)
+        self.switch = Switch(value=is_active, animate=False, id=switch_id if switch_id else self.id)
         self.text = Label(text, id=text_id)
 
     def compose(self) -> ComposeResult:
