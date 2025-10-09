@@ -51,9 +51,9 @@ class GridInput(Grid):
             margin: 0;
         }
         .unit {
+            color: $text-muted;
             width: 3;
             margin: 1 1 0 1;
-            color: $accent;
         }
     }
     """
