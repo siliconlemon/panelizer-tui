@@ -7,7 +7,8 @@ from textual.geometry import Size
 from textual.screen import Screen
 from textual.widgets import Header, Label, Button
 from textual_fspicker import SelectDirectory
-from ...utils.ascii_painter import paint
+
+from ...utils import AsciiPainter
 
 
 class LaunchScreen(Screen[Optional[Path]]):
@@ -41,7 +42,7 @@ class LaunchScreen(Screen[Optional[Path]]):
                     try:
                         with asset_path.open("r", encoding="utf-8") as f:
                             raw_art = f.read()
-                        colorized_art = paint(ascii_string=raw_art, color_map=color_map)
+                        colorized_art = AsciiPainter.paint(ascii_string=raw_art, color_map=color_map)
                         self.ASCII_ART_CACHE[filename] = colorized_art
                     except Exception as e:
                         self.ASCII_ART_CACHE[filename] = f"[Error loading {filename}: {e}]"
