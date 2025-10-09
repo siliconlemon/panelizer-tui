@@ -1,5 +1,5 @@
 """
-A Panelizer TUI package containing custom screens based on the Screen and ModalScreen classes from `textual`.
+A Panelizer TUI package containing custom screens based on the Screen class from `textual`.
 """
 
 from .done import DoneScreen
