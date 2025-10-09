@@ -47,9 +47,7 @@ Button {
     color: $primary-lighten-1;
     border: round $primary;
     background: transparent;
-    min-width: 14;
-    padding: 0 2;
-    margin: 0 2;
+    min-width: 8;
 }
 
 Button:hover {
@@ -129,6 +127,10 @@ SelectDirectory .option-list--option {
     padding: 0;
 }
 
+SelectDirectory Button {
+    padding: 0 1;
+}
+
 /* Custom element classes for common use caes */
 
 .input-label {
@@ -155,21 +157,35 @@ SelectDirectory .option-list--option {
     min-height: 3;
     min-width: 14;
     padding: 0;
-    color: $secondary;
-    border: round $secondary-darken-1;
+    color: $secondary-lighten-1;
+    border: round $secondary;
 }
 
 .toggle-btn.toggled {
     color: $text;
-    border: round $accent;
+    border: round $accent-darken-1;
 }
 
 .toggle-btn:hover,
-.toggle-btn.toggled:hover,
-.toggle-btn:focus,
-.toggle-btn.toggled:focus {
+.toggle-btn:focus {
     color: $text;
+    border: round $secondary;
+}
+
+.toggle-btn.toggled:hover,
+.toggle-btn.toggled:focus {
+    color: $accent-darken-3;
     border: round $secondary-darken-2;
+}
+
+.defaults-btn {
+    color: $text;
+    border: round $secondary;
+}
+
+.defaults-btn:focus, .defaults-btn:hover {
+    color: $text;
+    border: round $accent-darken-1;
 }
 
 .gap-left {

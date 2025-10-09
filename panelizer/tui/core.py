@@ -14,8 +14,8 @@ class PanelizerTUI(App[Any]):
     CSS_PATH = ["./css/globals.tcss"]
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
-    MIN_ROWS: int = 28
-    MIN_COLS: int = 80
+    MIN_ROWS: int = 32
+    MIN_COLS: int = 86
     SCREENS = {
         "launch": LaunchScreen,
         "home": HomeScreen,

@@ -10,7 +10,7 @@ from textual.message import Message
 from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widget import Widget
-from textual.widgets import Button, Input, Header, Static, Select, Switch, Label
+from textual.widgets import Button, Input, Header, Static, Select, Switch, Label, Placeholder
 from textual_fspicker import SelectDirectory
 
 from ..dialogs.file_select import FileSelectDialog
@@ -269,6 +269,67 @@ class SwitchButton(Widget):
         self.remove_class("--hover")
 
 
+class Defaults(Widget):
+    """A widget with a label, a horizontal line, and three buttons: Save, Restore, Reset."""
+
+    DEFAULT_CSS = """
+        Defaults {
+            height: 6;
+            width: 100%;
+            margin-top: 1;
+            align-horizontal: center;
+            
+            .defaults-label {
+                text-align: left;
+                width: 100%;
+                padding: 0;
+                color: $accent;
+                text-style: bold;
+            }
+            
+            .defaults-row {
+                width: auto;
+            }
+            
+            .defaults-btn {
+                padding: 0;
+                color: $text;
+                border: round $secondary;
+            }
+            
+            .defaults-btn:focus, .defaults-btn:hover {
+                color: $text;
+                border: round $accent;
+            }
+        }
+    """
+
+    def __init__(
+        self,
+        *,
+        label: str = "Default Values",
+        save_id: str = "defaults-save",
+        restore_id: str = "defaults-restore",
+        reset_id: str = "defaults-reset",
+        widget_id: str | None = None,
+        **kwargs,
+    ):
+        super().__init__(id=widget_id, **kwargs)
+        self.label_text = label
+        self.save_id = save_id
+        self.restore_id = restore_id
+        self.reset_id = reset_id
+
+    def compose(self) -> ComposeResult:
+        with Vertical():
+            yield Static(self.label_text, classes="defaults-label")
+            with Horizontal(classes="defaults-row"):
+                yield Button("Save", id=self.save_id, classes="defaults-btn gap-right save", variant="default")
+                yield Button("Restore", id=self.restore_id, classes="defaults-btn gap-right restore", variant="primary")
+                yield Button("Reset", id=self.reset_id, classes="defaults-btn reset", variant="error")
+
+
+
 class HomeScreen(Screen[str]):
     CSS_PATH = ["../css/home.tcss"]
     BINDINGS = []
@@ -312,6 +373,14 @@ class HomeScreen(Screen[str]):
                     yield SwitchButton(
                         text="Split Wide Images",
                         is_active=self.split_image_active
+                    )
+
+                    yield Defaults(
+                        label="Default Values",
+                        save_id="save-defaults-btn",
+                        restore_id="restore-defaults-btn",
+                        reset_id="reset-defaults-btn",
+                        widget_id="defaults-widget"
                     )
 
                 yield Vertical(id="future-feature")
@@ -359,6 +428,7 @@ class HomeScreen(Screen[str]):
         self._update_file_mode_buttons()
         self._update_numbers()
 
+    # FIXME: Make this a damn switch
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "all-files-btn":
             self.file_mode = "all"
@@ -382,6 +452,15 @@ class HomeScreen(Screen[str]):
                 self.selected_path = Path(new_dir)
                 self._update_path_display()
             event.stop()
+        # TODO: Implement these
+        elif event.button.id == "save-defaults-btn":
+            ...
+        elif event.button.id == "restore-defaults-btn":
+            ...
+        elif event.button.id == "reset-defaults-btn":
+            ...
+
+    # handle reset
 
     async def on_select_changed(self, event: Select.Changed) -> None:
         if event.select.id == "bg-select":
