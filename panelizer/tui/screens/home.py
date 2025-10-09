@@ -2,10 +2,12 @@ import json
 from pathlib import Path
 from typing import Literal
 
+from textual import events
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Grid, Container
 from textual.content import Content
 from textual.events import Click, Enter, Leave
+from textual.keys import Keys
 from textual.message import Message
 from textual.reactive import reactive
 from textual.screen import Screen
@@ -224,14 +226,37 @@ class SwitchButton(Widget):
                 background: transparent;
                 border: none;
                 
+                &.-on .switch--slider {
+                    color: $success;
+                    border: none;
+                }
+                
+                & .switch--slider {
+                    color: $panel;
+                    border: none;
+                    background: $panel-darken-3;
+                }
+                
+                &:focus {
+                    border: none;
+                    background: $accent;
+                    color: $accent;
+                }
+                
+                &:light {
                     &.-on .switch--slider {
                         color: $success;
+                        border: none;
                     }
                     
                     & .switch--slider {
-                        color: $panel;
-                        background: $panel-darken-3;
+                        border: none;
                     }
+                    
+                    &:focus {
+                        border: none;
+                    }
+                }
             }
         }
     """
@@ -273,6 +298,13 @@ class SwitchButton(Widget):
             self.add_class("--toggled")
         else:
             self.remove_class("--toggled")
+
+    def _on_key(self, event: events.Key) -> None:
+        if event.key == Keys.Enter or event.key == Keys.Space:
+            if not self.switch.value:
+                self.add_class("--toggled")
+            else:
+                self.remove_class("--toggled")
 
     def on_enter(self) -> None:
         self.add_class("--hover")
