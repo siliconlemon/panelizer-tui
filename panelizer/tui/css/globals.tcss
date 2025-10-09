@@ -183,6 +183,18 @@ SelectDirectory Button {
     border: round $secondary;
 }
 
+.defaults-btn.save:focus, .defaults-btn.save:hover {
+    color: $success-lighten-1;
+}
+
+.defaults-btn.restore:focus, .defaults-btn.restore:hover {
+    color: $warning-lighten-1;
+}
+
+.defaults-btn.reset:focus, .defaults-btn.reset:hover {
+    color: $error-lighten-1;
+}
+
 .defaults-btn:focus, .defaults-btn:hover {
     color: $text;
     border: round $accent-darken-1;

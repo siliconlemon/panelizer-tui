@@ -203,6 +203,10 @@ class SwitchButton(Widget):
                 border: round $accent;
             }
             
+            &.--toggled Label {
+                color: $success-lighten-1;
+            }
+            
             Label {
                 width: 1fr;
                 min-height: 1;
@@ -219,11 +223,15 @@ class SwitchButton(Widget):
                 margin: 0 2 0 1;
                 background: transparent;
                 border: none;
-            }
-            
-            Switch:focus {
-                background: $accent;
-                border: none;
+                
+                    &.-on .switch--slider {
+                        color: $success;
+                    }
+                    
+                    & .switch--slider {
+                        color: $panel;
+                        background: $panel-darken-3;
+                    }
             }
         }
     """
@@ -261,6 +269,10 @@ class SwitchButton(Widget):
             self.switch.toggle()
         elif event.widget is self.switch:
             event.stop()
+        if self.switch.value:
+            self.add_class("--toggled")
+        else:
+            self.remove_class("--toggled")
 
     def on_enter(self) -> None:
         self.add_class("--hover")
