@@ -283,7 +283,7 @@ class Defaults(Widget):
                 text-align: left;
                 width: 100%;
                 padding: 0;
-                color: $accent;
+                color: $text;
                 text-style: bold;
             }
             
