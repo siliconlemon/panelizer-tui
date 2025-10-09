@@ -42,7 +42,7 @@
 #main-row {
     width: 1fr;
     height: 1fr;
-    padding: 1 0;
+    padding: 0 0 1 0;
     margin-bottom: 1;
 }
 
