@@ -18,23 +18,21 @@ from textual_fspicker import SelectDirectory
 from ..dialogs.file_select import FileSelectDialog
 
 
-# TODO: make this have variable rows (and maybe columns)
-class GridInput(Grid):
+class InputGrid(Grid):
     """
     A generic NxM grid widget with labels, suffixes and custom units.
-    Each cell is defined by the one entry in the parallel lists:
-    values, labels, suffixes and units.
+    Each cell is defined by one entry in the parallel lists (values, labels, suffixes and units).
     """
     DEFAULT_CSS = """
-    GridInput {
+    InputGrid {
         width: 100%;
         height: auto;
         margin-bottom: 1;
         layout: grid;
         
         .grid-cell {
-            margin-left: 0;
-            margin-right: 0;
+            margin: 0;
+            padding-right: 2;
         }
         .grid-row {
             layout: horizontal;
@@ -54,51 +52,47 @@ class GridInput(Grid):
         }
         .unit {
             color: $text-muted;
-            width: 3;
-            margin: 1 1 0 1;
+            width: 2;
+            margin: 1 0 0 1;
         }
     }
     """
 
     def __init__(
-        self,
-        *,
-        rows: int,
-        columns: int,
-        values: list[int],
-        labels: list[str],
-        input_ids: list[str],
-        units: list[str],
-        **kwargs
+            self,
+            *,
+            rows: int,
+            columns: int,
+            values: list[int],
+            labels: list[str],
+            input_ids: list[str],
+            units: list[str] = None,  # Optional
+            **kwargs
     ):
         super().__init__(**kwargs)
         self.rows = rows
         self.columns = columns
         self.ROW_HEIGHT = 4
         self.COLUMN_WIDTH = "1fr"
-
-        expected = rows * columns
+        n_expected = rows * columns
         n_values = len(values)
         n_labels = len(labels)
-        n_suffixes = len(input_ids)
-        n_units = len(units)
-
-        if not (n_values == n_labels == n_suffixes == n_units):
+        n_input_ids = len(input_ids)
+        if not (n_values == n_labels == n_input_ids):
             raise ValueError(
                 f"GridInput: Mismatched argument lengths: "
                 f"values={n_values}, labels={n_labels}, "
-                f"suffixes={n_suffixes}, units={n_units}"
+                f"input_ids={n_input_ids}"
             )
-        if n_values != expected:
+        if n_values != n_expected:
             raise ValueError(
-                f"GridInput: Given rows={rows} columns={columns} → {expected} cells, "
+                f"GridInput: Given rows={rows} columns={columns} → {n_expected} cells, "
                 f"but got {n_values} values (and similarly for other fields)."
             )
-
         self.values = values
         self.labels = labels
         self.input_ids = input_ids
-        self.units = units
+        self.units = units if units else [None] * n_expected
 
     async def on_mount(self):
         self.styles.height = self.rows * self.ROW_HEIGHT
@@ -107,9 +101,9 @@ class GridInput(Grid):
         self.styles.grid_columns = [self.COLUMN_WIDTH] * self.columns
         self.styles.grid_rows = [self.ROW_HEIGHT] * self.rows
 
-
     def compose(self) -> ComposeResult:
-        for idx in range(self.rows * self.columns):
+        n_cells = self.rows * self.columns
+        for idx in range(n_cells):
             label = self.labels[idx]
             element_id = self.input_ids[idx]
             value = self.values[idx]
@@ -118,7 +112,8 @@ class GridInput(Grid):
                 yield Static(label, classes="input-label")
                 with Horizontal(classes="grid-row"):
                     yield Input(str(value), id=element_id, classes="input", type="number")
-                    yield Static(unit, classes="unit", disabled=True)
+                    if unit:
+                        yield Static(unit, classes="unit", disabled=True)
 
 
 class SimpleSelect(Widget):
@@ -394,7 +389,7 @@ class HomeScreen(Screen[str]):
             with Horizontal(id="main-row"):
                 with Vertical(id="input-column"):
 
-                    yield GridInput(
+                    yield InputGrid(
                         rows=2,
                         columns=2,
                         values=[self.img_padding_left, self.img_padding_right, self.img_padding_top, self.img_padding_bottom],
