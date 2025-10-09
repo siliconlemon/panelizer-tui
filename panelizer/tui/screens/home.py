@@ -203,10 +203,6 @@ class SwitchButton(Widget):
                 border: round $accent;
             }
             
-             &.--hover:focus-within {
-                border: round $secondary;
-             }
-            
             &.--toggled Label {
                 color: $success-lighten-1;
             }

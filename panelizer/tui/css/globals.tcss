@@ -178,12 +178,6 @@ SelectDirectory Button#select {
     border: round $secondary;
 }
 
-.toggle-btn.toggled:hover,
-.toggle-btn.toggled:focus {
-    color: $accent-darken-3;
-    border: round $secondary-darken-2;
-}
-
 .defaults-btn {
     color: $text;
     border: round $secondary;
