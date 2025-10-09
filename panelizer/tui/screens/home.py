@@ -237,30 +237,15 @@ class SwitchButton(Widget):
                 }
                 
                 & .switch--slider {
-                    color: $panel;
-                    border: none;
+                    color: $secondary-darken-1;
                     background: $panel-darken-3;
+                    border: none;
                 }
                 
                 &:focus {
                     border: none;
                     background: $accent;
                     color: $accent;
-                }
-                
-                &:light {
-                    &.-on .switch--slider {
-                        color: $success;
-                        border: none;
-                    }
-                    
-                    & .switch--slider {
-                        border: none;
-                    }
-                    
-                    &:focus {
-                        border: none;
-                    }
                 }
             }
         }
