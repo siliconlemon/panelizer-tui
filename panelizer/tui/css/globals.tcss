@@ -99,17 +99,17 @@ OptionList {
     border: round $secondary;
 }
 
-Dialog {
-    border: round $primary;
-    padding: 0;
-}
-
 InputBar {
     padding: 0;
     margin: 0;
 }
 
 /* Textual FS Picker Package Elements */
+
+Dialog {
+    border: round $secondary;
+    padding: 0;
+}
 
 CurrentDirectory {
     color: $text;
@@ -126,8 +126,15 @@ SelectDirectory .option-list--option {
     padding: 0;
 }
 
-SelectDirectory Button {
+SelectDirectory Button#cancel {
     padding: 0 1;
+    margin-right: 2;
+}
+
+SelectDirectory Button#select {
+    padding: 0 1;
+    margin-left: 2;
+    margin-right: 2;
 }
 
 /* Custom element classes for common use caes */

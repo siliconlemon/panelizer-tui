@@ -32,7 +32,7 @@ class PanelizerTUI(App[Any]):
         warning="#ebb370",
         error="#ff524d",
         surface="#3b4252",
-        panel="#292f3a",
+        panel="#27272d",
         dark=True,
         variables={
             "block-cursor-text-style": "none",
