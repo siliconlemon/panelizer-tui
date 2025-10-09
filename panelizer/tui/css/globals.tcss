@@ -69,7 +69,6 @@ Input:focus, Input:hover {
 
 Select > SelectCurrent > #label {
     color: $text;
-    padding: 0 1;
     border: round $secondary;
     background: transparent;
 }
@@ -77,6 +76,10 @@ Select > SelectCurrent > #label {
 Select:focus > SelectCurrent > #label, Select > SelectCurrent > #label:hover {
     color: $text;
     border: round $accent;
+}
+
+Select:focus > SelectCurrent > #label {
+    text-style: reverse;
 }
 
 Select > SelectCurrent > .arrow {
@@ -94,10 +97,6 @@ SelectCurrent {
 OptionList {
     background: transparent;
     border: round $secondary;
-}
-
-.option-list--option {
-    padding: 0 1;
 }
 
 Dialog {

@@ -145,6 +145,7 @@ class SimpleSelect(Widget):
         }
     """
 
+    # TODO: Pass the options in, add spaces
     def __init__(self, *, label: str, initial_value: str, select_id: str, **kwargs):
         if select_id:
             self.select_id = select_id
@@ -152,10 +153,10 @@ class SimpleSelect(Widget):
         self.label = label
         self.initial_value = initial_value
         self.options = [
-            ("White", "white"),
-            ("Light Gray", "lightgray"),
-            ("Dark Gray", "darkgray"),
-            ("Black", "black"),
+            (" White ", "white"),
+            (" Light Gray ", "lightgray"),
+            (" Dark Gray ", "darkgray"),
+            (" Black ", "black"),
         ]
 
     label_hovered = reactive(False)
@@ -218,6 +219,10 @@ class SwitchButton(Widget):
                 background: transparent;
                 color: $text;
             }
+            
+            &:focus-within Label {
+                text-style: reverse;
+            }
 
             Switch {
                 height: 1;
@@ -271,12 +276,11 @@ class SwitchButton(Widget):
             **kwargs
     ):
         super().__init__(**kwargs)
-        self._original_text = text
         self.text_id = text_id
         self.is_active = is_active
 
         self.switch = Switch(value=is_active, animate=False, id=switch_id if switch_id else self.id)
-        self.text = Label(text, id=text_id)
+        self.text = Label(" " + text + " ", id=text_id)
 
     def compose(self) -> ComposeResult:
         yield self.switch
@@ -294,6 +298,7 @@ class SwitchButton(Widget):
             self.switch.toggle()
         elif event.widget is self.switch:
             event.stop()
+        self.switch.focus()
         if self.switch.value:
             self.add_class("--toggled")
         else:
