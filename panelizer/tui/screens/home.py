@@ -145,19 +145,21 @@ class SimpleSelect(Widget):
         }
     """
 
-    # TODO: Pass the options in, add spaces
-    def __init__(self, *, label: str, initial_value: str, select_id: str, **kwargs):
+    def __init__(
+            self,
+            *,
+            select_id: str,
+            label: str,
+            initial: str,
+            options: list[tuple[str, str]],
+            **kwargs
+    ):
         if select_id:
             self.select_id = select_id
         super().__init__(**kwargs)
         self.label = label
-        self.initial_value = initial_value
-        self.options = [
-            (" White ", "white"),
-            (" Light Gray ", "lightgray"),
-            (" Dark Gray ", "darkgray"),
-            (" Black ", "black"),
-        ]
+        self.initial_value = initial
+        self.options = [(f" {label.strip()} ", value) for label, value in options]
 
     label_hovered = reactive(False)
 
@@ -254,18 +256,16 @@ class SwitchButton(Widget):
     def __init__(
             self,
             *,
+            switch_id: str | None = None,
             text: str,
             is_active: bool = False,
-            switch_id: str | None = None,
-            text_id: str | None = None,
             **kwargs
     ):
         super().__init__(**kwargs)
-        self.text_id = text_id
         self.is_active = is_active
 
         self.switch = Switch(value=is_active, animate=False, id=switch_id if switch_id else self.id)
-        self.text = Label(" " + text + " ", id=text_id)
+        self.text = Label(" " + text + " ")
 
     def compose(self) -> ComposeResult:
         yield self.switch
@@ -341,18 +341,18 @@ class Defaults(Widget):
     def __init__(
         self,
         *,
-        label: str = "Default Values",
-        save_id: str = "defaults-save",
-        restore_id: str = "defaults-restore",
-        reset_id: str = "defaults-reset",
+        save_btn_id: str = "defaults-save",
+        restore_btn_id: str = "defaults-restore",
+        reset_btn_id: str = "defaults-reset",
         widget_id: str | None = None,
+        label: str = "Default Values",
         **kwargs,
     ):
         super().__init__(id=widget_id, **kwargs)
         self.label_text = label
-        self.save_id = save_id
-        self.restore_id = restore_id
-        self.reset_id = reset_id
+        self.save_id = save_btn_id
+        self.restore_id = restore_btn_id
+        self.reset_id = reset_btn_id
 
     def compose(self) -> ComposeResult:
         with Vertical():
@@ -373,11 +373,17 @@ class HomeScreen(Screen[str]):
         self.selected_path: Path = default_path
         self.file_mode: Literal["all", "select"] = "all"
         self.selected_files: list[str] = []
-        self.padding_left: int = 0
-        self.padding_right: int = 0
-        self.padding_top: int = 0
-        self.padding_bottom: int = 0
+        self.img_padding_left: int = 0
+        self.img_padding_right: int = 0
+        self.img_padding_top: int = 0
+        self.img_padding_bottom: int = 0
         self.background_color: str = "white"
+        self.background_color_options: list[tuple[str, str]] = [
+            ("White", "white"),
+            ("Light Gray", "lightgray"),
+            ("Dark Gray", "darkgray"),
+            ("Black", "black"),
+        ]
         self.split_image_active: bool = False
 
     def compose(self) -> ComposeResult:
@@ -391,7 +397,7 @@ class HomeScreen(Screen[str]):
                     yield GridInput(
                         rows=2,
                         columns=2,
-                        values=[self.padding_left, self.padding_right, self.padding_top, self.padding_bottom],
+                        values=[self.img_padding_left, self.img_padding_right, self.img_padding_top, self.img_padding_bottom],
                         labels=["Left", "Right", "Top", "Bottom"],
                         input_ids=["pad-left", "pad-right", "pad-top", "pad-bottom"],
                         units=["%", "%", "%", "%"],
@@ -399,22 +405,24 @@ class HomeScreen(Screen[str]):
                     )
 
                     yield SimpleSelect(
-                        label="Background Color",
-                        initial_value=self.background_color,
                         select_id="bg-select",
+                        label="Background Color",
+                        initial=self.background_color,
+                        options=self.background_color_options,
                     )
 
                     yield SwitchButton(
+                        switch_id="split-wide-switch",
                         text="Split Wide Images",
                         is_active=self.split_image_active
                     )
 
                     yield Defaults(
+                        save_btn_id="save-defaults-btn",
+                        restore_btn_id="restore-defaults-btn",
+                        reset_btn_id="reset-defaults-btn",
+                        widget_id="defaults-widget",
                         label="Default Values",
-                        save_id="save-defaults-btn",
-                        restore_id="restore-defaults-btn",
-                        reset_id="reset-defaults-btn",
-                        widget_id="defaults-widget"
                     )
 
                 yield Vertical(id="future-feature")
@@ -513,10 +521,10 @@ class HomeScreen(Screen[str]):
         sel_btn.label = self._set_select_files_btn_label()
 
     def _update_numbers(self) -> None:
-        self.query_one("#pad-left", Input).value = str(self.padding_left)
-        self.query_one("#pad-right", Input).value = str(self.padding_right)
-        self.query_one("#pad-top", Input).value = str(self.padding_top)
-        self.query_one("#pad-bottom", Input).value = str(self.padding_bottom)
+        self.query_one("#pad-left", Input).value = str(self.img_padding_left)
+        self.query_one("#pad-right", Input).value = str(self.img_padding_right)
+        self.query_one("#pad-top", Input).value = str(self.img_padding_top)
+        self.query_one("#pad-bottom", Input).value = str(self.img_padding_bottom)
 
     async def on_input_changed(self, event: Input.Changed) -> None:
         await self.on_input_submitted(Input.Submitted(event.input, event.value))
@@ -551,10 +559,10 @@ class HomeScreen(Screen[str]):
             "background_color": self.background_color,
             "split_wide_images": self.split_image_active,
             "padding": {
-                "left": self.padding_left,
-                "right": self.padding_right,
-                "top": self.padding_top,
-                "bottom": self.padding_bottom,
+                "left": self.img_padding_left,
+                "right": self.img_padding_right,
+                "top": self.img_padding_top,
+                "bottom": self.img_padding_bottom,
             },
         }
         self.dismiss(json.dumps(settings))
