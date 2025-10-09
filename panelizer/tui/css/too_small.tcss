@@ -27,7 +27,7 @@ TooSmall {
 }
 
 #msg_err {
-    color: $error;
+    color: $error-lighten-1;
     text-style: bold;
     margin: 0;
 }

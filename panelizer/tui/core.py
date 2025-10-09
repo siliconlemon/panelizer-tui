@@ -30,7 +30,7 @@ class PanelizerTUI(App[Any]):
         background="#1e1e1e",
         success="#63bd4a",
         warning="#ebb370",
-        error="#e82c37",
+        error="#ff524d",
         surface="#3b4252",
         panel="#292f3a",
         dark=True,
