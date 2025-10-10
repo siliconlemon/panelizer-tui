@@ -9,7 +9,7 @@ from textual.widgets import Button, Input, Header, Select
 from textual_fspicker import SelectDirectory
 
 from ..dialogs import FileSelectDialog
-from ..widgets import DefaultsPalette, SimpleInputGrid, SimpleSelect, SwitchButton, SimpleButton
+from ..widgets import DefaultsPalette, SimpleInputGrid, SimpleSelect, Toggle, SimpleButton
 
 
 class HomeScreen(Screen[str]):
@@ -51,7 +51,7 @@ class HomeScreen(Screen[str]):
                         units=["%", "%", "%", "%"],
                         id="pad-grid"
                     )
-                    yield SwitchButton(
+                    yield Toggle(
                         switch_id="split-wide-switch",
                         text="Split Wide Images",
                         is_active=self.split_image_active,
@@ -192,9 +192,9 @@ class HomeScreen(Screen[str]):
             setattr(self, mapping[event.input.id], val)
             self._update_numbers()
 
-    def on_switch_button_changed(self, event: SwitchButton.Changed) -> None:
+    def on_switch_button_changed(self, event: Toggle.Changed) -> None:
         """Handler for the custom message posted by the SwitchButton."""
-        if event.switch_button.id == "split-image-toggle":
+        if event.ref.id == "split-image-toggle":
             self.split_image_active = event.active
             self.log(f"Split Image active state set to: {self.split_image_active}")
             event.stop()

@@ -8,15 +8,15 @@ from textual.widget import Widget
 from textual.widgets import Switch, Label
 
 
-class SwitchButton(Widget):
+class Toggle(Widget):
     """A button emulation combining a Switch and a clickable label within a horizontal container."""
 
     class Changed(Message):
         """Posted when the switch's active state changes."""
 
-        def __init__(self, switch_button: "SwitchButton", active: bool) -> None:
+        def __init__(self, ref: "Toggle", active: bool) -> None:
             super().__init__()
-            self.switch_button = switch_button
+            self.ref = ref
             self.active = active
 
     is_active: reactive[bool] = reactive(False)

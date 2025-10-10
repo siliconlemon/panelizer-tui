@@ -8,7 +8,7 @@ from .simple_button import SimpleButton
 from .simple_input import SimpleInput
 from .simple_input_grid import SimpleInputGrid
 from .simple_select import SimpleSelect
-from .switch_button import SwitchButton
+from .toggle import Toggle
 
 __all__ = [
     "DefaultsButton",
@@ -17,5 +17,5 @@ __all__ = [
     "SimpleInput",
     "SimpleInputGrid",
     "SimpleSelect",
-    "SwitchButton"
+    "Toggle"
 ]
