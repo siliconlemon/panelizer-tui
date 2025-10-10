@@ -19,10 +19,14 @@ class DefaultsButton(textual.widgets.Button, inherit_css=False):
             
             &:focus {
                 text-style: $button-focus-text-style;
+                border: round $accent;
             }
             &:hover {
                 color: $text 60%;
                 border: round $accent;
+            }
+            &:focus:hover {
+                border: round $secondary;
             }
             &.-active {
                 color: $text 40%;
