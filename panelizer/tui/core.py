@@ -53,7 +53,7 @@ class PanelizerTUI(App[Any]):
 
     def set_themes(self) -> None:
         """Registers the default theme and sets it as the current theme."""
-        for light_theme in ("textual-light", "catppuccin-latte", "solarized-lite"):
+        for light_theme in ("textual-light", "catppuccin-latte", "solarized-light"):
             self.unregister_theme(light_theme)
         self.register_theme(self.DEFAULT_THEME)
         self.theme = "default"
