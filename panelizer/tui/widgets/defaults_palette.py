@@ -1,9 +1,9 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
 from textual.widget import Widget
-from textual.widgets import Static, Button
 
 from ..widgets import DefaultsButton
+from .inert_label import InertLabel
 
 
 class DefaultsPalette(Widget):
@@ -46,7 +46,7 @@ class DefaultsPalette(Widget):
 
     def compose(self) -> ComposeResult:
         with Vertical():
-            yield Static(self.label_text, classes="defaults-label")
+            yield InertLabel(self.label_text, classes="defaults-label")
             with Horizontal(classes="defaults-row"):
                 yield DefaultsButton("Save", id=self.save_id, classes="defaults-btn gap-right", variant="save")
                 yield DefaultsButton("Restore", id=self.restore_id, classes="defaults-btn gap-right", variant="restore")

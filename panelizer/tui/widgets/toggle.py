@@ -7,7 +7,7 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Switch
 
-from tui.widgets import InertLabel
+from ..widgets import InertLabel
 
 
 class Toggle(Widget, inherit_css=False, can_focus=True):
@@ -41,10 +41,10 @@ class Toggle(Widget, inherit_css=False, can_focus=True):
                     &.-on {
                         border: round $success 60%;
                     }
-                    Label {
+                    InertLabel {
                         color: $text 60%;
                     }
-                    &.-on Label {
+                    &.-on InertLabel {
                         color: $success-lighten-1 60%;
                     }
                     Switch {
@@ -73,11 +73,11 @@ class Toggle(Widget, inherit_css=False, can_focus=True):
                     border: round $accent 30%;
                 }
 
-                &.-on Label {
+                &.-on InertLabel {
                     color: $success-lighten-1;
                 }
 
-                Label {
+                InertLabel {
                     width: 1fr;
                     min-height: 1;
                     text-align: center;
@@ -87,7 +87,7 @@ class Toggle(Widget, inherit_css=False, can_focus=True):
                     color: $text;
                 }
 
-                &:focus-within Label {
+                &:focus-within InertLabel {
                     text-style: $button-focus-text-style;
                 }
 

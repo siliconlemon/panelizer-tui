@@ -8,7 +8,7 @@ from textual.screen import Screen
 from textual.widgets import Header, Label, Button
 from textual_fspicker import SelectDirectory
 
-from ..widgets import SimpleButton
+from ..widgets import SimpleButton, InertLabel
 from ...utils import AsciiPainter
 
 
@@ -59,7 +59,7 @@ class LaunchScreen(Screen[Optional[Path]]):
         with Container(id="launch-container"):
             with Container(id="alignment-container"):
                 with Container(id="ascii-art-container"):
-                    yield Label(id="ascii-art")
+                    yield InertLabel(id="ascii-art")
             with Container(id="button-container"):
                 yield SimpleButton("Pick a Directory", id="pick-dir", classes="wide-btn", variant="primary")
                 yield SimpleButton("Current Directory", id="current-dir", classes="wide-btn", variant="primary")
@@ -94,7 +94,7 @@ class LaunchScreen(Screen[Optional[Path]]):
     def _update_ascii_art(self, filename: str) -> None:
         """Updates ASCII art label with new ASCII art."""
         art = self.ASCII_ART_CACHE.get(filename)
-        ascii_label = self.query_one("#ascii-art", Label)
+        ascii_label = self.query_one("#ascii-art", InertLabel)
         if art:
             ascii_label.update(art)
         else:

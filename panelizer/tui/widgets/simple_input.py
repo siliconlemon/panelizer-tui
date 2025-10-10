@@ -1,8 +1,11 @@
-from textual.widget import Widget
-from textual.widgets import Input, Static
-from textual.containers import Horizontal, Vertical
-from textual.app import ComposeResult
 from typing import Optional, Literal
+
+from textual.app import ComposeResult
+from textual.containers import Horizontal, Vertical
+from textual.widget import Widget
+from textual.widgets import Input
+
+from ..widgets import InertLabel
 
 
 class SimpleInput(Widget):
@@ -14,7 +17,6 @@ class SimpleInput(Widget):
             layout: grid;
             
             .input-label {
-                color: $text-muted;
                 margin-bottom: 1;
             }
             
@@ -64,8 +66,8 @@ class SimpleInput(Widget):
     def compose(self) -> ComposeResult:
         with Vertical():
             if self.label:
-                yield Static(self.label, classes="input-label")
+                yield InertLabel(self.label, classes="input-label")
             with Horizontal():
                 yield Input(str(self.value), id=self.input_id, type=self.type_, classes="single-input")
                 if self.unit:
-                    yield Static(self.unit, classes="unit-label", disabled=True)
+                    yield InertLabel(self.unit, classes="unit-label", disabled=True)

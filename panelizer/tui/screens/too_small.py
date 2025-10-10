@@ -3,7 +3,7 @@ from textual.containers import VerticalGroup
 from textual.css.query import NoMatches
 from textual.events import Resize
 from textual.screen import Screen
-from textual.widgets import Static
+from textual.widgets import Label
 
 
 class TooSmallScreen(Screen[None]):
@@ -31,8 +31,8 @@ class TooSmallScreen(Screen[None]):
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="msg_group"):
-            yield Static("Current window size is too small", id="msg_err", markup=True)
-            yield Static("Awaiting live update values", id="msg_size", markup=True)
+            yield Label("Current window size is too small", id="msg_err", markup=True)
+            yield Label("Awaiting live update values", id="msg_size", markup=True)
 
     def set_size(self, width, height):
         """Sets the current terminal size for display and updates the labels if mounted."""
@@ -46,8 +46,8 @@ class TooSmallScreen(Screen[None]):
         width = self._pending_width or 0
         height = self._pending_height or 0
         try:
-            msg_err = self.query_one("#msg_err", expect_type=Static)
-            msg_size = self.query_one("#msg_size", expect_type=Static)
+            msg_err = self.query_one("#msg_err", expect_type=Label)
+            msg_size = self.query_one("#msg_size", expect_type=Label)
             msg_err.update(
                 f"Please, resize to at least {self.min_width} × {self.min_height}\n"
             )

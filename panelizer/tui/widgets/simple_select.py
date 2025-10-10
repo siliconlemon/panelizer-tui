@@ -2,7 +2,9 @@ from textual.app import ComposeResult
 from textual.containers import Container
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Static, Select
+from textual.widgets import Select
+
+from ..widgets import InertLabel
 
 
 class SimpleSelect(Widget):
@@ -48,7 +50,7 @@ class SimpleSelect(Widget):
     label_hovered = reactive(False)
 
     def compose(self) -> ComposeResult:
-        yield Static(self.label, classes="input-label", id="label")
+        yield InertLabel(self.label, classes="input-label", id="label")
         with Container(id="simple-select-container"):
             yield Select(
                 id=self.select_id if self.select_id else None,
