@@ -22,7 +22,7 @@ class Toggle(Widget):
     is_active: reactive[bool] = reactive(False)
 
     DEFAULT_CSS = """
-        SwitchButton {
+        Toggle {
             width: 100%;
             height: 3;
             padding: 0 1 0 0;
