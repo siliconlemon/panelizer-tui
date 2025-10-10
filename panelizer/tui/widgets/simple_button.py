@@ -7,7 +7,6 @@ SimpleButtonVariant = Literal["default", "primary", "success", "warning", "error
 
 class SimpleButton(textual.widgets.Button, inherit_css=False):
     """A skin for textual's native button widget."""
-
     DEFAULT_CSS = """
         SimpleButton {
             color: $text;
@@ -113,8 +112,8 @@ class SimpleButton(textual.widgets.Button, inherit_css=False):
 
     def __init__(
         self,
-        label: str | None = None,
+        label: str,
         variant: SimpleButtonVariant = "default",
         **kwargs
     ):
-        super().__init__(label, variant, **kwargs)
+        super().__init__(f" {label.strip()} ", variant, **kwargs)

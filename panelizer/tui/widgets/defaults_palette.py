@@ -3,6 +3,8 @@ from textual.containers import Vertical, Horizontal
 from textual.widget import Widget
 from textual.widgets import Static, Button
 
+from ..widgets import DefaultsButton
+
 
 class DefaultsPalette(Widget):
     """A widget with a label, a horizontal line, and three buttons: Save, Restore, Reset."""
@@ -46,6 +48,6 @@ class DefaultsPalette(Widget):
         with Vertical():
             yield Static(self.label_text, classes="defaults-label")
             with Horizontal(classes="defaults-row"):
-                yield Button("Save", id=self.save_id, classes="defaults-btn gap-right save", variant="default")
-                yield Button("Restore", id=self.restore_id, classes="defaults-btn gap-right restore", variant="primary")
-                yield Button("Reset", id=self.reset_id, classes="defaults-btn reset", variant="error")
+                yield DefaultsButton("Save", id=self.save_id, classes="defaults-btn gap-right", variant="save")
+                yield DefaultsButton("Restore", id=self.restore_id, classes="defaults-btn gap-right", variant="restore")
+                yield DefaultsButton("Reset", id=self.reset_id, classes="defaults-btn", variant="reset")
