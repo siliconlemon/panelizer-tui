@@ -9,7 +9,7 @@ from textual.widgets import Button, Input, Header, Select
 from textual_fspicker import SelectDirectory
 
 from ..dialogs import FileSelectDialog
-from ..widgets import DefaultsPalette, InputGrid, SimpleSelect, SwitchButton
+from ..widgets import DefaultsPalette, SimpleInputGrid, SimpleSelect, SwitchButton
 
 
 class HomeScreen(Screen[str]):
@@ -42,7 +42,7 @@ class HomeScreen(Screen[str]):
             with Horizontal(id="main-row"):
 
                 with Vertical(id="first-column"):
-                    yield InputGrid(
+                    yield SimpleInputGrid(
                         rows=2,
                         columns=2,
                         values=[self.img_padding_left, self.img_padding_right, self.img_padding_top, self.img_padding_bottom],
