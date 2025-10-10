@@ -10,7 +10,7 @@ from textual.widgets import Switch
 from ..widgets import InertLabel
 
 
-class Toggle(textual.Widget, inherit_css=False, can_focus=True):
+class Toggle(textual.widget.Widget, inherit_css=False, can_focus=True):
     """A button emulation combining a Switch and a clickable label within a horizontal container."""
     DEFAULT_CSS = """
             Toggle {

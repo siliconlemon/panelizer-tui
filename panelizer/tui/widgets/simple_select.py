@@ -4,10 +4,10 @@ from textual.containers import Container
 from textual.reactive import reactive
 from textual.widgets import Select
 
-from ..widgets import InertLabel
+from .inert_label import InertLabel
 
 
-class CompleteSelect(textual.Widget):
+class CompleteSelect(textual.widget.Widget):
     """A widget for selecting the background color."""
     DEFAULT_CSS = """
         SimpleSelect {

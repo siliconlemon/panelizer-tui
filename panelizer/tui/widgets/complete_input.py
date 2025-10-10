@@ -5,10 +5,10 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Input
 
-from ..widgets import InertLabel
+from .inert_label import InertLabel
 
 
-class CompleteInput(textual.Widget):
+class CompleteInput(textual.widget.Widget):
     """A labeled input widget with an optional unit label to the right."""
     DEFAULT_CSS = """
         CompleteInput {

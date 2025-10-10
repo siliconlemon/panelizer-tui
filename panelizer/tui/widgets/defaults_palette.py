@@ -6,7 +6,7 @@ from ..widgets import DefaultsButton
 from .inert_label import InertLabel
 
 
-class DefaultsPalette(textual.Widget):
+class DefaultsPalette(textual.widget.Widget):
     """A widget with a label, a horizontal line, and three buttons: Save, Restore, Reset."""
 
     DEFAULT_CSS = """
