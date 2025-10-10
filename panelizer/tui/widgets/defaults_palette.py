@@ -17,8 +17,7 @@ class DefaultsPalette(Widget):
                 text-align: left;
                 width: 100%;
                 padding: 0;
-                color: $text;
-                text-style: bold;
+                margin-left: 1;
             }
 
             .defaults-row {
