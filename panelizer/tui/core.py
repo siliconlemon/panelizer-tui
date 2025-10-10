@@ -26,7 +26,7 @@ class PanelizerTUI(App[Any]):
         primary="#36c8de",
         secondary="#98a1a5",
         accent="#ffffff",
-        foreground="#dfe5ef",
+        foreground="#c0c5cd",
         background="#1e1e1e",
         success="#63bd4a",
         warning="#ebb370",
