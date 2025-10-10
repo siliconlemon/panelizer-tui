@@ -163,7 +163,7 @@ SelectDirectory Button#select {
     min-height: 3;
     min-width: 14;
     padding: 0;
-    color: $secondary-lighten-1;
+    color: $accent 60%;
     border: round $accent 50%;
 }
 

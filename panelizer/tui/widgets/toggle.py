@@ -97,7 +97,7 @@ class Toggle(Widget, inherit_css=False):
                 }
 
                 & .switch--slider {
-                    color: $secondary-darken-1;
+                    color: $accent 40%;
                     background: $panel-darken-3;
                     border: none;
                 }
