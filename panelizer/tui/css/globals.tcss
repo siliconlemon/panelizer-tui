@@ -9,34 +9,45 @@
 /* Generic Textual Elements */
 
 CommandPalette Vertical#--container {
+    height: auto;
     background: $background;
     max-width: 80;
-    margin: 2;
+    margin-top: 6;
+    padding: 0;
+    visibility: visible;
 }
 
 CommandPalette Horizontal#--input {
     max-height: 3;
-    border: round $accent 50% !important;
+    margin: 0 1 0 1;
+    border: round $accent 70%;
+    visibility: visible;
 }
 
 CommandPalette Vertical#--results {
-    margin-top: 0 !important;
+    margin: 0;
+    padding: 0;
+    border: none;
 }
 
 CommandPalette SearchIcon {
-    display: none !important;
+    display: none;
 }
 
 CommandInput {
     border: none !important;
-    margin: 0 !important;
+    margin: 0;
+    padding: 0;
     margin-left: 1;
 }
 
 CommandList {
     border: none !important;
-    margin: 0 1 0 1;
-    padding-bottom: 1 !important;
+    margin: 0 2 0 2;
+}
+
+CommandList > .option-list--option {
+    padding: 0 1 0 1;
 }
 
 Header {
