@@ -50,7 +50,7 @@ class SwitchButton(Widget):
             }
 
             &:focus-within Label {
-                text-style: reverse;
+                text-style: $button-focus-text-style;
             }
 
             Switch {

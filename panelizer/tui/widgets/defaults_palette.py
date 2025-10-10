@@ -23,17 +23,6 @@ class DefaultsPalette(Widget):
             .defaults-row {
                 width: auto;
             }
-
-            .defaults-btn {
-                padding: 0;
-                color: $text;
-                border: round $secondary;
-            }
-
-            .defaults-btn:focus, .defaults-btn:hover {
-                color: $text;
-                border: round $accent;
-            }
         }
     """
 

@@ -9,7 +9,7 @@ from textual.widgets import Button, Input, Header, Select
 from textual_fspicker import SelectDirectory
 
 from ..dialogs import FileSelectDialog
-from ..widgets import DefaultsPalette, SimpleInputGrid, SimpleSelect, SwitchButton
+from ..widgets import DefaultsPalette, SimpleInputGrid, SimpleSelect, SwitchButton, SimpleButton
 
 
 class HomeScreen(Screen[str]):
@@ -86,7 +86,7 @@ class HomeScreen(Screen[str]):
                     if self.file_mode == "select"
                     else "toggle-btn gap-left"
                 )
-            yield Button("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
+            yield SimpleButton("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
 
     @staticmethod
     def _highlight_toggled_text(text: str) -> str:
