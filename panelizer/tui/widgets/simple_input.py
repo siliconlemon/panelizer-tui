@@ -26,7 +26,7 @@ class SimpleInput(Widget):
             
             Input {
                 color: $text;
-                border: round $secondary;
+                border: round $accent 50%;
                 background: transparent;
                 color: $text;
                 width: 1fr;

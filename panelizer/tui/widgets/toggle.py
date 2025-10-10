@@ -28,7 +28,7 @@ class Toggle(Widget, inherit_css=False):
             padding: 0 1 0 0;
             layout: horizontal;
             text-align: center;
-            border: round $secondary;
+            border: round $accent 50%;
             
             &.--hover, &:focus-within {
                 border: round $accent;

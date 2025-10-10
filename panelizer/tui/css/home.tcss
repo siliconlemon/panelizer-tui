@@ -31,7 +31,7 @@
 
 #path-btn:focus, #path-btn:hover {
     color: $text;
-    border: round $secondary-darken-2;
+    border: round $accent-darken-2 50%;
 
 }
 

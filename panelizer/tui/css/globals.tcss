@@ -16,7 +16,7 @@ CommandPalette Vertical#--container {
 
 CommandPalette Horizontal#--input {
     max-height: 3;
-    border: round $secondary !important;
+    border: round $accent 50% !important;
 }
 
 CommandPalette Vertical#--results {
@@ -57,7 +57,7 @@ Button:hover {
 
 Input {
     color: $text;
-    border: round $secondary;
+    border: round $accent 50%;
     background: transparent;
 }
 
@@ -69,7 +69,7 @@ Input:focus, Input:hover {
 
 Select > SelectCurrent > #label {
     color: $text;
-    border: round $secondary;
+    border: round $accent 50%;
     background: transparent;
 }
 
@@ -96,7 +96,7 @@ SelectCurrent {
 
 OptionList {
     background: transparent;
-    border: round $secondary;
+    border: round $accent 50%;
 }
 
 InputBar {
@@ -107,13 +107,13 @@ InputBar {
 /* Textual FS Picker Package Elements */
 
 Dialog {
-    border: round $secondary;
+    border: round $accent 50%;
     padding: 0;
 }
 
 CurrentDirectory {
     color: $text;
-    border: round $secondary;
+    border: round $accent 50%;
     margin-left: 2;
 }
 
@@ -164,7 +164,7 @@ SelectDirectory Button#select {
     min-width: 14;
     padding: 0;
     color: $secondary-lighten-1;
-    border: round $secondary;
+    border: round $accent 50%;
 }
 
 .toggle-btn.toggled {
@@ -175,7 +175,7 @@ SelectDirectory Button#select {
 .toggle-btn:hover,
 .toggle-btn:focus {
     color: $text;
-    border: round $secondary;
+    border: round $accent 50%;
 }
 
 .gap-left {

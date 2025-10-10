@@ -10,7 +10,7 @@ class DefaultsButton(textual.widgets.Button, inherit_css=False):
     DEFAULT_CSS = """
         DefaultsButton {
             color: $text;
-            border: round $secondary;
+            border: round $accent 50%;
             background: transparent;
             height: auto;
             min-width: 8;
@@ -26,7 +26,7 @@ class DefaultsButton(textual.widgets.Button, inherit_css=False):
                 border: round $accent;
             }
             &:focus:hover {
-                border: round $secondary;
+                border: round $accent 50%;
             }
             &.-active {
                 color: $text 40%;
