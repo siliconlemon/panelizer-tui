@@ -9,7 +9,7 @@ from textual.widgets import Button, Input, Header, Select
 from textual_fspicker import SelectDirectory
 
 from ..dialogs import FileSelectDialog
-from ..widgets import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, TheButton
+from ..widgets import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, NeonButton
 
 
 class HomeScreen(Screen[str]):
@@ -38,7 +38,7 @@ class HomeScreen(Screen[str]):
         yield Header(icon="●")
         with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
-                yield TheButton(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
+                yield NeonButton(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
             with Horizontal(id="main-row"):
 
                 with Vertical(id="first-column"):
@@ -74,19 +74,19 @@ class HomeScreen(Screen[str]):
                     )
 
             with Horizontal(id="file-select-grid"):
-                yield TheButton(
+                yield NeonButton(
                     label=self._set_all_files_btn_label(), id="all-files-btn",
                     classes="toggle-btn gap-right toggled"
                     if self.file_mode == "all"
                     else "toggle-btn gap-right"
                 )
-                yield TheButton(
+                yield NeonButton(
                     label=self._set_select_files_btn_label(), id="select-files-btn",
                     classes="toggle-btn toggled gap-left"
                     if self.file_mode == "select"
                     else "toggle-btn gap-left"
                 )
-            yield TheButton("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
+            yield NeonButton("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
 
     @staticmethod
     def _highlight_toggled_text(text: str) -> str:
@@ -118,7 +118,7 @@ class HomeScreen(Screen[str]):
         self._update_numbers()
 
     # FIXME: Make this a damn switch
-    async def on_button_pressed(self, event: TheButton.Pressed) -> None:
+    async def on_button_pressed(self, event: NeonButton.Pressed) -> None:
         if event.button.id == "all-files-btn":
             self.file_mode = "all"
             self.selected_files = []
@@ -156,13 +156,13 @@ class HomeScreen(Screen[str]):
             self.background_color = str(event.value)
 
     def _update_path_display(self) -> None:
-        path_btn = self.query_one("#path-btn", TheButton)
+        path_btn = self.query_one("#path-btn", NeonButton)
         path = self.selected_path.as_posix()
         path_btn.label = path
 
     def _update_file_mode_buttons(self) -> None:
-        all_btn = self.query_one("#all-files-btn", TheButton)
-        sel_btn = self.query_one("#select-files-btn", TheButton)
+        all_btn = self.query_one("#all-files-btn", NeonButton)
+        sel_btn = self.query_one("#select-files-btn", NeonButton)
         all_btn.set_class(self.file_mode == "all", "toggled")
         sel_btn.set_class(self.file_mode == "select", "toggled")
         sel_btn.label = self._set_select_files_btn_label()

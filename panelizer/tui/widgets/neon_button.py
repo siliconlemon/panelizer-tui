@@ -2,13 +2,13 @@ from typing import Literal
 
 import textual
 
-TheButtonVariant = Literal["default", "primary", "success", "warning", "error"]
+NeonButtonVariant = Literal["default", "primary", "success", "warning", "error"]
 
 
-class TheButton(textual.widgets.Button, inherit_css=False):
+class NeonButton(textual.widgets.Button, inherit_css=False):
     """A skin for textual's native button widget."""
     DEFAULT_CSS = """
-        TheButton {
+        NeonButton {
             color: $text;
             border: round $accent;
             background: transparent;
@@ -113,7 +113,7 @@ class TheButton(textual.widgets.Button, inherit_css=False):
     def __init__(
         self,
         label: str,
-        variant: TheButtonVariant = "default",
+        variant: NeonButtonVariant = "default",
         **kwargs
     ):
         super().__init__(f" {label.strip()} ", variant, **kwargs)
