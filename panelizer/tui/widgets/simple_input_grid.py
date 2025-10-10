@@ -14,10 +14,12 @@ class SimpleInputGrid(Widget):
         width: 100%;
         height: auto;
         layout: grid;
+        
         .grid-cell {
             margin: 0;
             padding-right: 2;
         }
+        
     }
     """
 
@@ -55,10 +57,10 @@ class SimpleInputGrid(Widget):
         self.labels = labels
         self.input_ids = input_ids
         self.units = units if units else [None] * n_expected
-        self.types = types if types else ["integer"] * n_expected  # <--- default here
+        self.types = types if types else ["integer"] * n_expected
 
     async def on_mount(self):
-        self.styles.height = self.rows * 4  # 4 is your ROW_HEIGHT
+        self.styles.height = self.rows * 4
         self.styles.grid_size_rows = self.rows
         self.styles.grid_size_columns = self.columns
         self.styles.grid_columns = ["1fr"] * self.columns

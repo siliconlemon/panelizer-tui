@@ -8,39 +8,39 @@ from typing import Optional, Literal
 class SimpleInput(Widget):
     """A labeled input widget with an optional unit label to the right."""
     DEFAULT_CSS = """
-        SimpleInput, SimpleInputGrid {
+        SimpleInput {
             width: 100%;
             height: auto;
             layout: grid;
-        }
-        .grid-cell {
-            margin: 0;
-            padding-right: 2;
-        }
-        .grid-row {
-            layout: horizontal;
-            align-vertical: middle;
-            height: auto;
-            width: 1fr;
-            margin-bottom: 0;
-            padding: 0;
-        }
-        .input-label {
-            color: $text-muted;
-            margin-bottom: 1;
-        }
-        .single-input, .input {
-            color: $text;
-            width: 1fr;
-            min-width: 10;
-            min-height: 1;
-            padding: 0 1;
-            margin: 0;
-        }
-        .unit-label, .unit {
-            color: $text-muted;
-            width: 2;
-            margin: 1 0 0 1;
+            
+            .input-label {
+                color: $text-muted;
+                margin-bottom: 1;
+            }
+            
+            .unit-label, .unit {
+                color: $text-muted;
+                width: 2;
+                margin: 1 0 0 1;
+            }
+            
+            Input {
+                color: $text;
+                border: round $secondary;
+                background: transparent;
+                color: $text;
+                width: 1fr;
+                min-width: 10;
+                min-height: 1;
+                padding: 0 1;
+                margin: 0;
+                
+                &:focus, &:hover {
+                    color: $text;
+                    border: round $accent;
+                    background: transparent;
+                }
+            }
         }
     """
 
