@@ -9,7 +9,7 @@ from textual.widgets import Button, Input, Header, Select
 from textual_fspicker import SelectDirectory
 
 from ..dialogs import FileSelectDialog
-from ..widgets import DefaultsPalette, SimpleInputGrid, SimpleSelect, Toggle, SimpleButton
+from ..widgets import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, Button
 
 
 class HomeScreen(Screen[str]):
@@ -42,7 +42,7 @@ class HomeScreen(Screen[str]):
             with Horizontal(id="main-row"):
 
                 with Vertical(id="first-column"):
-                    yield SimpleInputGrid(
+                    yield CompleteInputGrid(
                         rows=2,
                         columns=2,
                         values=[self.img_padding_left, self.img_padding_right, self.img_padding_top, self.img_padding_bottom],
@@ -59,7 +59,7 @@ class HomeScreen(Screen[str]):
                     )
 
                 with Vertical(id="second-column"):
-                    yield SimpleSelect(
+                    yield CompleteSelect(
                         select_id="bg-select",
                         label="Background Color",
                         initial=self.background_color,
@@ -86,7 +86,7 @@ class HomeScreen(Screen[str]):
                     if self.file_mode == "select"
                     else "toggle-btn gap-left"
                 )
-            yield SimpleButton("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
+            yield Button("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
 
     @staticmethod
     def _highlight_toggled_text(text: str) -> str:

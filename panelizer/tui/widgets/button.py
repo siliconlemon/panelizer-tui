@@ -5,7 +5,7 @@ import textual
 SimpleButtonVariant = Literal["default", "primary", "success", "warning", "error"]
 
 
-class SimpleButton(textual.widgets.Button, inherit_css=False):
+class Button(textual.widgets.Button, inherit_css=False):
     """A skin for textual's native button widget."""
     DEFAULT_CSS = """
         SimpleButton {

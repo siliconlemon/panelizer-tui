@@ -1,16 +1,16 @@
 from typing import List, Literal
 
+import textual
 from textual.app import ComposeResult
-from textual.widget import Widget
-from ..widgets import SimpleInput
+from ..widgets import CompleteInput
 
-class SimpleInputGrid(Widget):
+class CompleteInputGrid(textual.Widget):
     """
     A generic NxM grid widget with labels and units.
     Each cell is defined by one entry in the parallel lists (values, labels, units, types).
     """
     DEFAULT_CSS = """
-    SimpleInputGrid {
+    CompleteInputGrid {
         width: 100%;
         height: auto;
         layout: grid;
@@ -69,7 +69,7 @@ class SimpleInputGrid(Widget):
     def compose(self) -> ComposeResult:
         n_cells = self.rows * self.columns
         for idx in range(n_cells):
-            yield SimpleInput(
+            yield CompleteInput(
                 label=self.labels[idx],
                 value=self.values[idx],
                 input_id=self.input_ids[idx],

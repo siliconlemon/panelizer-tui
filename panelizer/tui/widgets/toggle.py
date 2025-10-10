@@ -1,16 +1,16 @@
+import textual
 from textual import events
 from textual.app import ComposeResult
 from textual.events import Click
 from textual.keys import Keys
 from textual.message import Message
 from textual.reactive import reactive
-from textual.widget import Widget
 from textual.widgets import Switch
 
 from ..widgets import InertLabel
 
 
-class Toggle(Widget, inherit_css=False, can_focus=True):
+class Toggle(textual.Widget, inherit_css=False, can_focus=True):
     """A button emulation combining a Switch and a clickable label within a horizontal container."""
     DEFAULT_CSS = """
             Toggle {
