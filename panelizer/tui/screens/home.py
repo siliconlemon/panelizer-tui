@@ -40,8 +40,8 @@ class HomeScreen(Screen[str]):
             with Horizontal(id="path-row"):
                 yield Button(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
             with Horizontal(id="main-row"):
-                with Vertical(id="input-column"):
 
+                with Vertical(id="first-column"):
                     yield InputGrid(
                         rows=2,
                         columns=2,
@@ -51,20 +51,20 @@ class HomeScreen(Screen[str]):
                         units=["%", "%", "%", "%"],
                         id="pad-grid"
                     )
+                    yield SwitchButton(
+                        switch_id="split-wide-switch",
+                        text="Split Wide Images",
+                        is_active=self.split_image_active,
+                        id="split-wide-widget",
+                    )
 
+                with Vertical(id="second-column"):
                     yield SimpleSelect(
                         select_id="bg-select",
                         label="Background Color",
                         initial=self.background_color,
                         options=self.background_color_options,
                     )
-
-                    yield SwitchButton(
-                        switch_id="split-wide-switch",
-                        text="Split Wide Images",
-                        is_active=self.split_image_active
-                    )
-
                     yield DefaultsPalette(
                         save_btn_id="save-defaults-btn",
                         restore_btn_id="restore-defaults-btn",
@@ -73,7 +73,6 @@ class HomeScreen(Screen[str]):
                         label="Default Values",
                     )
 
-                yield Vertical(id="future-feature")
             with Horizontal(id="file-select-grid"):
                 yield Button(
                     label=self._set_all_files_btn_label(), id="all-files-btn",

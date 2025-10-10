@@ -11,7 +11,6 @@ class DefaultsPalette(Widget):
         DefaultsPalette {
             height: 6;
             width: 100%;
-            margin-top: 1;
             align-horizontal: center;
 
             .defaults-label {

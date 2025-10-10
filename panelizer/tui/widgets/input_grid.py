@@ -13,7 +13,6 @@ class InputGrid(Widget):
     InputGrid {
         width: 100%;
         height: auto;
-        margin-bottom: 1;
         layout: grid;
 
         .grid-cell {

@@ -46,16 +46,15 @@
     margin-bottom: 1;
 }
 
-#input-column {
+#first-column, #second-column {
     width: 1fr;
     height: auto;
-    padding-right: 0;
     align: left top;
 }
 
-#future-feature {
-    width: 1fr;
-    height: auto;
+#split-wide-widget {
+    margin-top: 1;
+    margin-right: 5;
 }
 
 #file-select-grid {

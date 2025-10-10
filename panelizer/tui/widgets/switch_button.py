@@ -24,7 +24,7 @@ class SwitchButton(Widget):
     DEFAULT_CSS = """
         SwitchButton {
             width: 100%;
-            height: auto;
+            height: 3;
             padding: 0 1 0 0;
             margin-right: 5;
             layout: horizontal;

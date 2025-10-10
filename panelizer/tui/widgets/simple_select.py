@@ -9,7 +9,7 @@ class SimpleSelect(Widget):
     """A widget for selecting the background color."""
     DEFAULT_CSS = """
         SimpleSelect {
-            height: 5;
+            height: 4;
             margin-right: 1;
             border: none;
 
