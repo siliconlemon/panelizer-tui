@@ -39,6 +39,7 @@ class PanelizerTUI(App[Any]):
             "footer-key-foreground": "#88c0d0",
         },
     )
+
     def __init__(self) -> None:
         super().__init__()
         self.set_themes()
