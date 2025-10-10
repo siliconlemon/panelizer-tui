@@ -52,9 +52,9 @@
     align: left top;
 }
 
-#split-wide-widget {
+#split-wide-toggle {
     margin-top: 1;
-    margin-right: 5;
+    margin-right: 6;
 }
 
 #file-select-grid {

@@ -52,10 +52,10 @@ class HomeScreen(Screen[str]):
                         id="pad-grid"
                     )
                     yield Toggle(
-                        switch_id="split-wide-switch",
+                        switch_id="split-wide-toggle-switch",
                         text="Split Wide Images",
                         is_active=self.split_image_active,
-                        id="split-wide-widget",
+                        id="split-wide-toggle",
                     )
 
                 with Vertical(id="second-column"):

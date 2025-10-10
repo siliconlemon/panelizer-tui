@@ -8,7 +8,7 @@ from textual.widget import Widget
 from textual.widgets import Switch, Label
 
 
-class Toggle(Widget):
+class Toggle(Widget, inherit_css=False):
     """A button emulation combining a Switch and a clickable label within a horizontal container."""
 
     class Changed(Message):
@@ -26,16 +26,47 @@ class Toggle(Widget):
             width: 100%;
             height: 3;
             padding: 0 1 0 0;
-            margin-right: 5;
             layout: horizontal;
             text-align: center;
             border: round $secondary;
-
+            
             &.--hover, &:focus-within {
                 border: round $accent;
+                &.-toggled {
+                    border: round $success;
+                }
+                Switch {
+                    &.-on .switch--slider {
+                        color: $success-lighten-1;
+                    }
+                    & .switch--slider {
+                        color: $accent 70%;
+                    }
+                }
             }
 
-            &.--toggled Label {
+            &:focus-within.--hover {
+                border: round $accent 60%;
+                &.-toggled {
+                    border: round $success 60%;
+                }
+                Label {
+                    color: $text 60%;
+                }
+                &.-toggled Label {
+                    color: $success-lighten-1 60%;
+                }
+                Switch {
+                    &.-on .switch--slider {
+                        color: $success-lighten-1 60%;
+                    }
+                    & .switch--slider {
+                        color: $accent 50%;
+                    }
+                }
+            }
+
+            &.-toggled Label {
                 color: $success-lighten-1;
             }
 
@@ -112,16 +143,16 @@ class Toggle(Widget):
             event.stop()
         self.switch.focus()
         if self.switch.value:
-            self.add_class("--toggled")
+            self.add_class("-toggled")
         else:
-            self.remove_class("--toggled")
+            self.remove_class("-toggled")
 
     def _on_key(self, event: events.Key) -> None:
         if event.key == Keys.Enter or event.key == Keys.Space:
             if not self.switch.value:
-                self.add_class("--toggled")
+                self.add_class("-toggled")
             else:
-                self.remove_class("--toggled")
+                self.remove_class("-toggled")
 
     def on_enter(self) -> None:
         self.add_class("--hover")
