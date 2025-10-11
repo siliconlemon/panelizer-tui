@@ -2,7 +2,8 @@ from typing import List, Literal
 
 import textual
 from textual.app import ComposeResult
-from ..widgets import CompleteInput
+
+from ..widgets.complete_input import CompleteInput
 
 class CompleteInputGrid(textual.widget.Widget):
     """

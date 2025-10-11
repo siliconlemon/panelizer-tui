@@ -5,11 +5,11 @@ class InertLabel(textual.widgets.Label, inherit_css=False):
     """A label with disallowed user selection."""
     ALLOW_SELECT = False
     DEFAULT_CSS = """
-        InertLabel {
-            color: $text;
-            height: auto;
-            width: auto;
-        }
+    InertLabel {
+        color: $text;
+        height: auto;
+        width: auto;
+    }
     """
 
     def __init__(

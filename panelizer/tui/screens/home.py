@@ -5,11 +5,11 @@ from typing import Literal
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Button, Input, Header, Select
+from textual.widgets import Input, Header, Select
 from textual_fspicker import SelectDirectory
 
-from ..dialogs import FileSelectDialog
-from ..widgets import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, NeonButton
+from textual_neon import FileSelectDialog
+from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, NeonButton
 
 
 class HomeScreen(Screen[str]):

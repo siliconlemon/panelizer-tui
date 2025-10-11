@@ -5,11 +5,11 @@ from textual.containers import Container
 from textual.events import Resize
 from textual.geometry import Size
 from textual.screen import Screen
-from textual.widgets import Header, Label, Button
+from textual.widgets import Header
 from textual_fspicker import SelectDirectory
 
-from ..widgets import NeonButton, InertLabel
-from ...utils import AsciiPainter
+from textual_neon import NeonButton, InertLabel
+from textual_neon import AsciiPainter
 
 
 class LaunchScreen(Screen[Optional[Path]]):

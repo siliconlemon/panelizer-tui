@@ -10,25 +10,23 @@ from .inert_label import InertLabel
 class CompleteSelect(textual.widget.Widget):
     """A widget for selecting the background color."""
     DEFAULT_CSS = """
-        SimpleSelect {
-            height: 4;
-            margin-right: 1;
-            border: none;
+    SimpleSelect {
+        height: 4;
+        margin-right: 1;
+        border: none;
 
-            .simple-select-input {
-                min-height: 3;
-                width: 1fr;
-            }
-
-            SelectCurrent {
-                color: $text;
-                border: none;
-            }
-
-            OptionList {
-                margin-right: 3;
-            }
+        .simple-select-input {
+            min-height: 3;
+            width: 1fr;
         }
+        SelectCurrent {
+            color: $text;
+            border: none;
+        }
+        OptionList {
+            margin-right: 3;
+        }
+    }
     """
 
     def __init__(

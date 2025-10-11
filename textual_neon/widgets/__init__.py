@@ -1,23 +1,25 @@
 """
-A Panelizer TUI package containing custom widgets based on different widgets from `textual`.
+A `textual_neon` package containing elements based on the Widget class from `textual`.
 """
 
-from .neon_button import NeonButton
 from .complete_input import CompleteInput
 from .complete_input_grid import CompleteInputGrid
-from .simple_select import CompleteSelect
-from .defaults_button import DefaultsButton
+from .complete_select import CompleteSelect
+from .defaults_button import DefaultsButton, DefaultsButtonVariant
 from .defaults_palette import DefaultsPalette
 from .inert_label import InertLabel
+from .neon_button import NeonButton, NeonButtonVariant
 from .toggle import Toggle
 
 __all__ = [
-    "NeonButton",
     "CompleteInput",
     "CompleteInputGrid",
     "CompleteSelect",
     "DefaultsButton",
+    "DefaultsButtonVariant",
     "DefaultsPalette",
     "InertLabel",
+    "NeonButton",
+    "NeonButtonVariant",
     "Toggle",
 ]

@@ -3,7 +3,9 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Checkbox
 from pathlib import Path
 
+# TODO: This never made sense
 class FileSelectDialog(ModalScreen[list[str] | None]):
+
     def __init__(self, folder: Path, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.folder = Path(folder)

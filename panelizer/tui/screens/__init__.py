@@ -6,6 +6,6 @@ from .done import DoneScreen
 from .home import HomeScreen
 from .launch import LaunchScreen
 from .progress import ProgressScreen
-from .too_small import TooSmallScreen
+from textual_neon.screens.too_small import TooSmallScreen
 
 __all__ = ["DoneScreen", "LaunchScreen", "ProgressScreen", "TooSmallScreen"]

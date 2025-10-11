@@ -2,7 +2,7 @@ import textual
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
 
-from ..widgets import DefaultsButton
+from ..widgets.defaults_button import DefaultsButton
 from .inert_label import InertLabel
 
 
@@ -10,22 +10,22 @@ class DefaultsPalette(textual.widget.Widget):
     """A widget with a label, a horizontal line, and three buttons: Save, Restore, Reset."""
 
     DEFAULT_CSS = """
-        DefaultsPalette {
-            height: 6;
+    DefaultsPalette {
+        height: 6;
+        width: 100%;
+        align-horizontal: center;
+
+        .defaults-label {
+            text-align: left;
             width: 100%;
-            align-horizontal: center;
-
-            .defaults-label {
-                text-align: left;
-                width: 100%;
-                padding: 0;
-                margin-left: 1;
-            }
-
-            .defaults-row {
-                width: auto;
-            }
+            padding: 0;
+            margin-left: 1;
         }
+
+        .defaults-row {
+            width: auto;
+        }
+    }
     """
 
     def __init__(

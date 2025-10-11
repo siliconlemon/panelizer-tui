@@ -11,39 +11,39 @@ from .inert_label import InertLabel
 class CompleteInput(textual.widget.Widget):
     """A labeled input widget with an optional unit label to the right."""
     DEFAULT_CSS = """
-        CompleteInput {
-            width: 100%;
-            height: auto;
-            layout: grid;
+    CompleteInput {
+        width: 100%;
+        height: auto;
+        layout: grid;
+        
+        .input-label {
+            margin-bottom: 1;
+        }
+        
+        .unit-label, .unit {
+            color: $text-muted;
+            width: 2;
+            margin: 1 0 0 1;
+        }
+        
+        Input {
+            color: $text;
+            border: round $accent 50%;
+            background: transparent;
+            color: $text;
+            width: 1fr;
+            min-width: 10;
+            min-height: 1;
+            padding: 0 1;
+            margin: 0;
             
-            .input-label {
-                margin-bottom: 1;
-            }
-            
-            .unit-label, .unit {
-                color: $text-muted;
-                width: 2;
-                margin: 1 0 0 1;
-            }
-            
-            Input {
+            &:focus, &:hover {
                 color: $text;
-                border: round $accent 50%;
+                border: round $accent;
                 background: transparent;
-                color: $text;
-                width: 1fr;
-                min-width: 10;
-                min-height: 1;
-                padding: 0 1;
-                margin: 0;
-                
-                &:focus, &:hover {
-                    color: $text;
-                    border: round $accent;
-                    background: transparent;
-                }
             }
         }
+    }
     """
 
     def __init__(
