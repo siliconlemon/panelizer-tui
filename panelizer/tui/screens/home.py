@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Literal
 
+import textual
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
@@ -118,7 +119,7 @@ class HomeScreen(Screen[str]):
         self._update_numbers()
 
     # FIXME: Make this a damn switch
-    async def on_button_pressed(self, event: NeonButton.Pressed) -> None:
+    async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
         if event.button.id == "all-files-btn":
             self.file_mode = "all"
             self.selected_files = []

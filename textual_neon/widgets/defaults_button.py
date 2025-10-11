@@ -4,8 +4,10 @@ import textual
 
 DefaultsButtonVariant = Literal["save", "restore", "reset"]
 """A literal defining which variants the NeonButton is prepared for."""
+
 DEFAULTS_BUTTON_VARIANTS = {"save", "restore", "reset"}
 
+# FIXME: These don't appear for some reason
 class DefaultsButton(textual.widgets.Button, inherit_css=False):
     """A skin for textual's native button widget. Used for the save, restore or reset actions."""
     DEFAULT_CSS = """
@@ -79,10 +81,12 @@ class DefaultsButton(textual.widgets.Button, inherit_css=False):
     def __init__(
         self,
         label: str,
+        *,
         variant: DefaultsButtonVariant,
         **kwargs
     ):
-        super().__init__(f" {label.strip()} ", variant, **kwargs)
+        super().__init__(f" {label.strip()} ", variant=variant, **kwargs)
+        self.validate_variant(variant)
 
 
     @staticmethod

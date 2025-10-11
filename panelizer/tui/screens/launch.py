@@ -1,5 +1,7 @@
 from pathlib import Path
 from typing import Optional
+
+import textual
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.events import Resize
@@ -72,7 +74,7 @@ class LaunchScreen(Screen[Optional[Path]]):
         # noinspection PyAsyncCall
         self.dismiss(selected_directory or None)
 
-    async def on_button_pressed(self, event: NeonButton.Pressed) -> None:
+    async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
         """Handles directory selection buttons."""
         lookup = {
             "pick-dir": Path.home() / "Pictures",
