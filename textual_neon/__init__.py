@@ -6,36 +6,16 @@ Contains custom app setup, screens, dialogs, widgets and utils for making rapid 
 Only dark themes are currently supported.
 """
 
-from .app import NeonApp
+from .app import *
+from .utils import *
+from .dialogs import *
+from .screens import *
+from .widgets import *
 
-from .utils import AsciiPainter
+from . import app, utils, dialogs, screens, widgets
 
-from .dialogs import FileSelectDialog, DirSelectDialog, NeonDialog
-
-from .screens import TooSmallScreen
-
-from .widgets import CompleteInput
-from .widgets import CompleteInputGrid
-from .widgets import CompleteSelect
-from .widgets import DefaultsButton
-from .widgets import DefaultsPalette
-from .widgets import InertLabel
-from .widgets import NeonButton
-from .widgets import Toggle
-
-
-__all__ = [
-    "NeonApp",
-    "AsciiPainter",
-    "FileSelectDialog",
-    "DirSelectDialog",
-    "NeonDialog",
-    "CompleteInput",
-    "CompleteInputGrid",
-    "CompleteSelect",
-    "DefaultsButton",
-    "DefaultsPalette",
-    "InertLabel",
-    "NeonButton",
-    "Toggle",
-]
+__all__ = []
+__all__.extend(app.__all__)
+__all__.extend(utils.__all__)
+__all__.extend(dialogs.__all__)
+__all__.extend(screens.__all__)
