@@ -1,11 +1,11 @@
 from typing import List, Literal
 
-import textual
 from textual.app import ComposeResult
+from textual.widget import Widget
 
 from ..widgets.complete_input import CompleteInput
 
-class CompleteInputGrid(textual.widget.Widget):
+class CompleteInputGrid(Widget):
     """
     A generic NxM grid widget with labels and units.
     Each cell is defined by one entry in the parallel lists (values, labels, units, types).

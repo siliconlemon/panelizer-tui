@@ -1,7 +1,7 @@
-import textual
+from textual.widgets import Label
 
 
-class InertLabel(textual.widgets.Label, inherit_css=False):
+class InertLabel(Label, inherit_css=False):
     """A label with disallowed user selection."""
     ALLOW_SELECT = False
     DEFAULT_CSS = """

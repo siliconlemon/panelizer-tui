@@ -1,12 +1,12 @@
-import textual
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
+from textual.widget import Widget
 
-from ..widgets.defaults_button import DefaultsButton
 from .inert_label import InertLabel
+from ..widgets.defaults_button import DefaultsButton
 
 
-class DefaultsPalette(textual.widget.Widget):
+class DefaultsPalette(Widget):
     """A widget with a label, a horizontal line, and three buttons: Save, Restore, Reset."""
 
     DEFAULT_CSS = """

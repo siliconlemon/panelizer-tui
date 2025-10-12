@@ -1,11 +1,12 @@
 from typing import Literal
 
 import textual
+from textual.widgets import Button
 
 NeonButtonVariant = Literal["default", "primary", "success", "warning", "error"]
 """A literal defining which variants the NeonButton is prepared for."""
 
-class NeonButton(textual.widgets.Button, inherit_css=False):
+class NeonButton(Button, inherit_css=False):
     """A skin for textual's native button widget."""
     DEFAULT_CSS = """
     NeonButton {

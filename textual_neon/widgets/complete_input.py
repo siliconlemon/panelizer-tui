@@ -1,14 +1,14 @@
 from typing import Optional, Literal
 
-import textual
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
+from textual.widget import Widget
 from textual.widgets import Input
 
 from .inert_label import InertLabel
 
 
-class CompleteInput(textual.widget.Widget):
+class CompleteInput(Widget):
     """A labeled input widget with an optional unit label to the right."""
     DEFAULT_CSS = """
     CompleteInput {

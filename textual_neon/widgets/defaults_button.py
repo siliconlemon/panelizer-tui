@@ -1,7 +1,7 @@
 from typing import Literal
 
-import textual
 from textual.geometry import Size
+from textual.widgets import Button
 from typing_extensions import override
 
 DefaultsButtonVariant = Literal["save", "restore", "reset"]
@@ -10,7 +10,7 @@ DefaultsButtonVariant = Literal["save", "restore", "reset"]
 DEFAULTS_BUTTON_VARIANTS = {"save", "restore", "reset"}
 
 # FIXME: These don't appear for some reason
-class DefaultsButton(textual.widgets.Button, inherit_css=False):
+class DefaultsButton(Button, inherit_css=False):
     """A skin for textual's native button widget. Used for the save, restore or reset actions."""
     DEFAULT_CSS = """
     DefaultsButton {
