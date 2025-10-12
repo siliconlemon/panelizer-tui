@@ -3,11 +3,12 @@ from typing import List, Literal
 from textual.app import ComposeResult
 from textual.widget import Widget
 
-from ..widgets.complete_input import CompleteInput
+from textual_neon.widgets.complete_input import CompleteInput
 
 class CompleteInputGrid(Widget):
     """
-    A generic NxM grid widget with labels and units.
+    A generic NxM grid widget where each cell has its own InertLabel for it's label and unit.
+    Uses CompleteInput from textual_neon.
     Each cell is defined by one entry in the parallel lists (values, labels, units, types).
     """
     DEFAULT_CSS = """

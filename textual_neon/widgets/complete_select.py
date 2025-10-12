@@ -1,29 +1,20 @@
-import textual
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Select
 
-from .inert_label import InertLabel
+from textual_neon.widgets.neon_select import NeonSelect
+from textual_neon.widgets.inert_label import InertLabel
 
 
 class CompleteSelect(Widget):
-    """A widget for selecting the background color."""
+    """A bundle of an InertLabel, a Container and a NeonSelect to make selector insertions easier."""
     DEFAULT_CSS = """
     CompleteSelect {
         height: 4;
         border: none;
-
-        .simple-select-input {
-            min-height: 3;
-            width: 1fr;
-        }
-        SelectCurrent {
-            color: $text;
-            border: none;
-        }
-        OptionList {
+        
+        NeonSelect OptionList {
             margin-right: 3;
         }
     }
@@ -49,11 +40,10 @@ class CompleteSelect(Widget):
 
     def compose(self) -> ComposeResult:
         yield InertLabel(self.label, classes="input-label", id="label")
-        with Container(id="simple-select-container"):
-            yield Select(
+        with Container():
+            yield NeonSelect(
                 id=self.select_id if self.select_id else None,
-                classes="simple-select-input",
-                compact=True,
+                classes="neon-select",
                 value=self.initial_value,
                 allow_blank=False,
                 options=self.options,

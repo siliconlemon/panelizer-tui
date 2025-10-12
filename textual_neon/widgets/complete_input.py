@@ -5,7 +5,7 @@ from textual.containers import Horizontal, Vertical
 from textual.widget import Widget
 from textual.widgets import Input
 
-from .inert_label import InertLabel
+from textual_neon.widgets.inert_label import InertLabel
 
 
 class CompleteInput(Widget):
