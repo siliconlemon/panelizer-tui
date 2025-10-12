@@ -12,7 +12,6 @@ class CompleteSelect(textual.widget.Widget):
     DEFAULT_CSS = """
     CompleteSelect {
         height: 4;
-        margin-right: 1;
         border: none;
 
         .simple-select-input {

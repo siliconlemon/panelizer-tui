@@ -18,9 +18,8 @@ class CompleteInputGrid(textual.widget.Widget):
         
         .grid-cell {
             margin: 0;
-            padding-right: 2;
+            padding-right: 1;
         }
-        
     }
     """
 
