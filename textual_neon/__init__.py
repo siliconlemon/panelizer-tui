@@ -10,7 +10,7 @@ from .app import NeonApp
 
 from .utils import AsciiPainter
 
-from .dialogs import FileSelect, DirSelect, NeonDialog
+from .dialogs import FileSelectDialog, DirSelectDialog, NeonDialog
 
 from .screens import TooSmallScreen
 
@@ -27,8 +27,8 @@ from .widgets import Toggle
 __all__ = [
     "NeonApp",
     "AsciiPainter",
-    "FileSelect",
-    "DirSelect",
+    "FileSelectDialog",
+    "DirSelectDialog",
     "NeonDialog",
     "CompleteInput",
     "CompleteInputGrid",

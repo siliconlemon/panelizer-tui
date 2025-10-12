@@ -1,5 +1,5 @@
 from textual_neon import NeonDialog
 
 
-class ListSelect(NeonDialog):
+class ListSelectDialog(NeonDialog):
     pass

@@ -8,8 +8,8 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Input, Header, Select
 
-from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, NeonButton, DirSelect
-from textual_neon.dialogs.list_select import ListSelect
+from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, NeonButton, DirSelectDialog
+from textual_neon.dialogs.list_select import ListSelectDialog
 
 
 class HomeScreen(Screen[str]):
@@ -126,7 +126,7 @@ class HomeScreen(Screen[str]):
             event.stop()
         elif event.button.id == "select-files-btn":
             self.file_mode = "select"
-            files = await self.app.push_screen_wait(ListSelect())
+            files = await self.app.push_screen_wait(ListSelectDialog())
             self.selected_files = files or []
             self._update_file_mode_buttons()
             event.stop()
@@ -135,7 +135,7 @@ class HomeScreen(Screen[str]):
             event.stop()
         elif event.button.id == "path-btn":
             new_dir = await self.app.push_screen_wait(
-                DirSelect(location=self.selected_path)
+                DirSelectDialog(location=self.selected_path)
             )
             if new_dir:
                 self.selected_path = Path(new_dir)

@@ -11,7 +11,7 @@ from textual.widgets import Header
 
 from textual_neon import NeonButton, InertLabel, NeonDialog
 from textual_neon import AsciiPainter
-from textual_neon import DirSelect
+from textual_neon import DirSelectDialog
 
 
 class LaunchScreen(Screen[Optional[Path]]):
@@ -69,7 +69,7 @@ class LaunchScreen(Screen[Optional[Path]]):
     async def _handle_directory_selection(self, start_directory: Path) -> None:
         """Opens directory picker and dismiss with selected path or None."""
         selected_directory = await self.app.push_screen_wait(
-            DirSelect(location=start_directory, double_click_directories=False)
+            DirSelectDialog(location=start_directory, double_click_directories=False)
         )
         # noinspection PyAsyncCall
         self.dismiss(selected_directory or None)

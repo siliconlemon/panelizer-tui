@@ -1,7 +1,7 @@
 from textual_fspicker import SelectDirectory
 
 
-class DirSelect(SelectDirectory, inherit_css=True):
+class DirSelectDialog(SelectDirectory, inherit_css=True):
     """A skin for the SelectDirectory class from textual-fspicker, selects a single directory."""
     DEFAULT_CSS = """
     DirSelect {
