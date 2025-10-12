@@ -15,8 +15,6 @@ class PanelizerTUI(NeonApp):
 
     def __init__(self) -> None:
         super().__init__()
-        # self.selected_input_dir: Path | None = None
-
         self.state_machine.register(
             "launch",
             screen="launch",

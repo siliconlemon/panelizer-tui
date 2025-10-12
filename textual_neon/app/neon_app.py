@@ -37,9 +37,7 @@ class NeonApp(App[Any]):
     CSS_PATH = [resources.files("textual_neon.css").joinpath("globals.tcss")]
     MIN_ROWS: int = 40
     MIN_COLS: int = 80
-    SCREENS = {
-        "too_small": TooSmallScreen,
-    }
+    SCREENS = {}
     DEFAULT_THEME = Theme(
         name="default",
         primary="#36c8de",
@@ -61,6 +59,7 @@ class NeonApp(App[Any]):
 
     def __init__(self) -> None:
         super().__init__()
+        self.SCREENS.update({"too_small": TooSmallScreen})
         self.set_themes()
         self.app_started = False
         self.too_small_modal_open = False

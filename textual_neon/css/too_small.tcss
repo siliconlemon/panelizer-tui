@@ -19,7 +19,7 @@ TooSmall {
     width: 100%;
     height: 7;
     dock: top;
-    align: center middle;
+    align: left top;
     background: $background;
     border: round $error;
     padding: 1 2;
