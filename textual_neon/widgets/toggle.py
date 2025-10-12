@@ -10,7 +10,7 @@ from textual.widgets import Switch
 from ..widgets.inert_label import InertLabel
 
 
-class Toggle(textual.widget.Widget, inherit_css=False, can_focus=True):
+class Toggle(textual.widget.Widget, inherit_css=False, can_focus=False):
     """A button emulation combining a Switch and a clickable label within a horizontal container."""
     DEFAULT_CSS = """
     Toggle {
@@ -29,9 +29,11 @@ class Toggle(textual.widget.Widget, inherit_css=False, can_focus=True):
             Switch {
                 &.-on .switch--slider {
                     color: $success-lighten-1;
+                    background: $panel-darken-3;
                 }
                 & .switch--slider {
                     color: $accent 70%;
+                    background: $panel-darken-3;
                 }
             }
         }
@@ -50,9 +52,11 @@ class Toggle(textual.widget.Widget, inherit_css=False, can_focus=True):
             Switch {
                 &.-on .switch--slider {
                     color: $success-lighten-1 60%;
+                    background: $panel-darken-3;
                 }
                 & .switch--slider {
                     color: $accent 50%;
+                    background: $panel-darken-3;
                 }
             }
         }
@@ -100,6 +104,7 @@ class Toggle(textual.widget.Widget, inherit_css=False, can_focus=True):
 
             &.-on .switch--slider {
                 color: $success;
+                background: $panel-darken-3;
                 border: none;
             }
 
@@ -110,9 +115,9 @@ class Toggle(textual.widget.Widget, inherit_css=False, can_focus=True):
             }
 
             &:focus {
-                border: none;
-                background: $accent;
                 color: $accent;
+                background: $panel-darken-3;
+                border: none;
             }
         }
     }
@@ -120,7 +125,6 @@ class Toggle(textual.widget.Widget, inherit_css=False, can_focus=True):
 
     class Changed(Message):
         """Posted when the switch's active state changes."""
-
         def __init__(self, ref: "Toggle", active: bool) -> None:
             super().__init__()
             self.ref = ref
@@ -139,12 +143,12 @@ class Toggle(textual.widget.Widget, inherit_css=False, can_focus=True):
         super().__init__(**kwargs)
         self.is_active = is_active
 
-        self.switch = Switch(value=is_active, animate=False, id=switch_id if switch_id else self.id)
-        self.text = InertLabel(" " + text + " ")
+        self._switch = Switch(value=is_active, animate=False, id=switch_id if switch_id else self.id)
+        self._label = InertLabel(" " + text + " ",)
 
     def compose(self) -> ComposeResult:
-        yield self.switch
-        yield self.text
+        yield self._switch
+        yield self._label
 
     def on_switch_changed(self, event: Switch.Changed) -> None:
         event.stop()
@@ -153,20 +157,20 @@ class Toggle(textual.widget.Widget, inherit_css=False, can_focus=True):
         self.post_message(self.Changed(self, local_is_active))
 
     def on_click(self, event: Click) -> None:
-        if event.widget is self.text or event.widget is self:
+        if event.widget is self._label or event.widget is self:
             event.stop()
-            self.switch.toggle()
-        elif event.widget is self.switch:
+            self._switch.toggle()
+        elif event.widget is self._switch:
             event.stop()
-        self.switch.focus()
-        if self.switch.value:
+        self._switch.focus()
+        if self._switch.value:
             self.add_class("-on")
         else:
             self.remove_class("-on")
 
     def _on_key(self, event: events.Key) -> None:
         if event.key == Keys.Enter or event.key == Keys.Space:
-            if not self.switch.value:
+            if not self._switch.value:
                 self.add_class("-on")
             else:
                 self.remove_class("-on")
