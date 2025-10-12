@@ -4,7 +4,7 @@ from textual_fspicker.file_dialog import BaseFileDialog
 class FileSelectDialog(BaseFileDialog, inherit_css=True):
     """A skin for the BaseFileDialog class from textual-fspicker, selects a single file."""
     DEFAULT_CSS = """
-    FileSelect {
+    FileSelectDialog {
 
         OptionList {
             background: transparent;
