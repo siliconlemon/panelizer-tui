@@ -66,18 +66,6 @@ Button:hover {
     border: round $primary-darken-3;
 }*/
 
-Input {
-    color: $text;
-    border: round $accent 50%;
-    background: transparent;
-}
-
-Input:focus, Input:hover {
-    color: $text;
-    border: round $accent;
-    background: transparent;
-}
-
 Select > SelectCurrent > #label {
     color: $text;
     border: round $accent 50%;
@@ -105,48 +93,7 @@ SelectCurrent {
     height: 3;
 }
 
-OptionList {
-    background: transparent;
-    border: round $accent 50%;
-}
-
-InputBar {
-    padding: 0;
-    margin: 0;
-}
-
 /* Textual FS Picker Package Elements */
-
-Dialog {
-    border: round $accent 50%;
-    padding: 0;
-}
-
-CurrentDirectory {
-    color: $text;
-    border: round $accent 50%;
-    margin-left: 2;
-}
-
-CurrentDirectory:focus, CurrentDirectory:hover {
-    color: $text;
-    border: round $accent;
-}
-
-SelectDirectory .option-list--option {
-    padding: 0;
-}
-
-SelectDirectory Button#cancel {
-    padding: 0 1;
-    margin-right: 2;
-}
-
-SelectDirectory Button#select {
-    padding: 0 1;
-    margin-left: 2;
-    margin-right: 2;
-}
 
 /* Custom element classes for common use caes */
 

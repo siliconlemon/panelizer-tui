@@ -21,5 +21,5 @@ __all__ = [
     "InertLabel",
     "NeonButton",
     "NeonButtonVariant",
-    "Toggle",
+    "Toggle"
 ]
