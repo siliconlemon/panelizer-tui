@@ -5,16 +5,46 @@ from textual.app import ComposeResult
 from textual.containers import VerticalGroup
 from textual.css.query import NoMatches
 from textual.events import Resize
-from textual.screen import Screen
+from textual.screen import ModalScreen
 from textual.widgets import Label
 
 if TYPE_CHECKING:
     from ..app import NeonApp
 
 
-class TooSmallScreen(Screen[None]):
-    CSS_PATH = [resources.files("textual_neon.css").joinpath("too_small.tcss")]
+class TooSmallScreen(ModalScreen[None]):
     MODAL = True
+    DEFAULT_CSS = """
+    TooSmallScreen {
+        width: 100%;
+        height: 100%;
+        dock: left;
+        background: $background;
+    
+        #msg_group {
+        width: 100%;
+        height: 7;
+        dock: top;
+        align: left top;
+        background: $background;
+        border: round $error;
+        padding: 1 2;
+        margin: 1;
+        }
+    
+        #msg_err {
+            color: $error-lighten-1;
+            text-style: bold;
+            margin: 0;
+        }
+    
+        #msg_size {
+            color: $text;
+            text-style: bold;
+            margin: 0;
+        }
+    }
+    """
 
     def __init__(self, min_height, min_width, width=None, height=None, **kwargs):
         super().__init__(**kwargs)
