@@ -19,7 +19,7 @@ CommandPalette Vertical#--container {
 
 CommandPalette Horizontal#--input {
     max-height: 3;
-    margin: 0 1 0 1;
+    margin: 0;
     border: round $accent 70%;
     visibility: visible;
 }
@@ -27,7 +27,9 @@ CommandPalette Horizontal#--input {
 CommandPalette Vertical#--results {
     margin: 0;
     padding: 0;
-    border: none;
+    border-bottom: round $accent 50%;
+    border-left: round $accent 50%;
+    border-right: round $accent 50%;
 }
 
 CommandPalette SearchIcon {
@@ -43,7 +45,7 @@ CommandInput {
 
 CommandList {
     border: none !important;
-    margin: 0 2 0 2;
+    margin: 0;
 }
 
 CommandList > .option-list--option {
@@ -54,10 +56,8 @@ Header {
     max-height: 1;
 }
 
-Screen, ModalScreen {
-    &:focus-within HeaderIcon {
-        color: $text 30%;
-    }
+HeaderIcon {
+    color: $foreground 50%;
 }
 
 /*Button {
@@ -71,33 +71,6 @@ Button:hover {
     color: $primary-darken-2;
     border: round $primary-darken-3;
 }*/
-
-Select > SelectCurrent > #label {
-    color: $text;
-    border: round $accent 50%;
-    background: transparent;
-}
-
-Select:focus > SelectCurrent > #label, Select > SelectCurrent > #label:hover {
-    color: $text;
-    border: round $accent;
-}
-
-Select:focus > SelectCurrent > #label {
-    text-style: $button-focus-text-style;
-}
-
-Select > SelectCurrent > .arrow {
-    margin-top: 1;
-}
-
-SelectCurrent {
-    color: $text;
-    border: none;
-    background: transparent;
-    margin: 0;
-    height: 3;
-}
 
 /* Custom element classes for common use caes */
 
