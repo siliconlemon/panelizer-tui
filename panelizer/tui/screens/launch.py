@@ -9,7 +9,7 @@ from textual.geometry import Size
 from textual.screen import Screen
 from textual.widgets import Header
 
-from textual_neon import NeonButton, InertLabel
+from textual_neon import NeonButton, InertLabel, NeonDialog
 from textual_neon import AsciiPainter
 from textual_neon import DirSelect
 

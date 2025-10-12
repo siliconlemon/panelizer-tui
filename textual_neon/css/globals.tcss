@@ -54,6 +54,12 @@ Header {
     max-height: 1;
 }
 
+Screen, ModalScreen {
+    &:focus-within HeaderIcon {
+        color: $text 30%;
+    }
+}
+
 /*Button {
     color: $primary-lighten-1;
     border: round $primary;
@@ -92,8 +98,6 @@ SelectCurrent {
     margin: 0;
     height: 3;
 }
-
-/* Textual FS Picker Package Elements */
 
 /* Custom element classes for common use caes */
 
