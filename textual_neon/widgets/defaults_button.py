@@ -1,6 +1,8 @@
 from typing import Literal
 
 import textual
+from textual.geometry import Size
+from typing_extensions import override
 
 DefaultsButtonVariant = Literal["save", "restore", "reset"]
 """A literal defining which variants the NeonButton is prepared for."""
@@ -88,7 +90,7 @@ class DefaultsButton(textual.widgets.Button, inherit_css=False):
         super().__init__(f" {label.strip()} ", variant=variant, **kwargs)
         self.validate_variant(variant)
 
-
+    @override
     @staticmethod
     def validate_variant(variant: str) -> str:
         if variant not in DEFAULTS_BUTTON_VARIANTS:
@@ -96,3 +98,8 @@ class DefaultsButton(textual.widgets.Button, inherit_css=False):
                 f"Valid DefaultsButton variants are {list(DEFAULTS_BUTTON_VARIANTS)}"
             )
         return variant
+
+    @override
+    def get_content_width(self, container: Size, viewport: Size) -> int:
+        width = super().get_content_width(container, viewport)
+        return width - 2 if width >= 4 else width
