@@ -48,6 +48,6 @@ class DefaultsPalette(textual.widget.Widget):
         with Vertical():
             yield InertLabel(self.label_text, classes="defaults-label")
             with Horizontal(classes="defaults-row"):
-                yield DefaultsButton("Save", id=self.save_id, classes="defaults-btn gap-right", variant="save")
-                yield DefaultsButton("Restore", id=self.restore_id, classes="defaults-btn gap-right", variant="restore")
-                yield DefaultsButton("Reset", id=self.reset_id, classes="defaults-btn", variant="reset")
+                yield DefaultsButton("Save", id=self.save_id, classes="gap-right", variant="save")
+                yield DefaultsButton("Restore", id=self.restore_id, classes="gap-right", variant="restore")
+                yield DefaultsButton("Reset", id=self.reset_id, variant="reset")
