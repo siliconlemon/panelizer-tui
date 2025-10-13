@@ -8,76 +8,7 @@
 
 /* Generic Textual Elements */
 
-CommandPalette Vertical#--container {
-    height: auto;
-    background: $background;
-    max-width: 80;
-    margin-top: 6;
-    padding: 0;
-    visibility: visible;
-}
-
-CommandPalette Horizontal#--input {
-    max-height: 3;
-    margin: 0;
-    border: round $accent 70%;
-    visibility: visible;
-}
-
-CommandPalette Vertical#--results {
-    margin: 0;
-    padding: 0;
-    border-bottom: round $accent 50%;
-    border-left: round $accent 50%;
-    border-right: round $accent 50%;
-}
-
-CommandPalette SearchIcon {
-    display: none;
-}
-
-CommandInput {
-    border: none !important;
-    margin: 0;
-    padding: 0;
-    margin-left: 1;
-}
-
-CommandList {
-    border: none !important;
-    margin: 0;
-}
-
-CommandList > .option-list--option {
-    padding: 0 1 0 1;
-}
-
-Header {
-    max-height: 1;
-}
-
-HeaderIcon {
-    color: $foreground 50%;
-}
-
-/*Button {
-    color: $primary-lighten-1;
-    border: round $primary;
-    background: transparent;
-    min-width: 8;
-}
-
-Button:hover {
-    color: $primary-darken-2;
-    border: round $primary-darken-3;
-}*/
-
 /* Custom element classes for common use caes */
-
-.input-label {
-    margin: 0 0 0 1;
-}
-
 .wide-btn {
     width: 100;
     min-width: 20;

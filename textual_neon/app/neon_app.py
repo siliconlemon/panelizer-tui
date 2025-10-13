@@ -38,6 +38,53 @@ class NeonApp(App[Any]):
     MIN_ROWS: int = 30
     MIN_COLS: int = 90
     SCREENS = {}
+    DEFAULT_CSS = """
+    Header {
+        max-height: 1;
+    }
+    HeaderIcon {
+        color: $foreground 50%;
+    }
+    CommandPalette {
+        SearchIcon {
+            display: none;
+        }
+        Vertical#--container {
+            height: auto;
+            background: $background;
+            max-width: 80;
+            margin-top: 6;
+            padding: 0;
+            visibility: visible;
+        }
+        Horizontal#--input {
+            max-height: 3;
+            margin: 0;
+            border: round $accent 70%;
+            visibility: visible;
+        }
+        Vertical#--results {
+            margin: 0;
+            padding: 0;
+            border-bottom: round $accent 50%;
+            border-left: round $accent 50%;
+            border-right: round $accent 50%;
+        }
+    }
+    CommandInput {
+        border: none !important;
+        margin: 0;
+        padding: 0;
+        margin-left: 1;
+    }
+    CommandList {
+        border: none !important;
+        margin: 0;
+        & > .option-list--option {
+            padding: 0 1 0 1;
+        }
+    }
+    """
     DEFAULT_THEME = Theme(
         name="default",
         primary="#36c8de",
