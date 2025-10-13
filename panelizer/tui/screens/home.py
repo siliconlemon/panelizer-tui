@@ -76,15 +76,15 @@ class HomeScreen(Screen[str]):
             with Horizontal(id="file-select-grid"):
                 yield NeonButton(
                     label=self._set_all_files_btn_label(), id="all-files-btn",
-                    classes="toggle-btn gap-right toggled"
+                    classes="choice-btn gap-right toggled"
                     if self.file_mode == "all"
-                    else "toggle-btn gap-right"
+                    else "choice-btn gap-right"
                 )
                 yield NeonButton(
                     label=self._set_select_files_btn_label(), id="select-files-btn",
-                    classes="toggle-btn toggled gap-left"
+                    classes="choice-btn toggled gap-left"
                     if self.file_mode == "select"
-                    else "toggle-btn gap-left"
+                    else "choice-btn gap-left"
                 )
             yield NeonButton("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
 
