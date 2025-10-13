@@ -17,7 +17,7 @@ class CompleteInput(Widget):
         layout: grid;
         
         InertLabel#label {
-            margin-bottom: 1;
+            margin-left: 1;
         }
         
         InertLabel#unit {
