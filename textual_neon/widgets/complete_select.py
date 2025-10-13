@@ -14,6 +14,10 @@ class CompleteSelect(Widget):
         height: 4;
         border: none;
         
+        InertLabel#label {
+            margin-left: 1;
+        }
+        
         NeonSelect OptionList {
             margin-right: 3;
         }
@@ -39,7 +43,7 @@ class CompleteSelect(Widget):
     label_hovered = reactive(False)
 
     def compose(self) -> ComposeResult:
-        yield InertLabel(self.label, classes="input-label", id="label")
+        yield InertLabel(self.label, id="label")
         with Container():
             yield NeonSelect(
                 id=self.select_id if self.select_id else None,
