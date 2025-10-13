@@ -16,11 +16,11 @@ class CompleteInput(Widget):
         height: auto;
         layout: grid;
         
-        .input-label {
+        InertLabel#label {
             margin-bottom: 1;
         }
         
-        .unit-label, .unit {
+        InertLabel#unit {
             color: $text-muted;
             width: 2;
             margin: 1 0 0 1;
@@ -66,8 +66,8 @@ class CompleteInput(Widget):
     def compose(self) -> ComposeResult:
         with Vertical():
             if self.label:
-                yield InertLabel(self.label, classes="input-label")
+                yield InertLabel(self.label, id="label")
             with Horizontal():
                 yield Input(str(self.value), id=self.input_id, type=self.type_, classes="single-input")
                 if self.unit:
-                    yield InertLabel(self.unit, classes="unit-label", disabled=True)
+                    yield InertLabel(self.unit, id="unit", disabled=True)
