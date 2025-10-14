@@ -10,6 +10,7 @@ from textual.widgets import Switch
 from ..widgets.inert_label import InertLabel
 
 
+# TODO: Add custom emissions for Toggle, block the switch events
 class Toggle(Widget, inherit_css=False, can_focus=False):
     """A button emulation combining a Switch and a clickable label within a horizontal container."""
     DEFAULT_CSS = """
