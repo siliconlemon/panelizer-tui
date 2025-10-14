@@ -1,6 +1,6 @@
 from textual.widgets import Select
 
-
+# TODO: Implement all of the css and classes, drop the inheritance
 class NeonSelect(Select, inherit_css=True):
     """A skin for textual's native Select widget."""
     DEFAULT_CSS = """
@@ -59,5 +59,6 @@ class NeonSelect(Select, inherit_css=True):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Forces compact layout for listed options
         if not self.compact:
             self.compact = True

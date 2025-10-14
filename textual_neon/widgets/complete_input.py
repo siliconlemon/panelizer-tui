@@ -3,13 +3,13 @@ from typing import Optional, Literal
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widget import Widget
-from textual.widgets import Input
 
+from textual_neon.widgets.neon_input import NeonInput
 from textual_neon.widgets.inert_label import InertLabel
 
 
 class CompleteInput(Widget):
-    """A labeled input widget with an optional unit label to the right."""
+    """A labeled input widget with an optional unit label to the right. Uses NeonInput."""
     DEFAULT_CSS = """
     CompleteInput {
         width: 100%;
@@ -20,28 +20,14 @@ class CompleteInput(Widget):
             margin-left: 1;
         }
         
+        NeonInput {
+            width: 1fr;
+        }
+        
         InertLabel#unit {
             color: $text-muted;
             width: 2;
             margin: 1 0 0 1;
-        }
-        
-        Input {
-            color: $text;
-            border: round $accent 50%;
-            background: transparent;
-            color: $text;
-            width: 1fr;
-            min-width: 10;
-            min-height: 1;
-            padding: 0 1;
-            margin: 0;
-            
-            &:focus, &:hover {
-                color: $text;
-                border: round $accent;
-                background: transparent;
-            }
         }
     }
     """
@@ -68,6 +54,6 @@ class CompleteInput(Widget):
             if self.label:
                 yield InertLabel(self.label, id="label")
             with Horizontal():
-                yield Input(str(self.value), id=self.input_id, type=self.type_, classes="single-input")
+                yield NeonInput(str(self.value), id=self.input_id, type=self.type_, classes="single-input")
                 if self.unit:
                     yield InertLabel(self.unit, id="unit", disabled=True)

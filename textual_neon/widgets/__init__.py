@@ -9,6 +9,7 @@ from .defaults_button import DefaultsButton, DefaultsButtonVariant
 from .defaults_palette import DefaultsPalette
 from .inert_label import InertLabel
 from .neon_button import NeonButton, NeonButtonVariant
+from .neon_input import NeonInput
 from .neon_select import NeonSelect
 from .toggle import Toggle
 
@@ -22,6 +23,7 @@ __all__ = [
     "InertLabel",
     "NeonButton",
     "NeonButtonVariant",
+    "NeonInput",
     "NeonSelect",
     "Toggle"
 ]
