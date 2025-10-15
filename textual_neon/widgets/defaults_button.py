@@ -4,10 +4,10 @@ from textual.geometry import Size
 from textual.widgets import Button
 from typing_extensions import override
 
-DefaultsButtonVariant = Literal["save", "restore", "reset"]
+DefaultsButtonVariant = Literal["default", "save", "restore", "reset"]
 """A literal defining which variants the NeonButton is prepared for."""
 
-DEFAULTS_BUTTON_VARIANTS = {"save", "restore", "reset"}
+DEFAULTS_BUTTON_VARIANTS = {"default", "save", "restore", "reset"}
 
 # FIXME: These don't appear for some reason
 class DefaultsButton(Button, inherit_css=False):
@@ -87,15 +87,14 @@ class DefaultsButton(Button, inherit_css=False):
         variant: DefaultsButtonVariant,
         **kwargs
     ):
-        super().__init__(f" {label.strip()} ", variant=variant, **kwargs)
-        self.validate_variant(variant)
+        super().__init__(f" {label.strip()} ", **kwargs)
+        self.variant = self.validate_variant(variant)
 
     @override
-    @staticmethod
-    def validate_variant(variant: str) -> str:
+    def validate_variant(self, variant: str) -> str:
         if variant not in DEFAULTS_BUTTON_VARIANTS:
             raise ValueError(
-                f"Valid DefaultsButton variants are {list(DEFAULTS_BUTTON_VARIANTS)}"
+                f"Valid DefaultsButton variants are {list(DEFAULTS_BUTTON_VARIANTS)}. Current variant: {variant}"
             )
         return variant
 

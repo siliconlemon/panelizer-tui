@@ -1,7 +1,9 @@
 """
-A `textual_neon` package containing elements based on the Widget class from `textual`.
+A textual_neon package containing elements based on the Widget class from `textual`.
 """
 
+from .choice_button import ChoiceButton
+from .choice_palette import ChoicePalette
 from .complete_input import CompleteInput
 from .complete_input_grid import CompleteInputGrid
 from .complete_select import CompleteSelect
@@ -14,6 +16,8 @@ from .neon_select import NeonSelect
 from .toggle import Toggle
 
 __all__ = [
+    "ChoiceButton",
+    "ChoicePalette",
     "CompleteInput",
     "CompleteInputGrid",
     "CompleteSelect",

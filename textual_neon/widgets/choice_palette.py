@@ -1,0 +1,91 @@
+from textual import on
+from typing import Literal, Any
+from textual.widget import Widget
+from collections.abc import Callable
+from textual.containers import Horizontal, Vertical, Container
+from textual_neon.widgets.choice_button import ChoiceButton
+
+class ChoicePalette(Widget, inherit_css=True):
+    """
+    A palette widget for setting up multiple choices with ChoiceButton entries.
+    Can be either horizontal or vertical.
+    """
+    DEFAULT_CSS = """
+    ChoicePalette {
+        height: auto;
+        width: 100%;
+        Horizontal, Vertical {
+            height: auto;
+        }
+    }
+    """
+    def __init__(
+        self,
+        *,
+        labels: list[str],
+        actions: list[Callable | None],
+        default_idx: int | None = None,
+        labels_when_selected: list[str | Callable[[], str]] | None = None,
+        orientation: Literal["horizontal", "vertical"] = "horizontal",
+        **kwargs
+    ) -> None:
+        super().__init__(**kwargs)
+        self.orientation = orientation
+        self.labels = labels
+        self.actions = actions or [None] * len(labels)
+        self.labels_when_selected = labels_when_selected or [None] * len(labels)
+        self._buttons = []
+        self._default_idx = default_idx
+
+    def compose(self):
+        self._buttons.clear()
+        container = Horizontal if self.orientation == "horizontal" else Vertical
+        num = len(self.labels)
+        with container():
+            for idx, label in enumerate(self.labels):
+                btn = ChoiceButton(
+                    label=label,
+                    action=self.actions[idx] if idx < len(self.actions) else None,
+                    label_when_selected=self.labels_when_selected[idx] if idx < len(self.labels_when_selected) else None,
+                )
+                # TODO: this doesnt seem to set anything
+                if self.orientation == "horizontal" and idx < num - 1:
+                    btn.styles.margin_right = 2
+                elif self.orientation == "vertical" and idx < num - 1:
+                    btn.styles.margin_bottom = 1
+                self._buttons.append(btn)
+                yield btn
+
+    async def on_mount(self) -> None:
+        idx = self._default_idx
+        if (
+            idx is not None
+            and 0 <= idx < len(self._buttons)
+        ):
+            for i, btn in enumerate(self._buttons):
+                btn.set_selected(i == idx)
+
+    @on(ChoiceButton.Selected)
+    def handle_selection(self, event: ChoiceButton.Selected):
+        try:
+            chosen_idx = self.buttons.index(event.button)
+        except ValueError:
+            chosen_idx = -1
+        for i, btn in enumerate(self.buttons):
+            btn.set_selected(i == chosen_idx)
+
+    @property
+    def selected_idx(self) -> int:
+        for idx, btn in enumerate(self.buttons):
+            if btn.selected:
+                return idx
+        return -1
+
+    @property
+    def selected_button(self):
+        idx = self.selected_idx
+        return self.buttons[idx] if idx != -1 else None
+
+    @property
+    def buttons(self) -> tuple[ChoiceButton, ...]:
+        return tuple(self._buttons)
