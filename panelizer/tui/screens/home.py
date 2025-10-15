@@ -40,6 +40,7 @@ class HomeScreen(Screen[str]):
         yield Header(icon="●")
         with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
+                # TODO: Why the hell is this wider than the rest?
                 yield NeonButton(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
             with Horizontal(id="main-row"):
 
