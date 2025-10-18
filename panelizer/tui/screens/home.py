@@ -40,10 +40,8 @@ class HomeScreen(Screen[str]):
         yield Header(icon="●")
         with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
-                # TODO: Why the hell is this wider than the rest?
                 yield NeonButton(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
             with Horizontal(id="main-row"):
-
                 with Vertical(id="first-column"):
                     yield CompleteInputGrid(
                         rows=2,
@@ -60,7 +58,6 @@ class HomeScreen(Screen[str]):
                         is_active=self.split_image_active,
                         id="split-wide-toggle",
                     )
-
                 with Vertical(id="second-column"):
                     yield CompleteSelect(
                         select_id="bg-select",
@@ -75,7 +72,6 @@ class HomeScreen(Screen[str]):
                         widget_id="defaults-widget",
                         label="Default Values",
                     )
-
             yield ChoicePalette(
                 labels=["All Files in Dir", "Select Files"],
                 actions=[None, None],
@@ -87,44 +83,40 @@ class HomeScreen(Screen[str]):
                 orientation="horizontal",
                 id="file-mode-palette",
             )
-
             yield NeonButton("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
-
 
 
     async def on_mount(self) -> None:
         self._update_path_display()
         self._update_numbers()
 
-    # FIXME: Make this a damn switch
     async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
-        if event.button.id == "all-files-btn":
-            self.file_mode = "all"
-            self.selected_files = []
-            event.stop()
-        elif event.button.id == "select-files-btn":
-            self.file_mode = "select"
-            files = await self.app.push_screen_wait(ListSelectDialog())
-            self.selected_files = files or []
-            event.stop()
-        elif event.button.id == "start-btn":
-            self._emit_settings_and_close()
-            event.stop()
-        elif event.button.id == "path-btn":
-            new_dir = await self.app.push_screen_wait(
-                DirSelectDialog(location=self.selected_path)
-            )
-            if new_dir:
-                self.selected_path = Path(new_dir)
-                self._update_path_display()
-            event.stop()
-        # TODO: Implement these
-        elif event.button.id == "save-defaults-btn":
-            ...
-        elif event.button.id == "restore-defaults-btn":
-            ...
-        elif event.button.id == "reset-defaults-btn":
-            ...
+        match event.button.id:
+            case "all-files-btn":
+                self.file_mode = "all"
+                self.selected_files = []
+                event.stop()
+            case "select-files-btn":
+                self.file_mode = "select"
+                files = await self.app.push_screen_wait(ListSelectDialog())
+                self.selected_files = files or []
+                event.stop()
+            case "start-btn":
+                self._emit_settings_and_close()
+                event.stop()
+            case "path-btn":
+                new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self.selected_path))
+                if new_dir:
+                    self.selected_path = Path(new_dir)
+                    self._update_path_display()
+                event.stop()
+            # TODO: Implement these
+            case "save-defaults-btn":
+                ...
+            case "restore-defaults-btn":
+                ...
+            case "reset-defaults-btn":
+                ...
 
     async def on_select_changed(self, event: Select.Changed) -> None:
         if event.select.id == "bg-select":

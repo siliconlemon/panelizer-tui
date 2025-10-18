@@ -46,13 +46,16 @@ class ChoicePalette(Widget, inherit_css=True):
                 btn = ChoiceButton(
                     label=label,
                     action=self.actions[idx] if idx < len(self.actions) else None,
-                    label_when_selected=self.labels_when_selected[idx] if idx < len(self.labels_when_selected) else None,
+                    label_when_selected=self.labels_when_selected[idx]
+                        if idx < len(self.labels_when_selected) else None,
                 )
-                # TODO: this doesnt seem to set anything
-                if self.orientation == "horizontal" and idx < num - 1:
-                    btn.styles.margin_right = 2
+                if self.orientation == "horizontal":
+                    if idx < num - 1:
+                        btn.styles.margin = (0, 1, 0, 0)
+                    else:
+                        btn.styles.margin = (0, 0, 0, 1)
                 elif self.orientation == "vertical" and idx < num - 1:
-                    btn.styles.margin_bottom = 1
+                        btn.styles.margin = (0, 0, 1, 0)
                 self._buttons.append(btn)
                 yield btn
 

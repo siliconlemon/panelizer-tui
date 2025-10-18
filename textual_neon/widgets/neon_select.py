@@ -12,15 +12,14 @@ class NeonSelect(Select, inherit_css=True):
         SelectCurrent {
             color: $text;
             border: none !important;
-            color: $text;
-            border: none;
             background: transparent;
             margin: 0;
+            padding: 0 0 0 0 !important;
             height: 3;
         }
         
         & > SelectOverlay {
-            padding: 0 1 0 1 !important;
+            padding: 0 0 0 1 !important;
         }
         
         OptionList {
