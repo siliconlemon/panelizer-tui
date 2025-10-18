@@ -51,9 +51,9 @@ class ChoicePalette(Widget, inherit_css=True):
                 )
                 if self.orientation == "horizontal":
                     if idx < num - 1:
-                        btn.styles.margin = (0, 1, 0, 0)
+                        btn.styles.margin = (0, 2, 0, 0)
                     else:
-                        btn.styles.margin = (0, 0, 0, 1)
+                        btn.styles.margin = (0, 0, 0, 2)
                 elif self.orientation == "vertical" and idx < num - 1:
                         btn.styles.margin = (0, 0, 1, 0)
                 self._buttons.append(btn)
