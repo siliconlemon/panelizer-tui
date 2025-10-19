@@ -6,7 +6,7 @@
  * awaiting a fix from jetbrains.
  */
 
-Screen {
+LaunchScreen {
     align: center middle;
     layout: vertical;
 }
@@ -47,3 +47,8 @@ Screen {
     margin-bottom: 2;
 }
 
+.launch-btn {
+    width: auto;
+    width: 20;
+    margin: 0 2;
+}

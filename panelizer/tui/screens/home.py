@@ -11,7 +11,7 @@ from textual.widgets import Input, Header, Select
 from textual.worker import Worker
 
 from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, NeonButton, DirSelectDialog, \
-    ChoicePalette, ChoiceButton
+    ChoicePalette, ChoiceButton, Paths
 from textual_neon.dialogs.list_select import ListSelectDialog
 
 
@@ -19,10 +19,10 @@ class HomeScreen(Screen[str]):
     CSS_PATH = ["../css/home.tcss"]
     BINDINGS = []
 
-    def __init__(self, default_path: Path, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._most_recent_worker: Worker | None = None
-        self._selected_dir: Path = default_path
+        self._selected_dir: Path = Paths.pictures()
         self.file_mode: Literal["all", "select"] = "all"
         self.selected_files: list[str] = []
         self.img_padding_left: int = 0
@@ -93,6 +93,7 @@ class HomeScreen(Screen[str]):
         self._update_numbers()
 
     async def on_unmount(self) -> None:
+        # self.workers.cancel_all() # Maybe just like this?
         if self._most_recent_worker and self._most_recent_worker.is_running:
             self._most_recent_worker.cancel()
 

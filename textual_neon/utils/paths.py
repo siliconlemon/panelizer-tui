@@ -1,0 +1,94 @@
+import platform
+from pathlib import Path
+
+
+class Paths:
+    """Cross-platform utility for getting standard user directories."""
+
+    @staticmethod
+    def _get_xdg_dir(xdg_var: str, fallback: str) -> Path:
+        """Helper to read XDG user directories on Linux."""
+        xdg_config = Path.home() / ".config" / "user-dirs.dirs"
+        if xdg_config.exists():
+            # noinspection PyBroadException
+            try:
+                with xdg_config.open("r") as f:
+                    for line in f:
+                        if line.startswith(xdg_var):
+                            # Format: XDG_PICTURES_DIR="$HOME/Pictures"
+                            path_str = line.split("=", 1)[1].strip().strip('"')
+                            path_str = path_str.replace("$HOME", str(Path.home()))
+                            return Path(path_str)
+            except Exception:
+                pass
+        return Path.home() / fallback
+
+    @staticmethod
+    def pictures() -> Path:
+        """Returns the default Pictures directory for the current OS."""
+        system = platform.system()
+
+        if system == "Windows":
+            return Path.home() / "Pictures"
+        elif system == "Darwin":
+            return Path.home() / "Pictures"
+        elif system == "Linux":
+            return Paths._get_xdg_dir("XDG_PICTURES_DIR", "Pictures")
+        else:
+            return Path.home() / "Pictures"
+
+    @staticmethod
+    def documents() -> Path:
+        """Returns the default Documents directory for the current OS."""
+        system = platform.system()
+
+        if system == "Windows":
+            return Path.home() / "Documents"
+        elif system == "Darwin":
+            return Path.home() / "Documents"
+        elif system == "Linux":
+            return Paths._get_xdg_dir("XDG_DOCUMENTS_DIR", "Documents")
+        else:
+            return Path.home() / "Documents"
+
+    @staticmethod
+    def downloads() -> Path:
+        """Returns the default Downloads directory for the current OS."""
+        system = platform.system()
+
+        if system == "Windows":
+            return Path.home() / "Downloads"
+        elif system == "Darwin":
+            return Path.home() / "Downloads"
+        elif system == "Linux":
+            return Paths._get_xdg_dir("XDG_DOWNLOAD_DIR", "Downloads")
+        else:
+            return Path.home() / "Downloads"
+
+    @staticmethod
+    def videos() -> Path:
+        """Returns the default Videos directory for the current OS."""
+        system = platform.system()
+
+        if system == "Windows":
+            return Path.home() / "Videos"
+        elif system == "Darwin":
+            return Path.home() / "Movies"  # macOS uses "Movies" instead
+        elif system == "Linux":
+            return Paths._get_xdg_dir("XDG_VIDEOS_DIR", "Videos")
+        else:
+            return Path.home() / "Videos"
+
+    @staticmethod
+    def music() -> Path:
+        """Returns the default Music directory for the current OS."""
+        system = platform.system()
+
+        if system == "Windows":
+            return Path.home() / "Music"
+        elif system == "Darwin":
+            return Path.home() / "Music"
+        elif system == "Linux":
+            return Paths._get_xdg_dir("XDG_MUSIC_DIR", "Music")
+        else:
+            return Path.home() / "Music"

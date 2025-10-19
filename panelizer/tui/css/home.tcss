@@ -6,6 +6,11 @@
  * awaiting a fix from jetbrains.
  */
 
+HomeScreen {
+    align: center middle;
+    layout: vertical;
+}
+
 #home-row {
     height: 100%;
     max-height: 50;

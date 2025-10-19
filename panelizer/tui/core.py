@@ -19,8 +19,8 @@ class PanelizerTUI(NeonApp):
             "launch",
             screen="launch",
             next_state="home",
-            validate=lambda path: isinstance(path, Path) and path.exists(),
-            args_from_result=lambda path: (path,),
+            validate=lambda result: result is True,
+            args_from_result=lambda result: (),
         )
         self.state_machine.register(
             "home",
