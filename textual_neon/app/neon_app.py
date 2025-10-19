@@ -16,16 +16,19 @@ NOT_REGISTERED_MSG = """
 |   Example:
 |   
 |   YourApp(NeonApp):
+|       SCREENS = {
+|           "launch": LaunchScreen,
+|           "home": HomeScreen,
+|       }
 |       def __init__(self) -> None:
 |           super().__init__()
 |           self.state_machine.register(
-|               'home',
-|               screen=HomeScreen,
-|               next=None,
-|               fallback='launch',
-|               validate=lambda result: bool(result),
-|               args_from_result=lambda result: (result,),
-|          )
+|               "launch",
+|               screen="launch",
+|               next_state="home",
+|               validate=lambda result: result is True,
+|               args_from_result=lambda result: (),
+|           )
 |
 """
 
