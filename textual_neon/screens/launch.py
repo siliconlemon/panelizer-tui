@@ -2,12 +2,13 @@ from pathlib import Path
 
 import textual
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Container
 from textual.events import Resize
 from textual.geometry import Size
 from textual.message import Message
 from textual.screen import Screen
-from textual.widgets import Header
+from textual.widgets import Header, Footer
 
 from textual_neon.utils import AsciiPainter
 from textual_neon.widgets.neon_button import NeonButton
@@ -102,13 +103,21 @@ class LaunchScreen(Screen[bool]):
             max-height: 3;
             width: 100%;
             align: center middle;
-            margin-bottom: 2;
+            margin-bottom: 1;
         }
 
         NeonButton.launch-btn {
             width: auto;
             width: 20;
             margin: 0 2;
+        }
+        
+        Footer {
+            background: transparent;
+            border: none !important;
+            FooterKey.-command-palette {
+                border: none !important;
+            }
         }
     }
     """
@@ -173,6 +182,7 @@ class LaunchScreen(Screen[bool]):
             with Container(id="buttons"):
                 yield NeonButton(self.enter_label, id="enter", classes="launch-btn", variant="primary")
                 yield NeonButton(self.exit_label, id="exit", classes="launch-btn", variant="primary")
+        yield Footer()
 
     async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
         """Handles enter/exit button presses."""
