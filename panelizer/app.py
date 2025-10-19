@@ -4,8 +4,8 @@ Run this directly to launch the app.
 """
 
 from textual_neon import NeonApp
-from panelizer.tui.screens.home import HomeScreen
-from panelizer.tui.screens.launch import PanelizerLaunchScreen
+from .tui import HomeScreen
+from .tui import PanelizerLaunchScreen
 
 
 class Panelizer(NeonApp):

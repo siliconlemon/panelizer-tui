@@ -61,6 +61,12 @@ class HomeScreen(Screen[str]):
                         is_active=self.split_image_active,
                         id="split-wide-toggle",
                     )
+                    yield Toggle(
+                        switch_id="stack-landscape-toggle-switch",
+                        text="Stack Landscape Images",
+                        is_active=False,
+                        id="stack-landscape-toggle",
+                    )
                 with Vertical(id="second-column"):
                     yield CompleteSelect(
                         select_id="bg-select",

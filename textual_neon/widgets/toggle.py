@@ -19,7 +19,6 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
         height: 3;
         padding: 0 1 0 0;
         layout: horizontal;
-        text-align: center;
         border: round $accent 50%;
 
         &.--hover, &:focus-within {
@@ -85,7 +84,7 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
         InertLabel {
             width: 1fr;
             min-height: 1;
-            text-align: center;
+            text-align: left;
             padding: 0 1 0 1;
             text-style: bold;
             background: transparent;
@@ -99,7 +98,7 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
         Switch {
             height: 1;
             padding: 0;
-            margin: 0 2 0 1;
+            margin: 0 1 0 1;
             background: transparent;
             border: none;
 

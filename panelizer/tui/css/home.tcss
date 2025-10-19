@@ -70,6 +70,10 @@ HomeScreen {
     margin-right: 5;
 }
 
+Toggle {
+    margin-right: 5;
+}
+
 #file-select-grid {
     width: 1fr;
     height: auto;
