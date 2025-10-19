@@ -2,7 +2,26 @@ from textual_fspicker.file_dialog import BaseFileDialog
 
 
 class FileSelectDialog(BaseFileDialog, inherit_css=True):
-    """A skin for the BaseFileDialog class from textual-fspicker, selects a single file."""
+    """A skin for the BaseFileDialog class from textual-fspicker, selects a single file.
+
+    Usage:
+    ::
+        async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
+            match event.button.id:
+                case "pick-file-btn":
+                    self._most_recent_worker = self.app.run_worker(self._pick_file_task, exclusive=True)
+                    event.stop()
+        ...
+        async def _pick_file_task(self) -> None:
+            selected = await self.app.push_screen_wait(FileSelectDialog(location=self.selected_path))
+            if selected:
+                self.selected_file = Path(selected)
+                self._update_file_display()
+        ...
+        async def on_unmount(self) -> None:
+            if self._most_recent_worker and self._most_recent_worker.is_running:
+                self._most_recent_worker.cancel()
+    """
     DEFAULT_CSS = """
     FileSelectDialog {
 

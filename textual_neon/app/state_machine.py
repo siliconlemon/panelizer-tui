@@ -60,9 +60,7 @@ class StateMachine:
         self._registered = True
 
     async def run(self, start_state: str = "launch") -> None:
-        """
-        Runs the state machine loop from the initial state until exit.
-        """
+        """Runs the state machine loop from the initial state until exit."""
         state_name = start_state
         args = ()
         while state_name:

@@ -126,11 +126,9 @@ class NeonApp(App[Any]):
 
     @work
     async def run_state_machine(self) -> None:
-        """
-        Runs the app's state machine registered with data-driven states and transitions.
-        """
+        """Runs the app's state machine registered with data-driven states and transitions."""
         if not self.state_machine.registered:
-            raise NotImplementedError(
+            raise ValueError(
                 NOT_REGISTERED_MSG
             )
-        await self.state_machine.run()
+        await self.state_machine.run(start_state="launch")

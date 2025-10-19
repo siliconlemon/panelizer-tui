@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 from typing import Optional
 
@@ -8,10 +9,11 @@ from textual.events import Resize
 from textual.geometry import Size
 from textual.screen import Screen
 from textual.widgets import Header
+from textual.worker import Worker
 
-from textual_neon import NeonButton, InertLabel, NeonDialog
 from textual_neon import AsciiPainter
 from textual_neon import DirSelectDialog
+from textual_neon import NeonButton, InertLabel
 
 
 class LaunchScreen(Screen[Optional[Path]]):
@@ -30,6 +32,9 @@ class LaunchScreen(Screen[Optional[Path]]):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._start_directory: Path | None = None
+        self._selected_dir: Path | None = None
+        self._most_recent_worker: Worker | None = None
         if not self.ASCII_ART_CACHE:
             color_map = {
                 "*": "#b2b2b2",
@@ -53,6 +58,13 @@ class LaunchScreen(Screen[Optional[Path]]):
     def on_mount(self) -> None:
         self._update_layout(self.size)
 
+    # FIXME: If i try to cancel here, like normal, it results in a blank screen due to a dangling worker
+    # FIXME: StateMachine gets no next state for fuck's sake
+    async def on_unmount(self) -> None:
+        if self._most_recent_worker and self._most_recent_worker.is_running:
+            raise ValueError("Worker was running when screen was unmounted!") # Doesn't get triggered right now
+            self._most_recent_worker.cancel()
+
     def on_resize(self, event: Resize) -> None:
         self._update_layout(event.size)
 
@@ -66,14 +78,10 @@ class LaunchScreen(Screen[Optional[Path]]):
                 yield NeonButton("Pick a Directory", id="pick-dir", classes="wide-btn", variant="primary")
                 yield NeonButton("Current Directory", id="current-dir", classes="wide-btn", variant="primary")
 
-    async def _handle_directory_selection(self, start_directory: Path) -> None:
-        """Opens directory picker and dismiss with selected path or None."""
-        selected_directory = await self.app.push_screen_wait(
-            DirSelectDialog(location=start_directory, double_click_directories=False)
-        )
-        # noinspection PyAsyncCall
-        self.dismiss(selected_directory or None)
+    async def _select_dir_worker(self) -> None:
+        self._selected_dir = await self.app.push_screen_wait(DirSelectDialog(location=self._start_directory))
 
+    # FIXME: No dismiss means staying in the screen; dismissal (leading to unmount) breaks the worker handling
     async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
         """Handles directory selection buttons."""
         lookup = {
@@ -81,7 +89,12 @@ class LaunchScreen(Screen[Optional[Path]]):
             "current-dir": Path.cwd()
         }
         if event.button.id in lookup:
-            await self._handle_directory_selection(lookup[event.button.id])
+            self._start_directory = lookup[event.button.id]
+            self._most_recent_worker = self.app.run_worker(self._select_dir_worker, exclusive=True)
+            await self._most_recent_worker.wait()
+        # There actually is a dir being selected, the screen still gets stuck though - must be a bad cancel
+        self._dismiss_gracefully()
+        event.stop()
 
     def _pick_fitting_ascii(self, cols: int, rows: int) -> tuple[int, int, str]:
         """Picks the largest ASCII art that will fit in cols×rows."""
@@ -122,3 +135,7 @@ class LaunchScreen(Screen[Optional[Path]]):
         art_container.styles.width = width
         art_container.styles.height = height
         self._update_ascii_art(filename)
+
+    def _dismiss_gracefully(self) -> None:
+        if self._selected_dir:
+            self.dismiss(self._selected_dir)

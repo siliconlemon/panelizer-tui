@@ -122,7 +122,7 @@ class ScreenSize:
     async def handle_on_resize(self, width: int, height: int) -> None:
         """
         Shows or hides the 'too small' modal based on terminal dimensions.
-        Runs the main state machine if the size permits, and it has not already started.
+        Runs the main state machine if the size permits, and it has not yet started.
         """
         if height < self.app.MIN_ROWS or width < self.app.MIN_COLS:
             if not self.app.too_small_modal_open:

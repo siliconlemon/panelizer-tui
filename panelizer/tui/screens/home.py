@@ -8,6 +8,7 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Input, Header, Select
+from textual.worker import Worker
 
 from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, NeonButton, DirSelectDialog, \
     ChoicePalette, ChoiceButton
@@ -20,7 +21,8 @@ class HomeScreen(Screen[str]):
 
     def __init__(self, default_path: Path, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.selected_path: Path = default_path
+        self._most_recent_worker: Worker | None = None
+        self._selected_dir: Path = default_path
         self.file_mode: Literal["all", "select"] = "all"
         self.selected_files: list[str] = []
         self.img_padding_left: int = 0
@@ -40,7 +42,7 @@ class HomeScreen(Screen[str]):
         yield Header(icon="●")
         with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
-                yield NeonButton(self.selected_path.as_posix(), id="path-btn", classes="extra-wide-btn")
+                yield NeonButton(self._selected_dir.as_posix(), id="path-btn", classes="extra-wide-btn")
             with Horizontal(id="main-row"):
                 with Vertical(id="first-column"):
                     yield CompleteInputGrid(
@@ -90,6 +92,10 @@ class HomeScreen(Screen[str]):
         self._update_path_display()
         self._update_numbers()
 
+    async def on_unmount(self) -> None:
+        if self._most_recent_worker and self._most_recent_worker.is_running:
+            self._most_recent_worker.cancel()
+
     async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
         match event.button.id:
             case "all-files-btn":
@@ -98,17 +104,13 @@ class HomeScreen(Screen[str]):
                 event.stop()
             case "select-files-btn":
                 self.file_mode = "select"
-                files = await self.app.push_screen_wait(ListSelectDialog())
-                self.selected_files = files or []
+                self._most_recent_worker = self.app.run_worker(self._select_files_worker, exclusive=True)
                 event.stop()
             case "start-btn":
-                self._emit_settings_and_close()
+                self._dismiss_gracefully()
                 event.stop()
             case "path-btn":
-                new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self.selected_path))
-                if new_dir:
-                    self.selected_path = Path(new_dir)
-                    self._update_path_display()
+                self._most_recent_worker = self.app.run_worker(self._select_dir_worker, exclusive=True)
                 event.stop()
             # TODO: Implement these
             case "save-defaults-btn":
@@ -118,13 +120,23 @@ class HomeScreen(Screen[str]):
             case "reset-defaults-btn":
                 ...
 
+    async def _select_files_worker(self) -> None:
+        files = await self.app.push_screen_wait(ListSelectDialog())
+        self.selected_files = files or []
+
+    async def _select_dir_worker(self) -> None:
+        new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self._selected_dir))
+        if new_dir:
+            self._selected_dir = Path(new_dir)
+            self._update_path_display()
+
     async def on_select_changed(self, event: Select.Changed) -> None:
         if event.select.id == "bg-select":
             self.background_color = str(event.value)
 
     def _update_path_display(self) -> None:
         path_btn = self.query_one("#path-btn", NeonButton)
-        path = self.selected_path.as_posix()
+        path = self._selected_dir.as_posix()
         path_btn.label = path
 
     def _update_numbers(self) -> None:
@@ -183,9 +195,9 @@ class HomeScreen(Screen[str]):
         else:
             return f"{count} Files Selected"
 
-    def _emit_settings_and_close(self) -> None:
+    def _dismiss_gracefully(self) -> None:
         settings = {
-            "path": str(self.selected_path),
+            "path": str(self._selected_dir),
             "files": self.selected_files if self.file_mode == "select" and self.selected_files else "ALL",
             "background_color": self.background_color,
             "split_wide_images": self.split_image_active,

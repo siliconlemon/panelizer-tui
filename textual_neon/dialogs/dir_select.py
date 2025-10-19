@@ -2,7 +2,27 @@ from textual_fspicker import SelectDirectory
 
 
 class DirSelectDialog(SelectDirectory, inherit_css=True):
-    """A skin for the SelectDirectory class from textual-fspicker, selects a single directory."""
+    """
+    A skin for the SelectDirectory class from textual-fspicker, selects a single directory.
+
+    Usage:
+    ::
+        async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
+            match event.button.id:
+                case "path-btn":
+                    self._most_recent_worker = self.app.run_worker(self._select_dir_worker, exclusive=True)
+                    event.stop()
+        ...
+        async def _select_dir_worker(self) -> None:
+            new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self.selected_path))
+            if new_dir:
+                self.selected_path = Path(new_dir)
+                self._update_path_display()
+        ...
+        async def on_unmount(self) -> None:
+            if self._most_recent_worker and self._most_recent_worker.is_running:
+                self._most_recent_worker.cancel()
+    """
     DEFAULT_CSS = """
     DirSelectDialog {
     
