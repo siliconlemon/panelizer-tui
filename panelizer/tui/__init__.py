@@ -5,11 +5,8 @@ panelizer.tui
 This package contains all UI-related components for interacting with the user.
 Initially, it's CLI-based (Rich/Textual), helping users select input/output
 directories and flowing through the processing pipeline.
-
-Public tui:
-- pick_directory()
 """
 
-from .core import PanelizerTUI
+from .screens import DoneScreen, HomeScreen, PanelizerLaunchScreen, ProgressScreen
 
-__all__ = ["PanelizerTUI"]
+__all__ = ["DoneScreen", "HomeScreen", "PanelizerLaunchScreen", "ProgressScreen"]

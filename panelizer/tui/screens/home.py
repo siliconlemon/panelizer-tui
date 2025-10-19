@@ -22,6 +22,7 @@ class HomeScreen(Screen[str]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._most_recent_worker: Worker | None = None
+        # TODO: make the selected dir be settable as a default when settings are implemented, use Paths as hard default
         self._selected_dir: Path = Paths.pictures()
         self.file_mode: Literal["all", "select"] = "all"
         self.selected_files: list[str] = []
