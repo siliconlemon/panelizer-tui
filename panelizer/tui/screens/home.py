@@ -15,6 +15,7 @@ from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, Tog
 from textual_neon.dialogs.list_select import ListSelectDialog
 
 
+# TODO: Implement a working defaults system before progressing further, plug everything to _handle_dismiss
 class HomeScreen(Screen[str]):
     CSS_PATH = ["../css/home.tcss"]
     BINDINGS = []
@@ -115,7 +116,7 @@ class HomeScreen(Screen[str]):
                 self._most_recent_worker = self.app.run_worker(self._select_files_worker, exclusive=True)
                 event.stop()
             case "start-btn":
-                self._dismiss_gracefully()
+                self._handle_dismiss()
                 event.stop()
             case "path-btn":
                 self._most_recent_worker = self.app.run_worker(self._select_dir_worker, exclusive=True)
@@ -203,7 +204,7 @@ class HomeScreen(Screen[str]):
         else:
             return f"{count} Files Selected"
 
-    def _dismiss_gracefully(self) -> None:
+    def _handle_dismiss(self) -> None:
         settings = {
             "path": str(self._selected_dir),
             "files": self.selected_files if self.file_mode == "select" and self.selected_files else "ALL",
