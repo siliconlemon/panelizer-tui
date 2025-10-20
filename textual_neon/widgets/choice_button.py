@@ -1,5 +1,6 @@
 import inspect
 from collections.abc import Callable
+from typing_extensions import override
 
 from textual.message import Message
 
@@ -11,13 +12,6 @@ class ChoiceButton(NeonButton, inherit_css=True):
     A dynamic button widget for selecting one of multiple options with added functionality on-press.
     Based on NeonButton.
     """
-
-    class Selected(Message):
-        """Posted when this ChoiceButton is selected (pressed)."""
-        def __init__(self, sender: "ChoiceButton") -> None:
-            super().__init__()
-            self.button = sender
-
     DEFAULT_CSS = """
     ChoiceButton {
         width: 1fr;
@@ -59,6 +53,12 @@ class ChoiceButton(NeonButton, inherit_css=True):
     }
     """
 
+    class Selected(Message):
+        """Posted when this ChoiceButton is selected (pressed)."""
+        def __init__(self, sender: "ChoiceButton") -> None:
+            super().__init__()
+            self.button = sender
+
     def __init__(
         self,
         *,
@@ -90,7 +90,8 @@ class ChoiceButton(NeonButton, inherit_css=True):
         self.set_class(value, "--selected")
         if value:
             if self.label_when_selected:
-                new_label = self.label_when_selected() if callable(self.label_when_selected) else self.label_when_selected
+                new_label = self.label_when_selected() \
+                    if callable(self.label_when_selected) else self.label_when_selected
             else:
                 new_label = self._label_default
             new_label = new_label.strip()
@@ -111,3 +112,12 @@ class ChoiceButton(NeonButton, inherit_css=True):
                 result = self.action()
                 if inspect.isawaitable(result):
                     await result
+
+    @override
+    def watch_label(self, new_label: str) -> None:
+        """
+        Overrides the parent NeonButton.watch_label to prevent re-formatting.
+        ChoiceButton's label formatting is managed entirely by the
+        set_selected() method.
+        """
+        pass

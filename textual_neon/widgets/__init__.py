@@ -13,6 +13,7 @@ from .inert_label import InertLabel
 from .neon_button import NeonButton, NeonButtonVariant
 from .neon_input import NeonInput
 from .neon_select import NeonSelect
+from .path_button import PathButton
 from .toggle import Toggle
 
 __all__ = [
@@ -29,5 +30,6 @@ __all__ = [
     "NeonButtonVariant",
     "NeonInput",
     "NeonSelect",
+    "PathButton",
     "Toggle"
 ]

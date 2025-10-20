@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Literal
 
 import textual
+from pyexpat.errors import messages
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -10,9 +11,8 @@ from textual.screen import Screen
 from textual.widgets import Input, Header, Select
 from textual.worker import Worker
 
-from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, Toggle, NeonButton, DirSelectDialog, \
-    ChoicePalette, ChoiceButton, Paths
-from textual_neon.dialogs.list_select import ListSelectDialog
+from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
+    Toggle, NeonButton, DirSelectDialog, ChoicePalette, ChoiceButton, Paths, ListSelectDialog, PathButton
 
 
 # TODO: Implement a working defaults system before progressing further, plug everything to _handle_dismiss
@@ -44,7 +44,8 @@ class HomeScreen(Screen[str]):
         yield Header(icon="●")
         with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
-                yield NeonButton(self._selected_dir.as_posix(), id="path-btn", classes="extra-wide-btn")
+                # TODO: Shouldn't the format be determined by the os in Paths?
+                yield PathButton(self._selected_dir.as_posix(), id="path-btn")
             with Horizontal(id="main-row"):
                 with Vertical(id="first-column"):
                     yield CompleteInputGrid(

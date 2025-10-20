@@ -27,23 +27,6 @@ HomeScreen {
     margin-bottom: 1;
 }
 
-#path-btn {
-    overflow-x: hidden;
-    text-align: center;
-    color: $text;
-    border: round $accent;
-}
-
-#path-btn:focus, #path-btn:hover {
-    color: $text;
-    border: round $accent-darken-2 50%;
-
-}
-
-#path-btn:hover {
-    text-style: underline;
-}
-
 #main-row {
     width: 1fr;
     height: 1fr;

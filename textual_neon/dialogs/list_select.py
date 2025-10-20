@@ -1,4 +1,4 @@
-from textual_neon import NeonDialog
+from textual_neon.dialogs.neon_dialog import NeonDialog
 
 
 class ListSelectDialog(NeonDialog):
