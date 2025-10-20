@@ -6,8 +6,8 @@ from textual.app import App
 from textual.events import Resize
 from textual.theme import Theme
 
-from .state_machine import StateMachine
-from ..screens.too_small import ScreenSize, TooSmallScreen
+from textual_neon.app.state_machine import StateMachine
+from textual_neon.screens.too_small import TooSmallScreen
 
 NOT_REGISTERED_MSG = """
 |
@@ -111,17 +111,59 @@ class NeonApp(App[Any]):
     )
 
     def __init__(self) -> None:
+        """Ensures that the TooSmallScreen is registered and sets up the StateMachine."""
         super().__init__()
-        self.SCREENS.update({"too_small": TooSmallScreen})
         self.set_themes()
         self.app_started = False
         self.too_small_modal_open = False
-        self.screen_size = ScreenSize(app=self)
+        self.SCREENS.update({"too_small": TooSmallScreen})
         self.state_machine = StateMachine(app=self)
 
+    async def on_mount(self) -> None:
+        """Handles the initial size check on app startup."""
+        width, height = self.size
+        if height < self.MIN_ROWS or width < self.MIN_COLS:
+            await self.show_too_small_modal(width, height)
+        else:
+            # Size is OK on startup, run the app.
+            self.app_started = True
+            self.run_state_machine()
+
     async def on_resize(self, event: Resize) -> None:
-        """Shows the TooSmallScreen if the terminal window gets too small."""
-        await self.screen_size.handle_on_resize(event.size.width, event.size.height)
+        """Handles all subsequent terminal resize events."""
+        width, height = event.size
+
+        if height < self.MIN_ROWS or width < self.MIN_COLS:
+            # Screen is too small
+            if not self.too_small_modal_open:
+                await self.show_too_small_modal(width, height)
+        else:
+            # Screen is large enough
+            if self.too_small_modal_open:
+                await self.hide_too_small_modal()
+
+            # If the app hasn't started yet (e.g., it started too small
+            # and was just resized), start it now.
+            if not self.app_started:
+                self.app_started = True
+                self.run_state_machine()
+
+    async def show_too_small_modal(self, width: int, height: int) -> None:
+        """Displays the 'TooSmallScreen' modal."""
+        if not self.too_small_modal_open:
+            self.too_small_modal_open = True
+            await self.push_screen(
+                self.SCREENS["too_small"](
+                    self.MIN_ROWS, self.MIN_COLS, width=width, height=height
+                )
+            )
+
+    async def hide_too_small_modal(self) -> None:
+        """Closes the 'TooSmallScreen' modal."""
+        if self.too_small_modal_open:
+            if isinstance(self.screen, TooSmallScreen):
+                await self.pop_screen()
+            self.too_small_modal_open = False
 
     def set_themes(self) -> None:
         """Registers the default theme and removes all pre-built light themes."""

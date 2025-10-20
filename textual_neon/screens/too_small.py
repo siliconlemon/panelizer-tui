@@ -1,14 +1,9 @@
-from typing import TYPE_CHECKING
-
 from textual.app import ComposeResult
 from textual.containers import VerticalGroup
 from textual.css.query import NoMatches
 from textual.events import Resize
 from textual.screen import ModalScreen
 from textual.widgets import Label
-
-if TYPE_CHECKING:
-    from ..app import NeonApp
 
 
 class TooSmallScreen(ModalScreen[None]):
@@ -19,24 +14,24 @@ class TooSmallScreen(ModalScreen[None]):
         height: 100%;
         dock: left;
         background: $background;
-    
+
         #msg_group {
-        width: 100%;
-        height: 7;
-        dock: top;
-        align: left top;
-        background: $background;
-        border: round $error;
-        padding: 1 2;
-        margin: 1;
+            width: 100%;
+            height: 7;
+            dock: top;
+            align: left top;
+            background: $background;
+            border: round $error;
+            padding: 1 2;
+            margin: 1;
         }
-    
+
         #msg_err {
             color: $error-lighten-1;
             text-style: bold;
             margin: 0;
         }
-    
+
         #msg_size {
             color: $text;
             text-style: bold;
@@ -91,44 +86,3 @@ class TooSmallScreen(ModalScreen[None]):
             )
         except NoMatches:
             pass
-
-
-class ScreenSize:
-    """
-    Handles screen size checks and the 'too small' modal for a Textual app.
-    Extends textual's App functionality with a parent reference.
-    """
-
-    def __init__(self, *, app: "NeonApp") -> None:
-        self.app = app
-
-    async def show_too_small_modal(self) -> None:
-        """Displays the 'TooSmallScreen' modal if it is not already open."""
-        if not self.app.too_small_modal_open:
-            self.app.too_small_modal_open = True
-            await self.app.push_screen(
-                self.app.SCREENS["too_small"](
-                    self.app.MIN_ROWS, self.app.MIN_COLS, width=self.app.size.width, height=self.app.size.height
-                )
-            )
-
-    async def close_too_small_modal(self) -> None:
-        """Closes the 'TooSmallScreen' modal if it is open."""
-        if self.app.too_small_modal_open:
-            await self.app.pop_screen()
-            self.app.too_small_modal_open = False
-
-    async def handle_on_resize(self, width: int, height: int) -> None:
-        """
-        Shows or hides the 'too small' modal based on terminal dimensions.
-        Runs the main state machine if the size permits, and it has not yet started.
-        """
-        if height < self.app.MIN_ROWS or width < self.app.MIN_COLS:
-            if not self.app.too_small_modal_open:
-                await self.show_too_small_modal()
-        else:
-            if self.app.too_small_modal_open:
-                await self.close_too_small_modal()
-            if not self.app.app_started:
-                self.app.app_started = True
-                self.app.run_state_machine()
