@@ -3,6 +3,7 @@ from typing import Any
 
 from textual import work
 from textual.app import App
+from textual.binding import Binding
 from textual.events import Resize
 from textual.theme import Theme
 
@@ -40,7 +41,10 @@ class NeonApp(App[Any]):
     CSS_PATH = [resources.files("textual_neon.css").joinpath("globals.tcss")]
     MIN_ROWS: int = 30
     MIN_COLS: int = 90
-    SCREENS = {}
+    BINDINGS = [
+        Binding("right", "focus_next", "Next", show=False),
+        Binding("left", "focus_previous", "Previous", show=False),
+    ]
     DEFAULT_CSS = """
     Header {
         max-height: 1;
