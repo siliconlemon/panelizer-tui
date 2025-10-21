@@ -2,6 +2,7 @@
 Main TUI entrypoint for panelizer-tui
 Run this directly to launch the app.
 """
+
 from textual.theme import Theme
 
 from textual_neon import NeonApp
@@ -54,6 +55,7 @@ class Panelizer(NeonApp):
             validate=lambda result: bool(result),
             args_from_result=lambda result: (result,),
         )
+
 
 
 def terminal_entry():

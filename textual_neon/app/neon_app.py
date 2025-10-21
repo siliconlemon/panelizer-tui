@@ -1,3 +1,4 @@
+import json
 from importlib import resources
 from typing import Any
 
@@ -6,6 +7,7 @@ from textual.app import App
 from textual.binding import Binding
 from textual.events import Resize
 from textual.theme import Theme
+from typing_extensions import override
 
 from textual_neon.app.state_machine import StateMachine
 from textual_neon.screens.too_small import TooSmallScreen
@@ -41,6 +43,7 @@ class NeonApp(App[Any]):
     CSS_PATH = [resources.files("textual_neon.css").joinpath("globals.tcss")]
     MIN_ROWS: int = 30
     MIN_COLS: int = 90
+    SCREENS = {}
     BINDINGS = [
         Binding("right", "focus_next", "Next", show=False),
         Binding("left", "focus_previous", "Previous", show=False),
@@ -115,6 +118,9 @@ class NeonApp(App[Any]):
         },
     )
 
+    GREEN = "\033[92m"
+    RESET = "\033[0m"
+
     def __init__(self) -> None:
         """Ensures that the TooSmallScreen is registered and sets up the StateMachine."""
         super().__init__()
@@ -185,3 +191,24 @@ class NeonApp(App[Any]):
                 NOT_REGISTERED_MSG
             )
         await self.state_machine.run(start_state="launch")
+
+    @override
+    def exit(self, result: Any | None = None, *, message: str | None = None, **kwargs) -> None:
+        """
+        Overrides the default exit to format the result as an exit message if no other message is provided.
+        If the result is a valid JSON string, it will be pretty-printed.
+        The output message uses the child app's TITLE to indicate its output.
+        """
+        if message is None and result is not None:
+            formatted_content = str(result)
+            if isinstance(result, str):
+                try:
+                    parsed_json = json.loads(result)
+                    formatted_content = f"\n{json.dumps(parsed_json, indent=2)}"
+                except json.JSONDecodeError:
+                    pass
+
+            # This is the dynamic part:
+            message = f"{self.GREEN}│\n└─ {self.TITLE} Output: {formatted_content}{self.RESET}"
+
+        super().exit(result, message=message, **kwargs)
