@@ -44,6 +44,7 @@ class NeonApp(App[Any]):
     DEFAULT_CSS = """
     Header {
         max-height: 1;
+        background: transparent !important;
     }
     HeaderIcon {
         color: $foreground 50%;
@@ -54,7 +55,7 @@ class NeonApp(App[Any]):
         }
         Vertical#--container {
             height: auto;
-            background: $background;
+            background: $panel;
             max-width: 80;
             margin-top: 6;
             padding: 0;
