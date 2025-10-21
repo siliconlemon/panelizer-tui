@@ -1,8 +1,3 @@
-"""
-Main TUI entrypoint for panelizer-tui
-Run this directly to launch the app.
-"""
-
 from textual.theme import Theme
 
 from textual_neon import NeonApp
@@ -11,6 +6,11 @@ from .tui import PanelizerLaunchScreen
 
 
 class Panelizer(NeonApp):
+    """
+    The main app class for the Panelizer, a textual-based terminal user interface
+    for batch-fitting images onto single-color backgrounds.
+    Inherits from NeonApp and implements features from textual_neon, textual_fspicker.
+    """
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
     MIN_ROWS = 32
@@ -59,6 +59,10 @@ class Panelizer(NeonApp):
 
 
 def terminal_entry():
+    """
+    The main TUI entrypoint for panelizer-tui
+    Run this directly to launch the app.
+    """
     app = Panelizer()
     app.run()
 
