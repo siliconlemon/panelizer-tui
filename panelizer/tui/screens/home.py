@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Literal
 
 import textual
-from pyexpat.errors import messages
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical

@@ -182,7 +182,7 @@ class LaunchScreen(Screen[bool]):
             with Container(id="buttons"):
                 yield NeonButton(self.enter_label, id="enter", classes="launch-btn", variant="primary")
                 yield NeonButton(self.exit_label, id="exit", classes="launch-btn", variant="primary")
-        yield Footer()
+        yield Footer(id="footer")
 
     async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
         """Handles enter/exit button presses."""
@@ -217,18 +217,21 @@ class LaunchScreen(Screen[bool]):
 
     def _update_layout(self, size: Size) -> None:
         """Updates sizes/layout of the ASCII art area after a resize."""
-        button_container = self.query_one("#buttons")
-        button_height = button_container.size.height
-        button_margin = button_container.styles.margin
-        button_margin_height = button_margin.top + button_margin.bottom
+        buttons_container = self.query_one("#buttons")
+        buttons_height = buttons_container.size.height
+        buttons_margin_vert = buttons_container.styles.margin.top + buttons_container.styles.margin.bottom
+        footer = self.query_one("#footer")
+        footer_height = footer.size.height
+        footer_margin_vert = footer.styles.margin.top + footer.styles.margin.bottom
 
         alignment_container = self.query_one("#alignment")
         container_padding = alignment_container.styles.padding
-        padding_height = container_padding.top + container_padding.bottom
-        padding_width = container_padding.left + container_padding.right
+        padding_vert = container_padding.top + container_padding.bottom
+        padding_hor = container_padding.left + container_padding.right
 
-        available_height = max(0, size.height - button_height - button_margin_height - padding_height - 1)
-        available_width = max(0, size.width - padding_width)
+        available_height = max(0, size.height - padding_vert - buttons_height \
+                               - buttons_margin_vert - footer_height - footer_margin_vert - 1)
+        available_width = max(0, size.width - padding_hor)
 
         width, height, filename = self._pick_fitting_ascii(available_width, available_height)
         art_container = self.query_one("#art-container")
