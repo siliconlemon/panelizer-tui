@@ -27,10 +27,10 @@ class HomeScreen(Screen[str]):
         self._selected_dir: Path = Paths.pictures()
         self.file_mode: Literal["all", "select"] = "all"
         self.selected_files: list[str] = []
-        self.img_padding_left: int = 0
-        self.img_padding_right: int = 0
-        self.img_padding_top: int = 0
-        self.img_padding_bottom: int = 0
+        self.img_pad_left: int = 0
+        self.img_pad_right: int = 0
+        self.img_pad_top: int = 0
+        self.img_pad_bottom: int = 0
         self.background_color: str = "white"
         self.background_color_options: list[tuple[str, str]] = [
             ("White", "white"),
@@ -51,7 +51,7 @@ class HomeScreen(Screen[str]):
                     yield CompleteInputGrid(
                         rows=2,
                         columns=2,
-                        values=[self.img_padding_left, self.img_padding_right, self.img_padding_top, self.img_padding_bottom],
+                        values=[self.img_pad_left, self.img_pad_right, self.img_pad_top, self.img_pad_bottom],
                         labels=["Left", "Right", "Top", "Bottom"],
                         input_ids=["pad-left", "pad-right", "pad-top", "pad-bottom"],
                         units=["%", "%", "%", "%"],
@@ -150,10 +150,10 @@ class HomeScreen(Screen[str]):
         path_btn.label = path
 
     def _update_numbers(self) -> None:
-        self.query_one("#pad-left", Input).value = str(self.img_padding_left)
-        self.query_one("#pad-right", Input).value = str(self.img_padding_right)
-        self.query_one("#pad-top", Input).value = str(self.img_padding_top)
-        self.query_one("#pad-bottom", Input).value = str(self.img_padding_bottom)
+        self.query_one("#pad-left", Input).value = str(self.img_pad_left)
+        self.query_one("#pad-right", Input).value = str(self.img_pad_right)
+        self.query_one("#pad-top", Input).value = str(self.img_pad_top)
+        self.query_one("#pad-bottom", Input).value = str(self.img_pad_bottom)
 
     async def on_input_changed(self, event: Input.Changed) -> None:
         await self.on_input_submitted(Input.Submitted(event.input, event.value))
@@ -212,10 +212,10 @@ class HomeScreen(Screen[str]):
             "background_color": self.background_color,
             "split_wide_images": self.split_image_active,
             "padding": {
-                "left": self.img_padding_left,
-                "right": self.img_padding_right,
-                "top": self.img_padding_top,
-                "bottom": self.img_padding_bottom,
+                "left": self.img_pad_left,
+                "right": self.img_pad_right,
+                "top": self.img_pad_top,
+                "bottom": self.img_pad_bottom,
             },
         }
         self.dismiss(json.dumps(settings))
