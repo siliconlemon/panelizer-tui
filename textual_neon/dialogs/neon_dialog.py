@@ -40,7 +40,7 @@ class NeonDialog(ModalScreen[Any]):
         Dialog {
             width: 80%;
             height: 80%;
-            border: round $border;
+            border: round $accent 50%;
             background: $panel;
             border-title-color: $text;
             border-title-background: $panel;
