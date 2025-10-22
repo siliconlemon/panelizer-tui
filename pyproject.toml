@@ -9,6 +9,7 @@ description = "A TUI (text user interface) tool for laying out instagram-ready c
 authors = [
     { name = "Ondřej Wiener", email = "ondrej.wiener@gmail.com" }
 ]
+# TODO: Add sys, pathlib, json, inspect, functools, maybe some more
 dependencies = [
     "textual>=0.40.0",
     "textual-fspicker>=0.6.0",

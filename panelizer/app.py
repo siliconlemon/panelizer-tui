@@ -1,6 +1,8 @@
+from pathlib import Path
+
 from textual.theme import Theme
 
-from textual_neon import NeonApp
+from textual_neon import NeonApp, Preferences, Paths
 from .tui import HomeScreen
 from .tui import PanelizerLaunchScreen
 
@@ -40,6 +42,11 @@ class Panelizer(NeonApp):
 
     def __init__(self) -> None:
         super().__init__()
+
+        self.preferences = Preferences(config_dir=Path("./preferences"))
+        self._register_defaults()
+        self.preferences.load()
+
         self.state_machine.register(
             "launch",
             screen="launch",
@@ -56,6 +63,21 @@ class Panelizer(NeonApp):
             args_from_result=lambda result: (result,),
         )
 
+    def _register_defaults(self) -> None:
+        """
+        Central place to define all default values for the app.
+        These are the "factory settings."
+        """
+        p = self.preferences
+        # TODO: Shouldn't the format (posix) be determined by the os in Paths?
+        p.register_default("start_dir", Paths.pictures().as_posix())
+        p.register_default("img_pad_left", 0)
+        p.register_default("img_pad_right", 0)
+        p.register_default("img_pad_top", 0)
+        p.register_default("img_pad_bottom", 0)
+        p.register_default("background_color", "white")
+        p.register_default("split_wide_active", False)
+        p.register_default("stack_landscape_active", False)
 
 
 def terminal_entry():

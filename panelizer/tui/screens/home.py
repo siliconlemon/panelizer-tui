@@ -11,39 +11,44 @@ from textual.widgets import Input, Header, Select
 from textual.worker import Worker
 
 from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
-    Toggle, NeonButton, DirSelectDialog, ChoicePalette, ChoiceButton, Paths, ListSelectDialog, PathButton
+    Toggle, NeonButton, DirSelectDialog, ChoicePalette, ChoiceButton, ListSelectDialog, \
+    PathButton, Preferences
 
 
-# TODO: Implement a working defaults system before progressing further, plug everything to _handle_dismiss
 class HomeScreen(Screen[str]):
     CSS_PATH = ["../css/home.tcss"]
     BINDINGS = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self._most_recent_worker: Worker | None = None
-        # TODO: make the selected dir be settable as a default when settings are implemented, use Paths as hard default
-        self._selected_dir: Path = Paths.pictures()
         self.file_mode: Literal["all", "select"] = "all"
         self.selected_files: list[str] = []
-        self.img_pad_left: int = 0
-        self.img_pad_right: int = 0
-        self.img_pad_top: int = 0
-        self.img_pad_bottom: int = 0
-        self.background_color: str = "white"
+        self.preferences = Preferences.ensure(app=self.app)
+        p = self.preferences
+        self._selected_dir = Path(p.get("start_dir"))
+        self.img_pad_left = p.get("img_pad_left")
+        self.img_pad_right = p.get("img_pad_right")
+        self.img_pad_top = p.get("img_pad_top")
+        self.img_pad_bottom = p.get("img_pad_bottom")
+        self.background_color = p.get("background_color")
+        self.split_wide_active = p.get("split_wide_active")
+        self.stack_landscape_active = p.get("stack_landscape_active")
+        self.split_wide_active: bool = p.get("split_wide_active")
+        self.stack_landscape_active: bool = p.get("stack_landscape_active")
+        # TODO: Maybe put the palette inside defaults registry? Debatable
         self.background_color_options: list[tuple[str, str]] = [
             ("White", "white"),
             ("Light Gray", "lightgray"),
             ("Dark Gray", "darkgray"),
             ("Black", "black"),
         ]
-        self.split_image_active: bool = False
 
     def compose(self) -> ComposeResult:
         yield Header(icon="●")
         with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
-                # TODO: Shouldn't the format be determined by the os in Paths?
                 yield PathButton(self._selected_dir.as_posix(), id="path-btn")
             with Horizontal(id="main-row"):
                 with Vertical(id="first-column"):
@@ -59,13 +64,13 @@ class HomeScreen(Screen[str]):
                     yield Toggle(
                         switch_id="split-wide-toggle-switch",
                         text="Split Wide Images",
-                        is_active=self.split_image_active,
+                        is_active=self.split_wide_active,
                         id="split-wide-toggle",
                     )
                     yield Toggle(
                         switch_id="stack-landscape-toggle-switch",
                         text="Stack Landscape Images",
-                        is_active=False,
+                        is_active=self.stack_landscape_active,
                         id="stack-landscape-toggle",
                     )
                 with Vertical(id="second-column"):
@@ -107,6 +112,10 @@ class HomeScreen(Screen[str]):
 
     async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
         match event.button.id:
+            case "path-btn":
+                # FIXME: This breaks worker management
+                self._most_recent_worker = self.app.run_worker(self._select_dir_worker, exclusive=True)
+                event.stop()
             case "all-files-btn":
                 self.file_mode = "all"
                 self.selected_files = []
@@ -118,16 +127,52 @@ class HomeScreen(Screen[str]):
             case "start-btn":
                 self._handle_dismiss()
                 event.stop()
-            case "path-btn":
-                self._most_recent_worker = self.app.run_worker(self._select_dir_worker, exclusive=True)
-                event.stop()
-            # TODO: Implement these
             case "save-defaults-btn":
-                ...
+                self._update_prefs_from_ui()
+                self.preferences.save()
+                self.notify("Defaults saved.", severity="information")
+                event.stop()
             case "restore-defaults-btn":
-                ...
+                self.preferences.load()
+                self._update_ui_from_prefs()
+                self.notify("Defaults restored from file.", severity="information")
+                event.stop()
             case "reset-defaults-btn":
-                ...
+                self.preferences.reset_all()
+                self._update_ui_from_prefs()
+                self.notify("Defaults reset to factory settings.", severity="warning")
+                event.stop()
+
+    def _update_ui_from_prefs(self) -> None:
+        """Pulls all values from self.app.defaults and updates the UI widgets."""
+        p = self.preferences
+        self._selected_dir = Path(p.get("start_dir"))
+        self.img_pad_left = p.get("img_pad_left")
+        self.img_pad_right = p.get("img_pad_right")
+        self.img_pad_top = p.get("img_pad_top")
+        self.img_pad_bottom = p.get("img_pad_bottom")
+        self.background_color = p.get("background_color")
+        self.split_wide_active = p.get("split_wide_active")
+        self.stack_landscape_active = p.get("stack_landscape_active")
+
+        self._update_path_display()
+        self._update_numbers()
+        self.query_one("#bg-select", Select).value = self.background_color
+        self.query_one("#split-wide-toggle", Toggle).value = self.split_wide_active
+        self.query_one("#stack-landscape-toggle", Toggle).value = self.stack_landscape_active
+
+    # FIXME: Does not seem to change the start_path on restart
+    def _update_prefs_from_ui(self) -> None:
+        """Pushes current UI values into self.app.defaults (in memory)."""
+        p = self.preferences
+        p.set("path", self._selected_dir.as_posix())
+        p.set("img_pad_left", self.img_pad_left)
+        p.set("img_pad_right", self.img_pad_right)
+        p.set("img_pad_top", self.img_pad_top)
+        p.set("img_pad_bottom", self.img_pad_bottom)
+        p.set("background_color", self.background_color)
+        p.set("split_wide_active", self.split_wide_active)
+        p.set("stack_landscape_active", self.stack_landscape_active)
 
     async def _select_files_worker(self) -> None:
         files = await self.app.push_screen_wait(ListSelectDialog())
@@ -159,10 +204,10 @@ class HomeScreen(Screen[str]):
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         mapping = {
-            "pad-left": "padding_left",
-            "pad-right": "padding_right",
-            "pad-top": "padding_top",
-            "pad-bottom": "padding_bottom",
+            "pad-left": "img_pad_left",
+            "pad-right": "img_pad_right",
+            "pad-top": "img_pad_top",
+            "pad-bottom": "img_pad_bottom",
         }
         if event.input.id in mapping:
             try:
@@ -175,10 +220,13 @@ class HomeScreen(Screen[str]):
 
     def on_switch_button_changed(self, event: Toggle.Changed) -> None:
         """Handler for the custom message posted by the SwitchButton."""
-        if event.ref.id == "split-image-toggle":
-            self.split_image_active = event.active
-            self.log(f"Split Image active state set to: {self.split_image_active}")
-            event.stop()
+        match event.ref.id:
+            case "split-wide-toggle":
+                self.split_wide_active = event.active
+                event.stop()
+            case "stack-landscape-toggle":
+                self.stack_landscape_active = event.active
+                event.stop()
 
     @on(ChoiceButton.Selected)
     async def file_mode_changed(self):
@@ -209,7 +257,8 @@ class HomeScreen(Screen[str]):
             "path": str(self._selected_dir),
             "files": self.selected_files if self.file_mode == "select" and self.selected_files else "ALL",
             "background_color": self.background_color,
-            "split_wide_images": self.split_image_active,
+            "split_wide_images": self.split_wide_active,
+            "stack_landscape_images": self.stack_landscape_active,
             "padding": {
                 "left": self.img_pad_left,
                 "right": self.img_pad_right,
