@@ -110,7 +110,7 @@ class NeonApp(App[Any]):
         warning="#ebb370",
         error="#ff524d",
         surface="#3b4252",
-        panel="#27272d",
+        panel="#17171a",
         dark=True,
         variables={
             "block-cursor-text-style": "none",
