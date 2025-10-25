@@ -69,7 +69,6 @@ class Panelizer(NeonApp):
         These are the "factory settings."
         """
         p = self.preferences
-        # TODO: Shouldn't the format (posix) be determined by the os in Paths?
         p.register_default("start_dir", Paths.pictures().as_posix())
         p.register_default("img_pad_left", 0)
         p.register_default("img_pad_right", 0)

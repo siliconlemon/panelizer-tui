@@ -1,9 +1,27 @@
 import platform
+import sys
 from pathlib import Path
 
 
 class Paths:
     """Cross-platform utility for getting standard user directories."""
+
+    @staticmethod
+    def app_base_dir() -> Path:
+        """
+        Finds the base directory for the application's data.
+
+        - For packaged executables ('frozen'), this is the directory
+          containing the executable.
+        - For standard .py execution, this is the directory containing
+          this Python file (e.g., the 'panelizer' directory).
+        """
+        if getattr(sys, 'frozen', False):
+            return Path(sys.executable).parent.resolve()
+        try:
+            return Path(__file__).parent.resolve()
+        except NameError:
+            return Path.cwd()
 
     @staticmethod
     def _get_xdg_dir(xdg_var: str, fallback: str) -> Path:

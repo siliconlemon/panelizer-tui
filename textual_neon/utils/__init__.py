@@ -1,5 +1,5 @@
 """
-A textual_neon package containing single-file UI utilities.
+A textual_neon package containing single-file utilities.
 """
 
 from .ascii_painter import AsciiPainter

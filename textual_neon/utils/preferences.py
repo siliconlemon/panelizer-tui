@@ -1,24 +1,12 @@
 import functools
 import inspect
 import json
-import sys
 from pathlib import Path
 from typing import Any, Dict, Callable
 
 from textual.app import App
 
-# FIXME: This points to root, not ./panelizer where the app is called from
-def _get_entrypoint_dir() -> Path:
-    """
-    Finds the directory of the main entrypoint script or executable.
-    Handles both standard .py execution and packaged executables.
-    """
-    if getattr(sys, 'frozen', False):
-        return Path(sys.executable).parent
-    if sys.argv and sys.argv[0]:
-        entry_file_path = Path(sys.argv[0]).resolve()
-        return entry_file_path.parent
-    return Path.cwd()
+from textual_neon.utils.paths import Paths
 
 
 class Preferences:
@@ -29,7 +17,7 @@ class Preferences:
     - 'Preferences' holds the user's saved preferences, which are loaded from and saved to a JSON config file.
     - 'Get' operations prioritize preferences before falling back to the registry.
     """
-    DEFAULT_PREFS_DIR = _get_entrypoint_dir() / "preferences"
+    DEFAULT_PREFS_DIR = Paths.app_base_dir() / "preferences"
 
     @staticmethod
     def ensure(*, app: "App") -> "Preferences":
