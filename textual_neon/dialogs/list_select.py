@@ -31,16 +31,30 @@ class ListSelectDialog(NeonDialog):
         }
     
         & SelectionList {
-            border: none;
-            margin: 1 0 1 0;
+            border: round $accent 50%;
+            margin: 0;
+            padding: 0;
             width: auto;
             height: auto;
             min-width: 50;
             min-height: 20;
             
-            &:focus, &:focus-within {
-                border: none;
+            &:focus, &:hover, &:focus-within {
+                border: round $accent;
             }
+        }
+        
+        & Horizontal#selection-buttons {
+            dock: top;
+            width: auto;
+            height: auto;
+            margin: 1 0 0 0;
+            
+            & > NeonButton {
+                width: auto;
+                border: none;
+                margin: 0;
+            }   
         }
     
         & Horizontal#dialog-buttons {
@@ -49,17 +63,11 @@ class ListSelectDialog(NeonDialog):
             height: auto;
             width: 100%;
             padding: 0 1 0 1;
-        }
-    
-        & Horizontal#dialog-buttons > NeonButton {
-            margin-left: 1;
-            width: auto;
-        }
-    
-        & NeonButton#close {
-            dock: top;
-            align: right top;
-            margin: 0 0 0 1;
+            
+            & > NeonButton {
+                margin: 0 1 0 1;
+                width: auto;
+            }
         }
     }
     """
@@ -73,13 +81,13 @@ class ListSelectDialog(NeonDialog):
         dialog = Dialog(id="dialog")
         dialog.border_title = self._title
         with dialog:
+            with Horizontal(id="selection-buttons"):
+                yield NeonButton("● Select All", variant="primary", id="all")
+                yield NeonButton("○ Select None", variant="primary", id="none")
             yield SelectionList(*self._items, id="list-select")
             with Horizontal(id="dialog-buttons"):
                 yield NeonButton("Confirm", variant="primary", id="confirm")
                 yield NeonButton("Cancel", variant="primary", id="cancel")
-
-    def on_mount(self) -> None:
-        self.query_one(SelectionList).focus()
 
     @on(NeonButton.Pressed, "#confirm")
     def confirm_button_pressed(self) -> None:

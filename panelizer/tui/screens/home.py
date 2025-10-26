@@ -167,7 +167,9 @@ class HomeScreen(Screen[str]):
         self._handle_dismiss()
 
     async def _select_files_worker(self) -> None:
-        files = await self.app.push_screen_wait(ListSelectDialog([("A", "a"), ("B", "b"), ("C", "c")]))
+        files = await self.app.push_screen_wait(
+            ListSelectDialog([("A", "a"), ("B", "b"), ("C", "c")], "Select Files")
+        )
         self.selected_files = files or []
 
     async def _select_dir_worker(self) -> None:
