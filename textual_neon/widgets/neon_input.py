@@ -51,7 +51,7 @@ class NeonInput(Input, inherit_css=False):
             }
         }
         &.-invalid {
-            border: tall $error 60%;
+            border: round $error 60%;
         }
         &.-invalid:focus {
             border: round $error;

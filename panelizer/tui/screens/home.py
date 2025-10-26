@@ -5,11 +5,12 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
+from textual.validation import Integer
 from textual.widgets import Input, Header, Select
 
 from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Preferences, ChoiceButton, DefaultsButton, Paths
+    PathButton, Preferences, ChoiceButton, DefaultsButton, Paths, NeonInput
 
 
 class HomeScreen(Screen[dict]):
@@ -35,6 +36,7 @@ class HomeScreen(Screen[dict]):
 
         self.selected_files: list[str] = []
         self.file_mode: Literal["all", "select"] = "all"
+        self.max_pad_percentage = 30
 
 
     def compose(self) -> ComposeResult:
@@ -44,7 +46,6 @@ class HomeScreen(Screen[dict]):
                 yield PathButton(self._selected_dir.as_posix(), id="path-btn")
             with Horizontal(id="main-row"):
                 with Vertical(id="first-column"):
-                    # FIXME: NeonInput does not have all states covered - invalid has a tall border
                     yield CompleteInputGrid(
                         rows=2,
                         columns=2,
@@ -95,6 +96,16 @@ class HomeScreen(Screen[dict]):
 
 
     async def on_mount(self) -> None:
+
+        img_pad_validator = Integer(
+            minimum=0,
+            maximum=self.max_pad_percentage,
+        )
+
+        for input_id in ["#pad-left", "#pad-right", "#pad-top", "#pad-bottom"]:
+            input_widget = self.query_one(input_id, Input)
+            input_widget.validators.append(img_pad_validator)
+
         self._update_path_display()
         self._update_numbers()
         self._select_all_files()
@@ -104,7 +115,13 @@ class HomeScreen(Screen[dict]):
         self.workers.cancel_all()
 
 
-    async def on_input_submitted(self, event: Input.Submitted) -> None:
+    @on(PathButton.Pressed, "#path-btn")
+    async def path_button_pressed(self) -> None:
+        self.run_worker(self._select_dir_worker, exclusive=True)
+
+
+    @on(NeonInput.Blurred)
+    async def input_blurred(self, event: Input.Submitted) -> None:
         mapping = {
             "pad-left": "img_pad_left",
             "pad-right": "img_pad_right",
@@ -116,15 +133,9 @@ class HomeScreen(Screen[dict]):
                 val = int(event.value)
             except ValueError:
                 val = 0
-            val = max(0, min(100, val))
+            val = max(0, min(self.max_pad_percentage, val))
             setattr(self, mapping[event.input.id], val)
             self._update_numbers()
-
-
-    @on(PathButton.Pressed, "#path-btn")
-    async def path_button_pressed(self) -> None:
-        self.run_worker(self._select_dir_worker, exclusive=True)
-
 
     @on(Select.Changed, "#bg-select")
     async def bg_select_changed(self, event: Select.Changed) -> None:
