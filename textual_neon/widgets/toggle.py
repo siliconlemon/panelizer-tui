@@ -130,6 +130,11 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
             self.ref = ref
             self.active = active
 
+        @property
+        def control(self) -> "Toggle":
+            """The Toggle widget that sent the message."""
+            return self.ref
+
     is_active: reactive[bool] = reactive(False)
 
     def __init__(

@@ -9,6 +9,20 @@ class ChoicePalette(Widget, inherit_css=True):
     """
     A palette widget for setting up multiple choices with ChoiceButton entries.
     Can be either horizontal or vertical.
+
+    Usage:
+    ::
+        @on(ChoiceButton.Selected)
+        async def file_mode_changed(self):
+            palette = self.query_one("#file-mode-palette", ChoicePalette)
+            idx = palette.selected_idx
+            if idx == 0:
+                self.file_mode = "all"
+                self.selected_files = []
+            elif idx == 1:
+                self.file_mode = "select"
+                files = await self.app.push_screen_wait(ListSelectDialog(items))
+                self.selected_files = files or []
     """
     DEFAULT_CSS = """
     ChoicePalette {

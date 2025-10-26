@@ -8,6 +8,8 @@ from textual.binding import Binding
 from textual.events import Resize
 from textual.theme import Theme
 from typing_extensions import override
+# noinspection PyProtectedMember
+from textual.widgets._toggle_button import ToggleButton
 
 from textual_neon.app.state_machine import StateMachine
 from textual_neon.screens.too_small import TooSmallScreen
@@ -129,6 +131,8 @@ class NeonApp(App[Any]):
         self.too_small_modal_open = False
         self.SCREENS.update({"too_small": TooSmallScreen})
         self.state_machine = StateMachine(app=self)
+        # Overrides the default toggle button inner icon for more clarity
+        ToggleButton.BUTTON_INNER = "●"
 
     async def on_mount(self) -> None:
         """Handles the initial size check on app startup."""

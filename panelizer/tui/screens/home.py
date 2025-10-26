@@ -2,17 +2,15 @@ import json
 from pathlib import Path
 from typing import Literal
 
-import textual
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Input, Header, Select
-from textual.worker import Worker
 
 from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
-    Toggle, NeonButton, DirSelectDialog, ChoicePalette, ChoiceButton, ListSelectDialog, \
-    PathButton, Preferences
+    Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
+    PathButton, Preferences, ChoiceButton, DefaultsButton
 
 
 class HomeScreen(Screen[str]):
@@ -100,38 +98,83 @@ class HomeScreen(Screen[str]):
     async def on_unmount(self) -> None:
         self.workers.cancel_all()
 
-    async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
-        match event.button.id:
-            case "path-btn":
-                # FIXME: This breaks worker management
-                self.run_worker(self._select_dir_worker, exclusive=True)
-                event.stop()
-            case "all-files-btn":
-                self.file_mode = "all"
-                self.selected_files = []
-                event.stop()
-            case "select-files-btn":
-                self.file_mode = "select"
-                self.run_worker(self._select_files_worker, exclusive=True)
-                event.stop()
-            case "start-btn":
-                self._handle_dismiss()
-                event.stop()
-            case "save-defaults-btn":
-                self._update_prefs_from_ui()
-                self.preferences.save()
-                self.notify("Defaults saved.", severity="information")
-                event.stop()
-            case "restore-defaults-btn":
-                self.preferences.load()
-                self._update_ui_from_prefs()
-                self.notify("Defaults restored from file.", severity="information")
-                event.stop()
-            case "reset-defaults-btn":
-                self.preferences.reset_all()
-                self._update_ui_from_prefs()
-                self.notify("Defaults reset to factory settings.", severity="warning")
-                event.stop()
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        mapping = {
+            "pad-left": "img_pad_left",
+            "pad-right": "img_pad_right",
+            "pad-top": "img_pad_top",
+            "pad-bottom": "img_pad_bottom",
+        }
+        if event.input.id in mapping:
+            try:
+                val = int(event.value)
+            except ValueError:
+                val = 0
+            val = max(0, min(100, val))
+            setattr(self, mapping[event.input.id], val)
+            self._update_numbers()
+
+    @on(PathButton.Pressed, "#path-btn")
+    async def path_button_pressed(self) -> None:
+        self.run_worker(self._select_dir_worker, exclusive=True)
+
+    @on(Select.Changed, "#bg-select")
+    async def bg_select_changed(self, event: Select.Changed) -> None:
+        self.background_color = str(event.value)
+
+    @on(Toggle.Changed, "#split-wide-toggle")
+    async def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
+        self.split_wide_active = event.active
+
+    @on(Toggle.Changed, "#stack-landscape-toggle")
+    async def stack_landscape_toggle_changed(self, event: Toggle.Changed) -> None:
+        self.stack_landscape_active = event.active
+
+    @on(DefaultsButton.Pressed, "#save-defaults-btn")
+    async def save_defaults_button_pressed(self) -> None:
+        self._update_prefs_from_ui()
+        self.preferences.save()
+        self.notify("Preferences have been saved.", severity="information")
+
+    @on(DefaultsButton.Pressed, "#restore-defaults-btn")
+    async def restore_defaults_button_pressed(self) -> None:
+        self.preferences.load()
+        self._update_ui_from_prefs()
+        self.notify("Preferences have been restored.", severity="information")
+
+    @on(DefaultsButton.Pressed, "#reset-defaults-btn")
+    async def reset_defaults_button_pressed(self) -> None:
+        self.preferences.reset_all()
+        self._update_ui_from_prefs()
+        self.notify(
+            "Preferences have been reset to factory defaults. "
+            "Save to overwrite your preferences with these values.", severity="warning"
+        )
+
+    @on(ChoiceButton.Selected)
+    async def file_mode_selected(self):
+        palette = self.query_one("#file-mode-palette", ChoicePalette)
+        idx = palette.selected_idx
+        if idx == 0:
+            self.file_mode = "all"
+            self.selected_files = []
+        elif idx == 1:
+            self.file_mode = "select"
+            self.run_worker(self._select_files_worker, exclusive=True)
+
+    @on(NeonButton.Pressed, "#start-btn")
+    async def start_button_pressed(self) -> None:
+        self._handle_dismiss()
+
+    async def _select_files_worker(self) -> None:
+        files = await self.app.push_screen_wait(ListSelectDialog([("A", "a"), ("B", "b"), ("C", "c")]))
+        self.selected_files = files or []
+
+    async def _select_dir_worker(self) -> None:
+        new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self._selected_dir))
+        if new_dir:
+            self._selected_dir = Path(new_dir)
+            self._update_path_display()
 
     def _update_ui_from_prefs(self) -> None:
         """Pulls all values from self.app.defaults and updates the UI widgets."""
@@ -166,20 +209,6 @@ class HomeScreen(Screen[str]):
         p.set("split_wide_active", self.split_wide_active)
         p.set("stack_landscape_active", self.stack_landscape_active)
 
-    async def _select_files_worker(self) -> None:
-        files = await self.app.push_screen_wait(ListSelectDialog())
-        self.selected_files = files or []
-
-    async def _select_dir_worker(self) -> None:
-        new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self._selected_dir))
-        if new_dir:
-            self._selected_dir = Path(new_dir)
-            self._update_path_display()
-
-    async def on_select_changed(self, event: Select.Changed) -> None:
-        if event.select.id == "bg-select":
-            self.background_color = str(event.value)
-
     def _update_path_display(self) -> None:
         path_btn = self.query_one("#path-btn", NeonButton)
         path = self._selected_dir.as_posix()
@@ -190,47 +219,6 @@ class HomeScreen(Screen[str]):
         self.query_one("#pad-right", Input).value = str(self.img_pad_right)
         self.query_one("#pad-top", Input).value = str(self.img_pad_top)
         self.query_one("#pad-bottom", Input).value = str(self.img_pad_bottom)
-
-    async def on_input_changed(self, event: Input.Changed) -> None:
-        await self.on_input_submitted(Input.Submitted(event.input, event.value))
-
-    async def on_input_submitted(self, event: Input.Submitted) -> None:
-        mapping = {
-            "pad-left": "img_pad_left",
-            "pad-right": "img_pad_right",
-            "pad-top": "img_pad_top",
-            "pad-bottom": "img_pad_bottom",
-        }
-        if event.input.id in mapping:
-            try:
-                val = int(event.value)
-            except ValueError:
-                val = 0
-            val = max(0, min(100, val))
-            setattr(self, mapping[event.input.id], val)
-            self._update_numbers()
-
-    def on_switch_button_changed(self, event: Toggle.Changed) -> None:
-        """Handler for the custom message posted by the SwitchButton."""
-        match event.ref.id:
-            case "split-wide-toggle":
-                self.split_wide_active = event.active
-                event.stop()
-            case "stack-landscape-toggle":
-                self.stack_landscape_active = event.active
-                event.stop()
-
-    @on(ChoiceButton.Selected)
-    async def file_mode_changed(self):
-        palette = self.query_one("#file-mode-palette", ChoicePalette)
-        idx = palette.selected_idx
-        if idx == 0:
-            self.file_mode = "all"
-            self.selected_files = []
-        elif idx == 1:
-            self.file_mode = "select"
-            files = await self.app.push_screen_wait(ListSelectDialog())
-            self.selected_files = files or []
 
     def _select_files_label(self) -> str:
         count = len(self.selected_files)

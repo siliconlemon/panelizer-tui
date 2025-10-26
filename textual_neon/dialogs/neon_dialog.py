@@ -52,10 +52,34 @@ class NeonDialog(ModalScreen[Any]):
             }
             
             NeonButton#close {
+                color: $text 60%;
+                border: round $accent 60%;
+            
                 min-width: 5;
                 max-width: 5;
                 margin: 0 1 1 1;
                 dock: right;
+                
+                &:hover {
+                    color: $text;
+                    border: round $accent;
+                }
+                &:focus {
+                    color: $text;
+                    border: round $accent;
+                    &:hover {
+                        color: $text 60%;
+                        border: round $accent 60%;
+                    }
+                }
+                &.-active {
+                    color: $text 40%;
+                    border: round $accent 40%;
+                }
+                &:disabled {
+                    color: $text 30%;
+                    border: round $accent 30%;
+                }
             }
         }
     }

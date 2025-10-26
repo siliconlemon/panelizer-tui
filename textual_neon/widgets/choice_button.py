@@ -59,6 +59,11 @@ class ChoiceButton(NeonButton, inherit_css=True):
             super().__init__()
             self.button = sender
 
+        @property
+        def control(self) -> "ChoiceButton":
+            """The ChoiceButton widget that sent the message."""
+            return self.button
+
     def __init__(
         self,
         *,
