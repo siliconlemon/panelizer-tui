@@ -70,6 +70,7 @@ class Panelizer(NeonApp):
         """
         p = self.preferences
         p.register_default("start_dir", Paths.pictures().as_posix())
+        p.register_default("allowed_extensions", [".jpg", ".jpeg", ".png"])
         p.register_default("img_pad_left", 0)
         p.register_default("img_pad_right", 0)
         p.register_default("img_pad_top", 0)

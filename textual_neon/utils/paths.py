@@ -1,10 +1,29 @@
 import platform
 import sys
 from pathlib import Path
+from typing import Iterable
 
 
 class Paths:
     """Cross-platform utility for getting standard user directories."""
+
+    @staticmethod
+    def _get_xdg_dir(xdg_var: str, fallback: str) -> Path:
+        """Helper to read XDG user directories on Linux."""
+        xdg_config = Path.home() / ".config" / "user-dirs.dirs"
+        if xdg_config.exists():
+            # noinspection PyBroadException
+            try:
+                with xdg_config.open("r") as f:
+                    for line in f:
+                        if line.startswith(xdg_var):
+                            # Format: XDG_PICTURES_DIR="$HOME/Pictures"
+                            path_str = line.split("=", 1)[1].strip().strip('"')
+                            path_str = path_str.replace("$HOME", str(Path.home()))
+                            return Path(path_str)
+            except Exception:
+                pass
+        return Path.home() / fallback
 
     @staticmethod
     def app_base_dir() -> Path:
@@ -24,22 +43,27 @@ class Paths:
             return Path.cwd()
 
     @staticmethod
-    def _get_xdg_dir(xdg_var: str, fallback: str) -> Path:
-        """Helper to read XDG user directories on Linux."""
-        xdg_config = Path.home() / ".config" / "user-dirs.dirs"
-        if xdg_config.exists():
-            # noinspection PyBroadException
-            try:
-                with xdg_config.open("r") as f:
-                    for line in f:
-                        if line.startswith(xdg_var):
-                            # Format: XDG_PICTURES_DIR="$HOME/Pictures"
-                            path_str = line.split("=", 1)[1].strip().strip('"')
-                            path_str = path_str.replace("$HOME", str(Path.home()))
-                            return Path(path_str)
-            except Exception:
-                pass
-        return Path.home() / fallback
+    def all_files_in_dir(dir_path: Path, *, extensions: Iterable[str] = None) -> Iterable[Path]:
+        """Yields all files in a directory, sorted by name, optionally filtering by extensions."""
+        if not dir_path.is_dir():
+            return
+
+        allowed_suffixes = None
+        if extensions:
+            allowed_suffixes = {f".{ext.lower().lstrip('.')}" for ext in extensions}
+
+        try:
+            sorted_files = sorted(dir_path.iterdir())
+        except OSError:
+            return
+
+        for file_path in sorted_files:
+            if file_path.is_file():
+                if allowed_suffixes:
+                    if file_path.suffix.lower() in allowed_suffixes:
+                        yield file_path
+                else:
+                    yield file_path
 
     @staticmethod
     def pictures() -> Path:

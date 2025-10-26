@@ -33,6 +33,7 @@ class ChoicePalette(Widget, inherit_css=True):
         }
     }
     """
+
     def __init__(
         self,
         *,
@@ -79,6 +80,22 @@ class ChoicePalette(Widget, inherit_css=True):
             idx is not None
             and 0 <= idx < len(self._buttons)
         ):
+            for i, btn in enumerate(self._buttons):
+                btn.set_selected(i == idx)
+
+    def refresh_disp_state(self) -> None:
+        """
+        Refreshes the display state and labels of all buttons based on the current state.
+        Useful if any of the labels_when_selected is a lambda that uses the caller's state post-press.
+        """
+        self.select(self.selected_idx)
+
+    def select(self, idx: int) -> None:
+        """
+        Selects the button at the given index. This alone refreshes the display state,
+        no need to call refresh_disp_state after.
+        """
+        if 0 <= idx < len(self._buttons):
             for i, btn in enumerate(self._buttons):
                 btn.set_selected(i == idx)
 

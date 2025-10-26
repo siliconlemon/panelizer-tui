@@ -10,7 +10,7 @@ from textual.widgets import Input, Header, Select
 
 from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Preferences, ChoiceButton, DefaultsButton
+    PathButton, Preferences, ChoiceButton, DefaultsButton, Paths
 
 
 class HomeScreen(Screen[str]):
@@ -19,10 +19,9 @@ class HomeScreen(Screen[str]):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.file_mode: Literal["all", "select"] = "all"
-        self.selected_files: list[str] = []
         self.preferences = Preferences.ensure(app=self.app)
         p = self.preferences
+        self.allowed_extensions: list[str] = p.get("allowed_extensions")
         self._selected_dir = Path(p.get("start_dir"))
         self.img_pad_left = p.get("img_pad_left")
         self.img_pad_right = p.get("img_pad_right")
@@ -35,6 +34,10 @@ class HomeScreen(Screen[str]):
         self.split_wide_active: bool = p.get("split_wide_active")
         self.stack_landscape_active: bool = p.get("stack_landscape_active")
 
+        self.selected_files: list[str] = []
+        self.file_mode: Literal["all", "select"] = "all"
+
+
     def compose(self) -> ComposeResult:
         yield Header(icon="●")
         with Vertical(id="home-row"):
@@ -42,6 +45,7 @@ class HomeScreen(Screen[str]):
                 yield PathButton(self._selected_dir.as_posix(), id="path-btn")
             with Horizontal(id="main-row"):
                 with Vertical(id="first-column"):
+                    # FIXME: NeonInput does not have all states covered - invalid has a tall border
                     yield CompleteInputGrid(
                         rows=2,
                         columns=2,
@@ -83,7 +87,7 @@ class HomeScreen(Screen[str]):
                 default_idx=0,
                 labels_when_selected=[
                     "All Files in Dir",
-                    lambda: (self._select_files_label() if self.selected_files else "Select Files"),
+                    lambda: (self._make_select_files_label() if self.selected_files else "Select Files"),
                 ],
                 orientation="horizontal",
                 id="file-mode-palette",
@@ -94,9 +98,12 @@ class HomeScreen(Screen[str]):
     async def on_mount(self) -> None:
         self._update_path_display()
         self._update_numbers()
+        self._select_all_files()
+
 
     async def on_unmount(self) -> None:
         self.workers.cancel_all()
+
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         mapping = {
@@ -114,21 +121,26 @@ class HomeScreen(Screen[str]):
             setattr(self, mapping[event.input.id], val)
             self._update_numbers()
 
+
     @on(PathButton.Pressed, "#path-btn")
     async def path_button_pressed(self) -> None:
         self.run_worker(self._select_dir_worker, exclusive=True)
+
 
     @on(Select.Changed, "#bg-select")
     async def bg_select_changed(self, event: Select.Changed) -> None:
         self.background_color = str(event.value)
 
+
     @on(Toggle.Changed, "#split-wide-toggle")
     async def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
         self.split_wide_active = event.active
 
+
     @on(Toggle.Changed, "#stack-landscape-toggle")
     async def stack_landscape_toggle_changed(self, event: Toggle.Changed) -> None:
         self.stack_landscape_active = event.active
+
 
     @on(DefaultsButton.Pressed, "#save-defaults-btn")
     async def save_defaults_button_pressed(self) -> None:
@@ -136,11 +148,13 @@ class HomeScreen(Screen[str]):
         self.preferences.save()
         self.notify("Preferences have been saved.", severity="information")
 
+
     @on(DefaultsButton.Pressed, "#restore-defaults-btn")
     async def restore_defaults_button_pressed(self) -> None:
         self.preferences.load()
         self._update_ui_from_prefs()
         self.notify("Preferences have been restored.", severity="information")
+
 
     @on(DefaultsButton.Pressed, "#reset-defaults-btn")
     async def reset_defaults_button_pressed(self) -> None:
@@ -151,32 +165,56 @@ class HomeScreen(Screen[str]):
             "Save to overwrite your preferences with these values.", severity="warning"
         )
 
+
     @on(ChoiceButton.Selected)
     async def file_mode_selected(self):
         palette = self.query_one("#file-mode-palette", ChoicePalette)
         idx = palette.selected_idx
         if idx == 0:
-            self.file_mode = "all"
-            self.selected_files = []
+            self._select_all_files()
         elif idx == 1:
-            self.file_mode = "select"
-            self.run_worker(self._select_files_worker, exclusive=True)
+            self._select_individual_files()
+
 
     @on(NeonButton.Pressed, "#start-btn")
     async def start_button_pressed(self) -> None:
         self._handle_dismiss()
 
     async def _select_files_worker(self) -> None:
-        files = await self.app.push_screen_wait(
-            ListSelectDialog([("A", "a"), ("B", "b"), ("C", "c")], "Select Files")
+        """A screen-level worker that pushes a file select dialog and updates the UI."""
+        target_dir = self._selected_dir
+        all_matching_files = Paths.all_files_in_dir(target_dir, extensions=self.allowed_extensions)
+
+        files = list(map(self._file_path_to_tuple, all_matching_files))
+
+        if not files:
+            self.notify(
+                f"No files with allowed extensions ({', '.join(self.allowed_extensions)}) found.",
+                severity="warning"
+            )
+            self.query_one("#file-mode-palette", ChoicePalette).select(0)
+            self._select_all_files()
+            return
+
+        dialog_title = f"Select Files ({", ".join(self.allowed_extensions)})"
+        files_from_dialog = await self.app.push_screen_wait(
+            ListSelectDialog(dialog_title, files)
         )
-        self.selected_files = files or []
+        if files_from_dialog is not None:
+            self.selected_files = files_from_dialog
+        if not self.selected_files:
+            self._select_all_files()
+
+        self.query_one("#file-mode-palette", ChoicePalette).refresh_disp_state()
+
 
     async def _select_dir_worker(self) -> None:
+        """A screen-level worker that pushes a dir select dialog and updates the UI."""
         new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self._selected_dir))
         if new_dir:
             self._selected_dir = Path(new_dir)
             self._update_path_display()
+
 
     def _update_ui_from_prefs(self) -> None:
         """Pulls all values from self.app.defaults and updates the UI widgets."""
@@ -198,6 +236,7 @@ class HomeScreen(Screen[str]):
         self.query_one("#split-wide-toggle", Toggle).value = self.split_wide_active
         self.query_one("#stack-landscape-toggle", Toggle).value = self.stack_landscape_active
 
+
     def _update_prefs_from_ui(self) -> None:
         """Pushes current UI values into self.app.defaults (in memory)."""
         p = self.preferences
@@ -211,10 +250,12 @@ class HomeScreen(Screen[str]):
         p.set("split_wide_active", self.split_wide_active)
         p.set("stack_landscape_active", self.stack_landscape_active)
 
+
     def _update_path_display(self) -> None:
         path_btn = self.query_one("#path-btn", NeonButton)
         path = self._selected_dir.as_posix()
         path_btn.label = path
+
 
     def _update_numbers(self) -> None:
         self.query_one("#pad-left", Input).value = str(self.img_pad_left)
@@ -222,22 +263,47 @@ class HomeScreen(Screen[str]):
         self.query_one("#pad-top", Input).value = str(self.img_pad_top)
         self.query_one("#pad-bottom", Input).value = str(self.img_pad_bottom)
 
-    def _select_files_label(self) -> str:
+
+    def _file_path_to_tuple(self, path: Path) -> tuple[str, str, bool]:
+        path_str = path.as_posix()
+        is_selected = path_str in set(self.selected_files)
+        return path.name, path_str, is_selected
+
+
+    def _select_all_files(self) -> None:
+        self.file_mode = "all"
+        all_files = Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions)
+        self.selected_files = [path.as_posix() for path in all_files]
+        self.query_one("#file-mode-palette", ChoicePalette).select(0)
+
+
+    def _select_individual_files(self) -> None:
+        if self.file_mode == "all":
+            self.selected_files = []
+        self.file_mode = "select"
+        self.run_worker(self._select_files_worker, exclusive=True)
+
+    def _make_select_files_label(self) -> str:
         count = len(self.selected_files)
-        if count == 0:
-            return "Select Files"
-        elif count == 1:
-            return f"1 file: {Path(self.selected_files[0]).name}"
-        elif count <= 3:
-            file_names = ', '.join(Path(f).name for f in self.selected_files)
-            return f"{count} Files: {file_names}"
-        else:
-            return f"{count} Files Selected"
+        match count:
+            case 0:
+                return "Select Files"
+            case 1:
+                return f"{count} File Selected"
+            case _:
+                return f"{count} Files Selected"
+
 
     def _handle_dismiss(self) -> None:
+        if not self.selected_files:
+            self.notify(
+                f"No files available with the allowed extensions ({",".join(self.allowed_extensions)})",
+                severity="error"
+            )
+            return
         settings = {
-            "path": str(self._selected_dir),
-            "files": self.selected_files if self.file_mode == "select" and self.selected_files else "ALL",
+            "selected_dir": str(self._selected_dir),
+            "selected_files": self.selected_files,
             "background_color": self.background_color,
             "split_wide_images": self.split_wide_active,
             "stack_landscape_images": self.stack_landscape_active,
@@ -248,4 +314,4 @@ class HomeScreen(Screen[str]):
                 "bottom": self.img_pad_bottom,
             },
         }
-        self.dismiss(json.dumps(settings))
+        self.dismiss(json.dumps(settings, ensure_ascii=False, indent=2))

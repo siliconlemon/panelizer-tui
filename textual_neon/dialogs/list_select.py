@@ -72,9 +72,12 @@ class ListSelectDialog(NeonDialog):
     }
     """
 
-    def __init__(self, items: Iterable[SelectionItem], title: str = "Select from list") -> None:
+    def __init__(self, title: str, items: Iterable[SelectionItem]) -> None:
         super().__init__(title=title)
         self._items = items
+        self._initial_selection = [
+            item for item in items if len(item) > 2 and item[2]
+        ]
 
     def compose(self) -> ComposeResult:
         """Create the dialog's widgets."""
@@ -106,4 +109,4 @@ class ListSelectDialog(NeonDialog):
 
     @on(NeonButton.Pressed, "#cancel")
     def cancel_button_pressed(self) -> None:
-        self.dismiss(None)
+        self.dismiss(self._initial_selection)
