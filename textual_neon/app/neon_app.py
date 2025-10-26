@@ -204,15 +204,17 @@ class NeonApp(App[Any]):
         The output message uses the child app's TITLE to indicate its output.
         """
         if message is None and result is not None:
-            formatted_content = str(result)
             if isinstance(result, str):
                 try:
                     parsed_json = json.loads(result)
                     formatted_content = f"\n{json.dumps(parsed_json, indent=2)}"
                 except json.JSONDecodeError:
-                    pass
+                    formatted_content = f"\n{result}"
+            elif isinstance(result, dict):
+                formatted_content = f"\n{json.dumps(result, indent=2)}"
+            else:
+                formatted_content = f"\n{result}"
 
-            # This is the dynamic part:
             message = f"{self.GREEN}│\n└─ {self.TITLE} Output: {formatted_content}{self.RESET}"
 
         super().exit(result, message=message, **kwargs)

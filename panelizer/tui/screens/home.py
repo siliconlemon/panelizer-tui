@@ -13,7 +13,7 @@ from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
     PathButton, Preferences, ChoiceButton, DefaultsButton, Paths
 
 
-class HomeScreen(Screen[str]):
+class HomeScreen(Screen[dict]):
     CSS_PATH = ["../css/home.tcss"]
     BINDINGS = []
 
@@ -314,4 +314,4 @@ class HomeScreen(Screen[str]):
                 "bottom": self.img_pad_bottom,
             },
         }
-        self.dismiss(json.dumps(settings, ensure_ascii=False, indent=2))
+        self.dismiss(settings)
