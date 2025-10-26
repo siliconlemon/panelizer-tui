@@ -21,8 +21,6 @@ class HomeScreen(Screen[str]):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self._most_recent_worker: Worker | None = None
         self.file_mode: Literal["all", "select"] = "all"
         self.selected_files: list[str] = []
         self.preferences = Preferences.ensure(app=self.app)
@@ -32,18 +30,12 @@ class HomeScreen(Screen[str]):
         self.img_pad_right = p.get("img_pad_right")
         self.img_pad_top = p.get("img_pad_top")
         self.img_pad_bottom = p.get("img_pad_bottom")
+        self.background_color_options: list[tuple[str, str]] = p.get("background_color_options")
         self.background_color = p.get("background_color")
         self.split_wide_active = p.get("split_wide_active")
         self.stack_landscape_active = p.get("stack_landscape_active")
         self.split_wide_active: bool = p.get("split_wide_active")
         self.stack_landscape_active: bool = p.get("stack_landscape_active")
-        # TODO: Maybe put the palette inside defaults registry? Debatable
-        self.background_color_options: list[tuple[str, str]] = [
-            ("White", "white"),
-            ("Light Gray", "lightgray"),
-            ("Dark Gray", "darkgray"),
-            ("Black", "black"),
-        ]
 
     def compose(self) -> ComposeResult:
         yield Header(icon="●")
@@ -106,15 +98,13 @@ class HomeScreen(Screen[str]):
         self._update_numbers()
 
     async def on_unmount(self) -> None:
-        # self.workers.cancel_all() # Maybe just like this?
-        if self._most_recent_worker and self._most_recent_worker.is_running:
-            self._most_recent_worker.cancel()
+        self.workers.cancel_all()
 
     async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
         match event.button.id:
             case "path-btn":
                 # FIXME: This breaks worker management
-                self._most_recent_worker = self.app.run_worker(self._select_dir_worker, exclusive=True)
+                self.run_worker(self._select_dir_worker, exclusive=True)
                 event.stop()
             case "all-files-btn":
                 self.file_mode = "all"
@@ -122,7 +112,7 @@ class HomeScreen(Screen[str]):
                 event.stop()
             case "select-files-btn":
                 self.file_mode = "select"
-                self._most_recent_worker = self.app.run_worker(self._select_files_worker, exclusive=True)
+                self.run_worker(self._select_files_worker, exclusive=True)
                 event.stop()
             case "start-btn":
                 self._handle_dismiss()
@@ -151,25 +141,27 @@ class HomeScreen(Screen[str]):
         self.img_pad_right = p.get("img_pad_right")
         self.img_pad_top = p.get("img_pad_top")
         self.img_pad_bottom = p.get("img_pad_bottom")
+        self.background_color_options = p.get("background_color_options")
         self.background_color = p.get("background_color")
         self.split_wide_active = p.get("split_wide_active")
         self.stack_landscape_active = p.get("stack_landscape_active")
 
         self._update_path_display()
         self._update_numbers()
+        self.query_one("#bg-select", Select).set_options(self.background_color_options)
         self.query_one("#bg-select", Select).value = self.background_color
         self.query_one("#split-wide-toggle", Toggle).value = self.split_wide_active
         self.query_one("#stack-landscape-toggle", Toggle).value = self.stack_landscape_active
 
-    # FIXME: Does not seem to change the start_path on restart
     def _update_prefs_from_ui(self) -> None:
         """Pushes current UI values into self.app.defaults (in memory)."""
         p = self.preferences
-        p.set("path", self._selected_dir.as_posix())
+        p.set("start_dir", self._selected_dir.as_posix())
         p.set("img_pad_left", self.img_pad_left)
         p.set("img_pad_right", self.img_pad_right)
         p.set("img_pad_top", self.img_pad_top)
         p.set("img_pad_bottom", self.img_pad_bottom)
+        p.set("background_color_options", self.background_color_options)
         p.set("background_color", self.background_color)
         p.set("split_wide_active", self.split_wide_active)
         p.set("stack_landscape_active", self.stack_landscape_active)

@@ -74,6 +74,15 @@ class Panelizer(NeonApp):
         p.register_default("img_pad_right", 0)
         p.register_default("img_pad_top", 0)
         p.register_default("img_pad_bottom", 0)
+        p.register_default(
+            "background_color_options",
+            [
+                ("White", "white"),
+                ("Light Gray", "lightgray"),
+                ("Dark Gray", "darkgray"),
+                ("Black", "black"),
+            ],
+        )
         p.register_default("background_color", "white")
         p.register_default("split_wide_active", False)
         p.register_default("stack_landscape_active", False)

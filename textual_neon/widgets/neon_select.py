@@ -1,4 +1,10 @@
+from typing import Iterable, override
+
+from rich.console import RenderableType
 from textual.widgets import Select
+# noinspection PyProtectedMember
+from textual.widgets._select import SelectType
+
 
 # TODO: Implement all of the css and classes, drop the inheritance
 class NeonSelect(Select, inherit_css=True):
@@ -61,3 +67,13 @@ class NeonSelect(Select, inherit_css=True):
         # Forces compact layout for listed options
         if not self.compact:
             self.compact = True
+
+    @override
+    def set_options(self, options: Iterable[tuple[RenderableType, SelectType]]) -> None:
+        options_formatted = map(
+            lambda idx: (
+                f" {idx[0].strip()} " if isinstance(idx[0], str) else idx[0], str(idx[1]),
+            ),
+            options,
+        )
+        super().set_options(options_formatted)
