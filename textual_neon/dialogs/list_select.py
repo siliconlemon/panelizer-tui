@@ -82,12 +82,22 @@ class ListSelectDialog(NeonDialog):
         dialog.border_title = self._title
         with dialog:
             with Horizontal(id="selection-buttons"):
-                yield NeonButton("● Select All", variant="primary", id="all")
-                yield NeonButton("○ Select None", variant="primary", id="none")
-            yield SelectionList(*self._items, id="list-select")
+                yield NeonButton("Select All", variant="primary", id="all")
+                yield NeonButton("Select None", variant="primary", id="none")
+            yield SelectionList(*self._items, id="list")
             with Horizontal(id="dialog-buttons"):
                 yield NeonButton("Confirm", variant="primary", id="confirm")
                 yield NeonButton("Cancel", variant="primary", id="cancel")
+
+    @on(NeonButton.Pressed, "#all")
+    def select_all_button_pressed(self) -> None:
+        selection_list = self.query_one(SelectionList)
+        selection_list.select_all()
+
+    @on(NeonButton.Pressed, "#none")
+    def select_none_button_pressed(self) -> None:
+        selection_list = self.query_one(SelectionList)
+        selection_list.deselect_all()
 
     @on(NeonButton.Pressed, "#confirm")
     def confirm_button_pressed(self) -> None:
