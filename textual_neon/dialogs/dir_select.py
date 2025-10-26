@@ -10,7 +10,7 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
         async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
             match event.button.id:
                 case "path-btn":
-                    self._most_recent_worker = self.app.run_worker(self._select_dir_worker, exclusive=True)
+                    self.run_worker(self._select_dir_worker, exclusive=True)
                     event.stop()
         ...
         async def _select_dir_worker(self) -> None:
@@ -20,8 +20,7 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 self._update_path_display()
         ...
         async def on_unmount(self) -> None:
-            if self._most_recent_worker and self._most_recent_worker.is_running:
-                self._most_recent_worker.cancel()
+            self.workers.cancel_all()
     """
     DEFAULT_CSS = """
     DirSelectDialog {
