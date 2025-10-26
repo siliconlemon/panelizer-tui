@@ -70,11 +70,11 @@ class Panelizer(NeonApp):
         """
         p = self.preferences
         p.register_default("start_dir", Paths.pictures().as_posix())
-        p.register_default("allowed_extensions", [".jpg", ".jpeg", ".png"])
-        p.register_default("img_pad_left", 0)
-        p.register_default("img_pad_right", 0)
-        p.register_default("img_pad_top", 0)
-        p.register_default("img_pad_bottom", 0)
+        p.register_default("allowed_extensions", ["jpg", "jpeg", "png"])
+        p.register_default("img_pad_left", 8)
+        p.register_default("img_pad_right", 8)
+        p.register_default("img_pad_top", 5)
+        p.register_default("img_pad_bottom", 5)
         p.register_default(
             "background_color_options",
             [

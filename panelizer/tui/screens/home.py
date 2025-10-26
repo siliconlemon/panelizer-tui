@@ -96,16 +96,13 @@ class HomeScreen(Screen[dict]):
 
 
     async def on_mount(self) -> None:
-
         img_pad_validator = Integer(
             minimum=0,
             maximum=self.max_pad_percentage,
         )
-
         for input_id in ["#pad-left", "#pad-right", "#pad-top", "#pad-bottom"]:
             input_widget = self.query_one(input_id, Input)
             input_widget.validators.append(img_pad_validator)
-
         self._update_path_display()
         self._update_numbers()
         self._select_all_files()
@@ -132,6 +129,7 @@ class HomeScreen(Screen[dict]):
             try:
                 val = int(event.value)
             except ValueError:
+                self.notify(f"Invalid value for {event.input.id}", severity="error")
                 val = 0
             val = max(0, min(self.max_pad_percentage, val))
             setattr(self, mapping[event.input.id], val)
@@ -171,8 +169,8 @@ class HomeScreen(Screen[dict]):
         self.preferences.reset_all()
         self._update_ui_from_prefs()
         self.notify(
-            "Preferences have been reset to factory defaults. "
-            "Save to overwrite your preferences with these values.", severity="warning"
+            "Preferences have been reset to factory defaults.\n"
+            "Click 'Save' to overwrite your preferences with these values.", severity="warning"
         )
 
 
@@ -192,14 +190,14 @@ class HomeScreen(Screen[dict]):
 
     async def _select_files_worker(self) -> None:
         """A screen-level worker that pushes a file select dialog and updates the UI."""
-        target_dir = self._selected_dir
-        all_matching_files = Paths.all_files_in_dir(target_dir, extensions=self.allowed_extensions)
+        all_matching_files = Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions)
 
         files = list(map(self._file_path_to_tuple, all_matching_files))
 
         if not files:
             self.notify(
-                f"No files with allowed extensions ({', '.join(self.allowed_extensions)}) found.",
+                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"
+                f"found in dir {self._selected_dir.as_posix()}",
                 severity="warning"
             )
             self.query_one("#file-mode-palette", ChoicePalette).select(0)
@@ -224,6 +222,7 @@ class HomeScreen(Screen[dict]):
         if new_dir:
             self._selected_dir = Path(new_dir)
             self._update_path_display()
+        self._select_all_files()
 
 
     def _update_ui_from_prefs(self) -> None:
@@ -307,7 +306,8 @@ class HomeScreen(Screen[dict]):
     def _handle_dismiss(self) -> None:
         if not self.selected_files:
             self.notify(
-                f"No files available with the allowed extensions ({",".join(self.allowed_extensions)})",
+                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"
+                f"found in dir {self._selected_dir.as_posix()}",
                 severity="error"
             )
             return
