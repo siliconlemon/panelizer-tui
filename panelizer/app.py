@@ -2,7 +2,7 @@ from pathlib import Path
 
 from textual.theme import Theme
 
-from textual_neon import NeonApp, Preferences, Paths
+from textual_neon import NeonApp, Preferences, Paths, LoadingScreen
 from .tui import HomeScreen
 from .tui import PanelizerLaunchScreen
 
@@ -20,6 +20,7 @@ class Panelizer(NeonApp):
     SCREENS = {
         "launch": PanelizerLaunchScreen,
         "home": HomeScreen,
+        "loading": LoadingScreen,
     }
     DEFAULT_THEME = Theme(
         name="default",
@@ -52,15 +53,20 @@ class Panelizer(NeonApp):
             screen="launch",
             next_state="home",
             validate=lambda result: result is True,
-            args_from_result=lambda result: (),
         )
         self.state_machine.register(
             "home",
             screen=HomeScreen,
-            next_state=None,
+            next_state="loading",
             fallback="launch",
             validate=lambda result: bool(result),
-            args_from_result=lambda result: (result,),
+            args_from_result=lambda result: ("loading", result["selected_files"], lambda something: ()),
+        )
+        self.state_machine.register(
+            "loading",
+            screen=LoadingScreen,
+            next_state=None,
+            args_from_result=lambda result: (result,)
         )
 
     def _register_defaults(self) -> None:

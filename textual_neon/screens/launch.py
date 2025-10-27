@@ -2,7 +2,6 @@ from pathlib import Path
 
 import textual
 from textual.app import ComposeResult
-from textual.binding import Binding
 from textual.containers import Container
 from textual.events import Resize
 from textual.geometry import Size
@@ -11,8 +10,8 @@ from textual.screen import Screen
 from textual.widgets import Header, Footer
 
 from textual_neon.utils import AsciiPainter
-from textual_neon.widgets.neon_button import NeonButton
 from textual_neon.widgets.inert_label import InertLabel
+from textual_neon.widgets.neon_button import NeonButton
 
 
 class LaunchScreen(Screen[bool]):
