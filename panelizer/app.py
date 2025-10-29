@@ -52,21 +52,27 @@ class Panelizer(NeonApp):
             "launch",
             screen="launch",
             next_state="home",
+            fallback=None,
             validate=lambda result: result is True,
         )
         self.state_machine.register(
             "home",
             screen=HomeScreen,
             next_state="loading",
-            fallback="launch",
+            fallback=None,
             validate=lambda result: bool(result),
-            args_from_result=lambda result: ("loading", result["selected_files"], lambda something: ()),
+            args_from_result=lambda result: (
+                "loading", result["selected_files"],
+                list(map(lambda path: path.split("/")[-1], result["selected_files"])),
+                lambda something: ()),
         )
         self.state_machine.register(
             "loading",
             screen=LoadingScreen,
-            next_state=None,
-            args_from_result=lambda result: (result,)
+            next_state="home",
+            fallback=None,
+            validate=lambda result: result == "home",
+            args_from_result=lambda result: (),
         )
 
     def _register_defaults(self) -> None:

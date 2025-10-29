@@ -38,7 +38,6 @@ class HomeScreen(Screen[dict]):
         self.file_mode: Literal["all", "select"] = "all"
         self.max_pad_percentage = 30
 
-
     def compose(self) -> ComposeResult:
         yield Header(icon="●")
         with Vertical(id="home-row"):
@@ -94,7 +93,6 @@ class HomeScreen(Screen[dict]):
             )
             yield NeonButton("Start Processing", id="start-btn", classes="extra-wide-btn", variant="primary")
 
-
     async def on_mount(self) -> None:
         img_pad_validator = Integer(
             minimum=0,
@@ -107,15 +105,12 @@ class HomeScreen(Screen[dict]):
         self._update_numbers()
         self._select_all_files()
 
-
     async def on_unmount(self) -> None:
         self.workers.cancel_all()
-
 
     @on(PathButton.Pressed, "#path-btn")
     async def path_button_pressed(self) -> None:
         self.run_worker(self._select_dir_worker, exclusive=True)
-
 
     @on(NeonInput.Blurred)
     async def input_blurred(self, event: Input.Submitted) -> None:
@@ -139,16 +134,13 @@ class HomeScreen(Screen[dict]):
     async def bg_select_changed(self, event: Select.Changed) -> None:
         self.background_color = str(event.value)
 
-
     @on(Toggle.Changed, "#split-wide-toggle")
     async def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
         self.split_wide_active = event.active
 
-
     @on(Toggle.Changed, "#stack-landscape-toggle")
     async def stack_landscape_toggle_changed(self, event: Toggle.Changed) -> None:
         self.stack_landscape_active = event.active
-
 
     @on(DefaultsButton.Pressed, "#save-defaults-btn")
     async def save_defaults_button_pressed(self) -> None:
@@ -156,13 +148,11 @@ class HomeScreen(Screen[dict]):
         self.preferences.save()
         self.notify("Preferences have been saved.", severity="information")
 
-
     @on(DefaultsButton.Pressed, "#restore-defaults-btn")
     async def restore_defaults_button_pressed(self) -> None:
         self.preferences.load()
         self._update_ui_from_prefs()
         self.notify("Preferences have been restored.", severity="information")
-
 
     @on(DefaultsButton.Pressed, "#reset-defaults-btn")
     async def reset_defaults_button_pressed(self) -> None:
@@ -173,7 +163,6 @@ class HomeScreen(Screen[dict]):
             "Click 'Save' to overwrite your preferences with these values.", severity="warning"
         )
 
-
     @on(ChoiceButton.Selected)
     async def file_mode_selected(self):
         palette = self.query_one("#file-mode-palette", ChoicePalette)
@@ -182,7 +171,6 @@ class HomeScreen(Screen[dict]):
             self._select_all_files()
         elif idx == 1:
             self._select_individual_files()
-
 
     @on(NeonButton.Pressed, "#start-btn")
     async def start_button_pressed(self) -> None:
@@ -215,7 +203,6 @@ class HomeScreen(Screen[dict]):
 
         self.query_one("#file-mode-palette", ChoicePalette).refresh_disp_state()
 
-
     async def _select_dir_worker(self) -> None:
         """A screen-level worker that pushes a dir select dialog and updates the UI."""
         new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self._selected_dir))
@@ -223,7 +210,6 @@ class HomeScreen(Screen[dict]):
             self._selected_dir = Path(new_dir)
             self._update_path_display()
         self._select_all_files()
-
 
     def _update_ui_from_prefs(self) -> None:
         """Pulls all values from self.app.defaults and updates the UI widgets."""
@@ -245,7 +231,6 @@ class HomeScreen(Screen[dict]):
         self.query_one("#split-wide-toggle", Toggle).value = self.split_wide_active
         self.query_one("#stack-landscape-toggle", Toggle).value = self.stack_landscape_active
 
-
     def _update_prefs_from_ui(self) -> None:
         """Pushes current UI values into self.app.defaults (in memory)."""
         p = self.preferences
@@ -259,12 +244,10 @@ class HomeScreen(Screen[dict]):
         p.set("split_wide_active", self.split_wide_active)
         p.set("stack_landscape_active", self.stack_landscape_active)
 
-
     def _update_path_display(self) -> None:
         path_btn = self.query_one("#path-btn", NeonButton)
         path = self._selected_dir.as_posix()
         path_btn.label = path
-
 
     def _update_numbers(self) -> None:
         self.query_one("#pad-left", Input).value = str(self.img_pad_left)
@@ -272,19 +255,16 @@ class HomeScreen(Screen[dict]):
         self.query_one("#pad-top", Input).value = str(self.img_pad_top)
         self.query_one("#pad-bottom", Input).value = str(self.img_pad_bottom)
 
-
     def _file_path_to_tuple(self, path: Path) -> tuple[str, str, bool]:
         path_str = path.as_posix()
         is_selected = path_str in set(self.selected_files)
         return path.name, path_str, is_selected
-
 
     def _select_all_files(self) -> None:
         self.file_mode = "all"
         all_files = Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions)
         self.selected_files = [path.as_posix() for path in all_files]
         self.query_one("#file-mode-palette", ChoicePalette).select(0)
-
 
     def _select_individual_files(self) -> None:
         if self.file_mode == "all":
@@ -301,7 +281,6 @@ class HomeScreen(Screen[dict]):
                 return f"{count} File Selected"
             case _:
                 return f"{count} Files Selected"
-
 
     def _handle_dismiss(self) -> None:
         if not self.selected_files:

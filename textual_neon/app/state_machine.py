@@ -59,35 +59,44 @@ class StateMachine:
         )
         self._registered = True
 
+    # FIXME: What the hell is so different with LoadingScreen?
     async def run(self, start_state: str = "launch") -> None:
         """Runs the state machine loop from the initial state until exit."""
         state_name = start_state
         args = ()
-        while state_name:
-            spec = self.specs.get(state_name)
-            if not spec:
-                break
-            scr = (
-                spec.screen
-                if not isinstance(spec.screen, str)
-                else self._app.SCREENS[spec.screen]
-            )
-            if callable(scr):
-                screen_instance = scr(*args) if args else scr()
-            else:
-                screen_instance = scr
-            result = await self._app.push_screen_wait(
-                screen_instance if not isinstance(spec.screen, str) else spec.screen
-            )
-            if spec.validate(result):
-                next_state = spec.next
-                next_args = spec.args_from_result(result)
-            elif spec.fallback:
-                next_state = spec.fallback
-                next_args = ()
-            else:
-                next_state = None
-                next_args = ()
-            state_name = next_state
-            args = next_args
-        self._app.exit(args[0] if args else None)
+
+        try:
+            while state_name:
+                spec = self.specs.get(state_name)
+                if not spec:
+                    break
+                scr = (
+                    spec.screen
+                    if not isinstance(spec.screen, str)
+                    else self._app.SCREENS[spec.screen]
+                )
+                if callable(scr):
+                    screen_instance = scr(*args) if args else scr()
+                else:
+                    screen_instance = scr
+                result = await self._app.push_screen_wait(
+                    screen_instance if not isinstance(spec.screen, str) else spec.screen
+                )
+                if spec.validate(result):
+                    next_state = spec.next
+                    next_args = spec.args_from_result(result)
+                elif spec.fallback:
+                    next_state = spec.fallback
+                    next_args = ()
+                else:
+                    next_state = None
+                    next_args = ()
+                state_name = next_state
+                args = next_args
+        # FIXME: This does not get triggered at all. How the hell does finally get a different behavior?
+        except Exception as e:
+            self._app.exit(e)
+        finally:
+            # FIXME: This dismisses the LoadingScreen immediately and outputs "loading"
+            #  (the Loading screen flashes for like half a second)
+            self._app.exit(args[0] if args else None)

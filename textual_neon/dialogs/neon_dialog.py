@@ -42,9 +42,9 @@ class NeonDialog(ModalScreen[Any]):
             border: round $accent 50%;
             background: $panel;
             border-title-color: $text;
-            border-title-background: $panel;
             border-subtitle-color: $text;
-            border-subtitle-background: $error;
+            border-title-background: transparent;
+            border-subtitle-background: transparent;
     
             OptionList, OptionList:focus {
                 background: $panel;
@@ -89,7 +89,7 @@ class NeonDialog(ModalScreen[Any]):
         Binding("escape", "dismiss(None)", show=False)
     ]
 
-    def __init__(self, title: str = "") -> None:
+    def __init__(self, title: str = "", **kwargs) -> None:
         super().__init__()
         self._title = title
 
