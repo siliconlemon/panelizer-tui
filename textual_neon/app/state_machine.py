@@ -59,7 +59,6 @@ class StateMachine:
         )
         self._registered = True
 
-    # FIXME: What the hell is so different with LoadingScreen?
     async def run(self, start_state: str = "launch") -> None:
         """Runs the state machine loop from the initial state until exit."""
         state_name = start_state
@@ -69,7 +68,8 @@ class StateMachine:
             while state_name:
                 spec = self.specs.get(state_name)
                 if not spec:
-                    break
+                    self._app.exit("No spec in the StateMachine loop.")
+                    return
                 scr = (
                     spec.screen
                     if not isinstance(spec.screen, str)
@@ -93,10 +93,8 @@ class StateMachine:
                     next_args = ()
                 state_name = next_state
                 args = next_args
-        # FIXME: This does not get triggered at all. How the hell does finally get a different behavior?
+
+            self._app.exit(args[0] if args else None)
+
         except Exception as e:
             self._app.exit(e)
-        finally:
-            # FIXME: This dismisses the LoadingScreen immediately and outputs "loading"
-            #  (the Loading screen flashes for like half a second)
-            self._app.exit(args[0] if args else None)

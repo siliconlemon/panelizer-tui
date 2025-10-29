@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 from textual.theme import Theme
@@ -61,18 +62,21 @@ class Panelizer(NeonApp):
             next_state="loading",
             fallback=None,
             validate=lambda result: bool(result),
+            # FIXME: Something aborts the LoadingScreen without it properly finishing,
+            #  so the first arg here is what ends up in the output.
             args_from_result=lambda result: (
-                "loading", result["selected_files"],
+                result["selected_files"],
                 list(map(lambda path: path.split("/")[-1], result["selected_files"])),
                 lambda something: ()),
         )
+        # FIXME: This prematurely exits when using the finally block and leaves a dangling LaunchScreen if not
         self.state_machine.register(
             "loading",
             screen=LoadingScreen,
             next_state="home",
             fallback=None,
             validate=lambda result: result == "home",
-            args_from_result=lambda result: (),
+            args_from_result=lambda result: (asyncio.sleep(0)),
         )
 
     def _register_defaults(self) -> None:

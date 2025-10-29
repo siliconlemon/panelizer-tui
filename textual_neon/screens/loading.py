@@ -67,7 +67,7 @@ class LoadingScreen(Screen):
                     width: 100%;
                 }
                 &.-complete {
-                    margin: 0 0 4 0;
+                    margin: 0 0 3 0;
                 }
             }
 
@@ -87,6 +87,13 @@ class LoadingScreen(Screen):
                 scrollbar-size-horizontal: 0;
                 &:focus {
                     background-tint: transparent;
+                    border: round $accent;
+                    &:hover {
+                        border: round $accent 50%;
+                    }
+                }
+                &:hover {
+                    border: round $accent;
                 }
             }
         }
@@ -106,14 +113,13 @@ class LoadingScreen(Screen):
 
     def __init__(
             self,
-            name: str,
             items: list | tuple,
             names: list[str] | tuple[str],
             function: Callable,
             title: str = "Loading",
             **kwargs
     ):
-        super().__init__(name=name, **kwargs)
+        super().__init__(**kwargs)
         self._title = title
         self._items = items
         self._names = names
@@ -128,7 +134,7 @@ class LoadingScreen(Screen):
         with Dialog(id="loading-container"):
             with Horizontal():
                 yield Digits("0".rjust(self._justified_digits, '0'), id="current")
-                yield Static("  ╱\n ╱\n╱")
+                yield Static("  ╱\n ╱ \n╱  ")
                 yield Digits(f"{self._total}".rjust(self._justified_digits, '0'), id="total")
             yield ProgressBar(self._total, show_bar=True, show_percentage=False, show_eta=False)
             yield LoadingIndicator()
@@ -140,7 +146,8 @@ class LoadingScreen(Screen):
         """Start the processing worker when the screen is mounted."""
         self.query_one(Dialog).border_title = self._title
         self.query_one(Log).write("Initializing...\n")
-        self.run_worker(self.process_items, exclusive=True)
+        # FIXME: The premature exit happens even when the worker doesnt run, it's just instant that way
+        self.run_worker(self.process_items, exclusive=False)
 
     async def on_dismount(self) -> None:
         """Cancel all workers when the screen is dismounted."""
@@ -149,15 +156,16 @@ class LoadingScreen(Screen):
     @on(NeonButton.Pressed, "#cancel")
     def cancel_button_pressed(self) -> None:
         """Handle cancel button press."""
-        self.dismiss(self._results)
-        # TODO: this (self.app.exit()) works fine, so its not a dangling worker, just state mishandling
+        self.dismiss("home")
+        # self.dismiss(self._results)
+        # TODO: this (self.app.exit()) works fine, so it might not be a dangling worker
         # self.app.exit()
 
     async def process_items(self) -> None:
         """The worker method to process items and update the UI."""
         log = self.query_one(Log)
         progress_bar = self.query_one(ProgressBar)
-        current_digits = self.query_one(Digits)
+        current_digits = self.query_one("#current", Digits)
         loading_indicator = self.query_one(LoadingIndicator)
 
         if len(self._items) != len(self._names):
@@ -172,20 +180,19 @@ class LoadingScreen(Screen):
                 if asyncio.iscoroutine(maybe_coroutine):
                     result = await maybe_coroutine
                 else:
+                    if i % 30 == 0:
+                        await asyncio.sleep(0)
                     result = maybe_coroutine
                 self._results.append(result)
                 progress_bar.advance(1)
                 current_digits.update(f"{current_step}".rjust(self._justified_digits, '0'))
+
             loading_indicator.display = False
             progress_bar.add_class("-complete")
             current_digits.update(
                 f"{self._total}".rjust(self._justified_digits, '0')
             )
             log.write_line("\nProcessing complete!")
+
         except asyncio.CancelledError:
             log.write_line("\nProcessing canceled.")
-            pass
-        except Exception as e:
-            log.write_line(f"\nError during processing:\n{e}")
-            log.write_line("\nAborting...")
-            loading_indicator.display = False
