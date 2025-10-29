@@ -24,22 +24,12 @@ class HomeScreen(Screen[dict]):
         p = self.preferences
         self.allowed_extensions: list[str] = p.get("allowed_extensions")
         self._selected_dir = Path(p.get("start_dir"))
-        self.img_pad_left = p.get("img_pad_left")
-        self.img_pad_right = p.get("img_pad_right")
-        self.img_pad_top = p.get("img_pad_top")
-        self.img_pad_bottom = p.get("img_pad_bottom")
-        self.background_color_options: list[tuple[str, str]] = p.get("background_color_options")
-        self.background_color = p.get("background_color")
-        self.split_wide_active = p.get("split_wide_active")
-        self.stack_landscape_active = p.get("stack_landscape_active")
-        self.split_wide_active: bool = p.get("split_wide_active")
-        self.stack_landscape_active: bool = p.get("stack_landscape_active")
-
         self.selected_files: list[str] = []
         self.file_mode: Literal["all", "select"] = "all"
         self.max_pad_percentage = 30
 
     def compose(self) -> ComposeResult:
+        p = self.preferences
         yield Header(icon="●")
         with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
@@ -49,7 +39,12 @@ class HomeScreen(Screen[dict]):
                     yield CompleteInputGrid(
                         rows=2,
                         columns=2,
-                        values=[self.img_pad_left, self.img_pad_right, self.img_pad_top, self.img_pad_bottom],
+                        values=[
+                            p.get("img_pad_left"),
+                            p.get("img_pad_right"),
+                            p.get("img_pad_top"),
+                            p.get("img_pad_bottom")
+                        ],
                         labels=["Left", "Right", "Top", "Bottom"],
                         input_ids=["pad-left", "pad-right", "pad-top", "pad-bottom"],
                         units=["%", "%", "%", "%"],
@@ -58,21 +53,21 @@ class HomeScreen(Screen[dict]):
                     yield Toggle(
                         switch_id="split-wide-toggle-switch",
                         text="Split Wide Images",
-                        is_active=self.split_wide_active,
+                        is_active=p.get("split_wide_active"),
                         id="split-wide-toggle",
                     )
                     yield Toggle(
                         switch_id="stack-landscape-toggle-switch",
                         text="Stack Landscape Images",
-                        is_active=self.stack_landscape_active,
+                        is_active=p.get("stack_landscape_active"),
                         id="stack-landscape-toggle",
                     )
                 with Vertical(id="second-column"):
                     yield CompleteSelect(
                         select_id="bg-select",
                         label="Background Color",
-                        initial=self.background_color,
-                        options=self.background_color_options,
+                        initial=p.get("background_color"),
+                        options=p.get("background_color_options"),
                     )
                     yield DefaultsPalette(
                         save_btn_id="save-defaults-btn",
@@ -103,11 +98,11 @@ class HomeScreen(Screen[dict]):
             input_widget = self.query_one(input_id, Input)
             input_widget.validators.append(img_pad_validator)
         self._update_path_display()
-        self._update_numbers()
+        self._update_padding_inputs()
         await self._select_all_files()
 
     def _get_all_files_in_dir_blocking(self) -> list[Path]:
-        """This is a blocking I/O call."""
+        """A blocking method to get all allowed files in the selected directory."""
         return list(Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions))
 
     @on(PathButton.Pressed, "#path-btn")
@@ -129,37 +124,37 @@ class HomeScreen(Screen[dict]):
                 self.notify(f"Invalid value for {event.input.id}", severity="error")
                 val = 0
             val = max(0, min(self.max_pad_percentage, val))
-            setattr(self, mapping[event.input.id], val)
-            self._update_numbers()
+            self.preferences.set(mapping[event.input.id], val)
+            self._update_padding_inputs()
 
     @on(Select.Changed, "#bg-select")
     async def bg_select_changed(self, event: Select.Changed) -> None:
-        self.background_color = str(event.value)
+        self.preferences.set("background_color", str(event.value))
 
     @on(Toggle.Changed, "#split-wide-toggle")
     async def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
-        self.split_wide_active = event.active
+        self.preferences.set("split_wide_active", event.active)
 
     @on(Toggle.Changed, "#stack-landscape-toggle")
     async def stack_landscape_toggle_changed(self, event: Toggle.Changed) -> None:
-        self.stack_landscape_active = event.active
+        self.preferences.set("stack_landscape_active", event.active)
 
     @on(DefaultsButton.Pressed, "#save-defaults-btn")
     async def save_defaults_button_pressed(self) -> None:
-        self._update_prefs_from_ui()
+        self.preferences.set("start_dir", self._selected_dir.as_posix())
         self.preferences.save()
         self.notify("Preferences have been saved.", severity="information")
 
     @on(DefaultsButton.Pressed, "#restore-defaults-btn")
     async def restore_defaults_button_pressed(self) -> None:
         self.preferences.load()
-        self._update_ui_from_prefs()
+        self._update_ui_from_preferences()
         self.notify("Preferences have been restored.", severity="information")
 
     @on(DefaultsButton.Pressed, "#reset-defaults-btn")
     async def reset_defaults_button_pressed(self) -> None:
         self.preferences.reset_all()
-        self._update_ui_from_prefs()
+        self._update_ui_from_preferences()
         self.notify(
             "Preferences have been reset to factory defaults.\n"
             "Click 'Save' to overwrite your preferences with these values.", severity="warning"
@@ -180,7 +175,6 @@ class HomeScreen(Screen[dict]):
 
     async def _select_files_worker(self) -> None:
         """A screen-level worker that pushes a file select dialog and updates the UI."""
-        # Await the thread worker instead of blocking
         all_matching_files = await asyncio.to_thread(self._get_all_files_in_dir_blocking)
         files = list(map(self._file_path_to_tuple, all_matching_files))
 
@@ -213,69 +207,54 @@ class HomeScreen(Screen[dict]):
             self._update_path_display()
         await self._select_all_files()
 
-    def _update_ui_from_prefs(self) -> None:
-        """Pulls all values from self.app.defaults and updates the UI widgets."""
+    def _update_ui_from_preferences(self) -> None:
+        """Pulls all values from self.preferences and updates the UI widgets."""
         p = self.preferences
         self._selected_dir = Path(p.get("start_dir"))
-        self.img_pad_left = p.get("img_pad_left")
-        self.img_pad_right = p.get("img_pad_right")
-        self.img_pad_top = p.get("img_pad_top")
-        self.img_pad_bottom = p.get("img_pad_bottom")
-        self.background_color_options = p.get("background_color_options")
-        self.background_color = p.get("background_color")
-        self.split_wide_active = p.get("split_wide_active")
-        self.stack_landscape_active = p.get("stack_landscape_active")
-
         self._update_path_display()
-        self._update_numbers()
-        self.query_one("#bg-select", Select).set_options(self.background_color_options)
-        self.query_one("#bg-select", Select).value = self.background_color
-        self.query_one("#split-wide-toggle", Toggle).value = self.split_wide_active
-        self.query_one("#stack-landscape-toggle", Toggle).value = self.stack_landscape_active
-
-    def _update_prefs_from_ui(self) -> None:
-        """Pushes current UI values into self.app.defaults (in memory)."""
-        p = self.preferences
-        p.set("start_dir", self._selected_dir.as_posix())
-        p.set("img_pad_left", self.img_pad_left)
-        p.set("img_pad_right", self.img_pad_right)
-        p.set("img_pad_top", self.img_pad_top)
-        p.set("img_pad_bottom", self.img_pad_bottom)
-        p.set("background_color_options", self.background_color_options)
-        p.set("background_color", self.background_color)
-        p.set("split_wide_active", self.split_wide_active)
-        p.set("stack_landscape_active", self.stack_landscape_active)
+        self._update_padding_inputs()
+        bg_select = self.query_one("#bg-select", Select)
+        bg_select.set_options(p.get("background_color_options"))
+        bg_select.value = p.get("background_color")
+        self.query_one("#split-wide-toggle", Toggle).value = p.get("split_wide_active")
+        self.query_one("#stack-landscape-toggle", Toggle).value = p.get("stack_landscape_active")
 
     def _update_path_display(self) -> None:
+        """Updates the PathButton label from the internal _selected_dir state."""
         path_btn = self.query_one("#path-btn", NeonButton)
         path = self._selected_dir.as_posix()
         path_btn.label = path
 
-    def _update_numbers(self) -> None:
-        self.query_one("#pad-left", Input).value = str(self.img_pad_left)
-        self.query_one("#pad-right", Input).value = str(self.img_pad_right)
-        self.query_one("#pad-top", Input).value = str(self.img_pad_top)
-        self.query_one("#pad-bottom", Input).value = str(self.img_pad_bottom)
+    def _update_padding_inputs(self) -> None:
+        """Updates padding input values by reading directly from preferences."""
+        p = self.preferences
+        self.query_one("#pad-left", Input).value = str(p.get("img_pad_left"))
+        self.query_one("#pad-right", Input).value = str(p.get("img_pad_right"))
+        self.query_one("#pad-top", Input).value = str(p.get("img_pad_top"))
+        self.query_one("#pad-bottom", Input).value = str(p.get("img_pad_bottom"))
 
     def _file_path_to_tuple(self, path: Path) -> tuple[str, str, bool]:
+        """Formats a Path object into a tuple for the ListSelectDialog."""
         path_str = path.as_posix()
         is_selected = path_str in set(self.selected_files)
         return path.name, path_str, is_selected
 
     async def _select_all_files(self) -> None:
+        """Sets the file mode to 'all' and populates selected_files with all valid files."""
         self.file_mode = "all"
-        # This correctly runs the blocking code in a thread and awaits it
         all_files = await asyncio.to_thread(self._get_all_files_in_dir_blocking)
         self.selected_files = [path.as_posix() for path in all_files]
         self.query_one("#file-mode-palette", ChoicePalette).select(0)
 
     def _select_individual_files(self) -> None:
+        """Sets the file mode to 'select' and launches the file selection worker."""
         if self.file_mode == "all":
             self.selected_files = []
         self.file_mode = "select"
         self.run_worker(self._select_files_worker, exclusive=True)
 
     def _make_select_files_label(self) -> str:
+        """Generates the label for the 'Select Files' button based on the current count."""
         count = len(self.selected_files)
         match count:
             case 0:
@@ -286,6 +265,7 @@ class HomeScreen(Screen[dict]):
                 return f"{count} Files Selected"
 
     def _handle_dismiss(self) -> None:
+        """Validates file selection and bundles all settings into a dict to dismiss the screen."""
         if not self.selected_files:
             self.notify(
                 f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"
@@ -293,17 +273,18 @@ class HomeScreen(Screen[dict]):
                 severity="error"
             )
             return
+        p = self.preferences
         settings = {
             "selected_dir": str(self._selected_dir),
             "selected_files": self.selected_files,
-            "background_color": self.background_color,
-            "split_wide_images": self.split_wide_active,
-            "stack_landscape_images": self.stack_landscape_active,
+            "background_color": p.get("background_color"),
+            "split_wide_images": p.get("split_wide_active"),
+            "stack_landscape_images": p.get("stack_landscape_active"),
             "padding": {
-                "left": self.img_pad_left,
-                "right": self.img_pad_right,
-                "top": self.img_pad_top,
-                "bottom": self.img_pad_bottom,
+                "left": p.get("img_pad_left"),
+                "right": p.get("img_pad_right"),
+                "top": p.get("img_pad_top"),
+                "bottom": p.get("img_pad_bottom"),
             },
         }
         self.dismiss(settings)
