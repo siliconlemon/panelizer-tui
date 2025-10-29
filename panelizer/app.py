@@ -1,4 +1,3 @@
-import asyncio
 from pathlib import Path
 
 from textual.theme import Theme
@@ -51,32 +50,36 @@ class Panelizer(NeonApp):
 
         self.state_machine.register(
             "launch",
-            screen="launch",
+            screen_class=PanelizerLaunchScreen,
             next_state="home",
             fallback=None,
             validate=lambda result: result is True,
         )
+        # FIXME: Going back to launch has the same symptoms as the LoadingScreen,
+        #  so it's either a fault in the state machine, or bad state handling in the HomeScreen
         self.state_machine.register(
             "home",
-            screen=HomeScreen,
-            next_state="loading",
+            screen_class=HomeScreen,
+            next_state="launch",
             fallback=None,
-            validate=lambda result: bool(result),
-            # FIXME: Something aborts the LoadingScreen without it properly finishing,
-            #  so the first arg here is what ends up in the output.
-            args_from_result=lambda result: (
-                result["selected_files"],
-                list(map(lambda path: path.split("/")[-1], result["selected_files"])),
-                lambda something: ()),
+            # validate=lambda result: bool(result),
+            validate=lambda result: True,
+            args_from_result=lambda result: (),
+            # args_from_result=lambda result: (
+            #     result["selected_files"],
+            #     list(map(lambda path: path.split("/")[-1], result["selected_files"])),
+            #     lambda something: ()
+            # ),
         )
-        # FIXME: This prematurely exits when using the finally block and leaves a dangling LaunchScreen if not
+        # FIXME: This somehow breaks the state machine and makes it go to launch, no matter the validation result
+        #  - notice, that it should either go to home or exit the app - neither one happens
         self.state_machine.register(
             "loading",
-            screen=LoadingScreen,
+            screen_class=LoadingScreen,
             next_state="home",
             fallback=None,
             validate=lambda result: result == "home",
-            args_from_result=lambda result: (asyncio.sleep(0)),
+            args_from_result=lambda result: (),
         )
 
     def _register_defaults(self) -> None:

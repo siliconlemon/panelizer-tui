@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 from typing import Literal
 
@@ -103,10 +104,14 @@ class HomeScreen(Screen[dict]):
             input_widget.validators.append(img_pad_validator)
         self._update_path_display()
         self._update_numbers()
-        self._select_all_files()
+        await self._select_all_files()
 
     async def on_unmount(self) -> None:
         self.workers.cancel_all()
+
+    def _get_all_files_in_dir_blocking(self) -> list[Path]:
+        """This is a blocking I/O call."""
+        return list(Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions))
 
     @on(PathButton.Pressed, "#path-btn")
     async def path_button_pressed(self) -> None:
@@ -168,7 +173,7 @@ class HomeScreen(Screen[dict]):
         palette = self.query_one("#file-mode-palette", ChoicePalette)
         idx = palette.selected_idx
         if idx == 0:
-            self._select_all_files()
+            await self._select_all_files()
         elif idx == 1:
             self._select_individual_files()
 
@@ -178,8 +183,8 @@ class HomeScreen(Screen[dict]):
 
     async def _select_files_worker(self) -> None:
         """A screen-level worker that pushes a file select dialog and updates the UI."""
-        all_matching_files = Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions)
-
+        # Await the thread worker instead of blocking
+        all_matching_files = await asyncio.to_thread(self._get_all_files_in_dir_blocking)
         files = list(map(self._file_path_to_tuple, all_matching_files))
 
         if not files:
@@ -189,7 +194,7 @@ class HomeScreen(Screen[dict]):
                 severity="warning"
             )
             self.query_one("#file-mode-palette", ChoicePalette).select(0)
-            self._select_all_files()
+            await self._select_all_files()
             return
 
         dialog_title = f"Select Files ({", ".join(self.allowed_extensions)})"
@@ -199,7 +204,7 @@ class HomeScreen(Screen[dict]):
         if files_from_dialog is not None:
             self.selected_files = files_from_dialog
         if not self.selected_files:
-            self._select_all_files()
+            await self._select_all_files()
 
         self.query_one("#file-mode-palette", ChoicePalette).refresh_disp_state()
 
@@ -209,7 +214,7 @@ class HomeScreen(Screen[dict]):
         if new_dir:
             self._selected_dir = Path(new_dir)
             self._update_path_display()
-        self._select_all_files()
+        await self._select_all_files()
 
     def _update_ui_from_prefs(self) -> None:
         """Pulls all values from self.app.defaults and updates the UI widgets."""
@@ -260,9 +265,16 @@ class HomeScreen(Screen[dict]):
         is_selected = path_str in set(self.selected_files)
         return path.name, path_str, is_selected
 
-    def _select_all_files(self) -> None:
+    # def _select_all_files(self) -> None:
+    #     self.file_mode = "all"
+    #     all_files = Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions)
+    #     self.selected_files = [path.as_posix() for path in all_files]
+    #     self.query_one("#file-mode-palette", ChoicePalette).select(0)
+
+    async def _select_all_files(self) -> None:
         self.file_mode = "all"
-        all_files = Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions)
+        # This correctly runs the blocking code in a thread and awaits it
+        all_files = await asyncio.to_thread(self._get_all_files_in_dir_blocking)
         self.selected_files = [path.as_posix() for path in all_files]
         self.query_one("#file-mode-palette", ChoicePalette).select(0)
 

@@ -1,4 +1,6 @@
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING, Type
+
+from textual.screen import Screen
 
 if TYPE_CHECKING:
     from .neon_app import NeonApp
@@ -13,13 +15,13 @@ class StateMachine:
     class StateSpec:
         def __init__(
             self,
-            screen: Any,
+            screen_class: Type[Screen],
             next_state: str | None = None,
             fallback: str | None = None,
             validate: Callable[[Any], bool] | None = None,
             args_from_result: Callable[[Any], tuple] = None,
         ):
-            self.screen = screen
+            self.screen = screen_class
             self.next = next_state
             self.fallback = fallback
             self.validate = validate or (lambda result: True)
@@ -40,7 +42,7 @@ class StateMachine:
         self,
         state_name: str,
         *,
-        screen: Any,
+        screen_class: Type[Screen],
         next_state: str | None = None,
         fallback: str | None = None,
         validate: Callable[[Any], bool] | None = None,
@@ -51,7 +53,7 @@ class StateMachine:
         transition logic, and result validation.
         """
         self.specs[state_name] = StateMachine.StateSpec(
-            screen=screen,
+            screen_class=screen_class,
             next_state=next_state,
             fallback=fallback,
             validate=validate,
@@ -70,18 +72,11 @@ class StateMachine:
                 if not spec:
                     self._app.exit("No spec in the StateMachine loop.")
                     return
-                scr = (
-                    spec.screen
-                    if not isinstance(spec.screen, str)
-                    else self._app.SCREENS[spec.screen]
-                )
-                if callable(scr):
-                    screen_instance = scr(*args) if args else scr()
-                else:
-                    screen_instance = scr
-                result = await self._app.push_screen_wait(
-                    screen_instance if not isinstance(spec.screen, str) else spec.screen
-                )
+
+                scr_class = spec.screen
+                screen_instance = scr_class(*args) if args else scr_class()
+                result = await self._app.push_screen_wait(screen_instance)
+
                 if spec.validate(result):
                     next_state = spec.next
                     next_args = spec.args_from_result(result)

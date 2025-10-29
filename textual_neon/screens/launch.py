@@ -124,7 +124,7 @@ class LaunchScreen(Screen[bool]):
     ESCAPE_TO_MINIMIZE = True
 
     # Change these in yur inherited versions!
-    ASCII_ART_DIR = Path(__file__).parent.parent.parent.parent / "assets"
+    ASCII_ART_DIR = Path(__file__).parent.parent / "assets"
     ASCII_ART_CACHE: dict[str, str] = {}
     DEFAULT_ASCII_ART = (40, 21, "icon-grayscale-40.txt")
     ASCII_ART_VARIANTS = [
