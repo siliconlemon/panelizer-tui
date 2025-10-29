@@ -29,8 +29,6 @@ class NeonDialog(ModalScreen[Any]):
             files = await self.app.push_screen_wait(ListSelectDialog())
             self.selected_files = files or []
         ...
-        async def on_unmount(self) -> None:
-            self.workers.cancel_all()
     """
     DEFAULT_CSS = """
     NeonDialog {

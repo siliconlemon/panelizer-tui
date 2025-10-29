@@ -55,31 +55,25 @@ class Panelizer(NeonApp):
             fallback=None,
             validate=lambda result: result is True,
         )
-        # FIXME: Going back to launch has the same symptoms as the LoadingScreen,
-        #  so it's either a fault in the state machine, or bad state handling in the HomeScreen
         self.state_machine.register(
             "home",
             screen_class=HomeScreen,
-            next_state="launch",
+            next_state="loading",
             fallback=None,
-            # validate=lambda result: bool(result),
-            validate=lambda result: True,
-            args_from_result=lambda result: (),
-            # args_from_result=lambda result: (
-            #     result["selected_files"],
-            #     list(map(lambda path: path.split("/")[-1], result["selected_files"])),
-            #     lambda something: ()
-            # ),
+            validate=lambda result: bool(result),
+            args_from_result=lambda result: (
+                result["selected_files"],
+                list(map(lambda path: path.split("/")[-1], result["selected_files"])),
+                lambda file_path: f"{file_path.split('/')[-1]} processed"
+            ),
         )
-        # FIXME: This somehow breaks the state machine and makes it go to launch, no matter the validation result
-        #  - notice, that it should either go to home or exit the app - neither one happens
         self.state_machine.register(
             "loading",
             screen_class=LoadingScreen,
-            next_state="home",
+            next_state=None,
             fallback=None,
-            validate=lambda result: result == "home",
-            args_from_result=lambda result: (),
+            validate=lambda result: bool(result),
+            args_from_result=lambda result: (result,),
         )
 
     def _register_defaults(self) -> None:

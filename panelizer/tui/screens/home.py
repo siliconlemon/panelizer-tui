@@ -106,9 +106,6 @@ class HomeScreen(Screen[dict]):
         self._update_numbers()
         await self._select_all_files()
 
-    async def on_unmount(self) -> None:
-        self.workers.cancel_all()
-
     def _get_all_files_in_dir_blocking(self) -> list[Path]:
         """This is a blocking I/O call."""
         return list(Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions))
@@ -264,12 +261,6 @@ class HomeScreen(Screen[dict]):
         path_str = path.as_posix()
         is_selected = path_str in set(self.selected_files)
         return path.name, path_str, is_selected
-
-    # def _select_all_files(self) -> None:
-    #     self.file_mode = "all"
-    #     all_files = Paths.all_files_in_dir(self._selected_dir, extensions=self.allowed_extensions)
-    #     self.selected_files = [path.as_posix() for path in all_files]
-    #     self.query_one("#file-mode-palette", ChoicePalette).select(0)
 
     async def _select_all_files(self) -> None:
         self.file_mode = "all"

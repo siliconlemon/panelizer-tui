@@ -1,7 +1,6 @@
 import asyncio
 from collections.abc import Callable
 from email.header import Header
-from typing import Collection
 
 from textual import on
 from textual.app import ComposeResult
@@ -146,22 +145,14 @@ class LoadingScreen(Screen):
         """Start the processing worker when the screen is mounted."""
         self.query_one(Dialog).border_title = self._title
         self.query_one(Log).write("Initializing...\n")
-        # FIXME: The bad dismiss happens even when the worker doesnt run, it's just instant that way
         self.run_worker(self.process_items, exclusive=False)
-
-    async def on_dismount(self) -> None:
-        """Cancel all workers when the screen is dismounted."""
-        self.workers.cancel_all()
 
     @on(NeonButton.Pressed, "#cancel")
     def cancel_button_pressed(self) -> None:
         """Handle cancel button press."""
-        # self.dismiss(None)
+        # self.dismiss("home")
         self.dismiss(self._results)
-        # TODO: this (self.app.exit()) works fine, so it might not be a dangling worker
-        # self.app.exit()
 
-    # FIXME: Should i somehow end the worker without dismissing the screen? it wasn't a problem before
     async def process_items(self) -> None:
         """The worker method to process items and update the UI."""
         log = self.query_one(Log)

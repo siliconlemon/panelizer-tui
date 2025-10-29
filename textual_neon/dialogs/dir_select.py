@@ -19,8 +19,6 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 self.selected_path = Path(new_dir)
                 self._update_path_display()
         ...
-        async def on_unmount(self) -> None:
-            self.workers.cancel_all()
     """
     DEFAULT_CSS = """
     DirSelectDialog {

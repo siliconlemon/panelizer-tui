@@ -19,8 +19,6 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
                 self.selected_file = Path(selected)
                 self._update_file_display()
         ...
-        async def on_unmount(self) -> None:
-            self.workers.cancel_all()
     """
     DEFAULT_CSS = """
     FileSelectDialog {
