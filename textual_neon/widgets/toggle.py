@@ -155,6 +155,9 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
         yield self._switch
         yield self._label
 
+    def watch_is_active(self, is_active: bool) -> None:
+        self.set_class(is_active, "-on")
+
     def on_switch_changed(self, event: Switch.Changed) -> None:
         event.stop()
         self.is_active = event.value
@@ -168,17 +171,11 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
         elif event.widget is self._switch:
             event.stop()
         self._switch.focus()
-        if self._switch.value:
-            self.add_class("-on")
-        else:
-            self.remove_class("-on")
 
     def _on_key(self, event: events.Key) -> None:
         if event.key == Keys.Enter or event.key == Keys.Space:
-            if not self._switch.value:
-                self.add_class("-on")
-            else:
-                self.remove_class("-on")
+            event.stop()
+            self._switch.toggle()
 
     def on_enter(self) -> None:
         self.add_class("--hover")
