@@ -19,4 +19,4 @@ venv/
 Thumbs.db
 
 # App-related
-preferences/
+settings/

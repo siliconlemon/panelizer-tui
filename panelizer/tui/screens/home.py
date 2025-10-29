@@ -11,7 +11,7 @@ from textual.widgets import Input, Header, Select
 
 from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Preferences, ChoiceButton, DefaultsButton, Paths, NeonInput
+    PathButton, Settings, ChoiceButton, DefaultsButton, Paths, NeonInput
 
 
 class HomeScreen(Screen[dict]):
@@ -20,16 +20,16 @@ class HomeScreen(Screen[dict]):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.preferences = Preferences.ensure(app=self.app)
-        p = self.preferences
-        self.allowed_extensions: list[str] = p.get("allowed_extensions")
-        self._selected_dir = Path(p.get("start_dir"))
+        self.settings = Settings.ensure(app=self.app)
+        s = self.settings
+        self.allowed_extensions: list[str] = s.get("allowed_extensions")
+        self._selected_dir = Path(s.get("start_dir"))
         self.selected_files: list[str] = []
         self.file_mode: Literal["all", "select"] = "all"
         self.max_pad_percentage = 30
 
     def compose(self) -> ComposeResult:
-        p = self.preferences
+        s = self.settings
         yield Header(icon="●")
         with Vertical(id="home-row"):
             with Horizontal(id="path-row"):
@@ -40,10 +40,10 @@ class HomeScreen(Screen[dict]):
                         rows=2,
                         columns=2,
                         values=[
-                            p.get("img_pad_left"),
-                            p.get("img_pad_right"),
-                            p.get("img_pad_top"),
-                            p.get("img_pad_bottom")
+                            s.get("img_pad_left"),
+                            s.get("img_pad_right"),
+                            s.get("img_pad_top"),
+                            s.get("img_pad_bottom")
                         ],
                         labels=["Left", "Right", "Top", "Bottom"],
                         input_ids=["pad-left", "pad-right", "pad-top", "pad-bottom"],
@@ -53,21 +53,21 @@ class HomeScreen(Screen[dict]):
                     yield Toggle(
                         switch_id="split-wide-toggle-switch",
                         text="Split Wide Images",
-                        is_active=p.get("split_wide_active"),
+                        is_active=s.get("split_wide_active"),
                         id="split-wide-toggle",
                     )
                     yield Toggle(
                         switch_id="stack-landscape-toggle-switch",
                         text="Stack Landscape Images",
-                        is_active=p.get("stack_landscape_active"),
+                        is_active=s.get("stack_landscape_active"),
                         id="stack-landscape-toggle",
                     )
                 with Vertical(id="second-column"):
                     yield CompleteSelect(
                         select_id="bg-select",
                         label="Background Color",
-                        initial=p.get("background_color"),
-                        options=p.get("background_color_options"),
+                        initial=s.get("background_color"),
+                        options=s.get("background_color_options"),
                     )
                     yield DefaultsPalette(
                         save_btn_id="save-defaults-btn",
@@ -124,40 +124,40 @@ class HomeScreen(Screen[dict]):
                 self.notify(f"Invalid value for {event.input.id}", severity="error")
                 val = 0
             val = max(0, min(self.max_pad_percentage, val))
-            self.preferences.set(mapping[event.input.id], val)
+            self.settings.set(mapping[event.input.id], val)
             self._update_padding_inputs()
 
     @on(Select.Changed, "#bg-select")
     async def bg_select_changed(self, event: Select.Changed) -> None:
-        self.preferences.set("background_color", str(event.value))
+        self.settings.set("background_color", str(event.value))
 
     @on(Toggle.Changed, "#split-wide-toggle")
     async def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
-        self.preferences.set("split_wide_active", event.active)
+        self.settings.set("split_wide_active", event.active)
 
     @on(Toggle.Changed, "#stack-landscape-toggle")
     async def stack_landscape_toggle_changed(self, event: Toggle.Changed) -> None:
-        self.preferences.set("stack_landscape_active", event.active)
+        self.settings.set("stack_landscape_active", event.active)
 
     @on(DefaultsButton.Pressed, "#save-defaults-btn")
     async def save_defaults_button_pressed(self) -> None:
-        self.preferences.set("start_dir", self._selected_dir.as_posix())
-        self.preferences.save()
+        self.settings.set("start_dir", self._selected_dir.as_posix())
+        self.settings.save()
         self.notify("Preferences have been saved.", severity="information")
 
     @on(DefaultsButton.Pressed, "#restore-defaults-btn")
     async def restore_defaults_button_pressed(self) -> None:
-        self.preferences.load()
+        self.settings.load()
         self._update_ui_from_preferences()
         self.notify("Preferences have been restored.", severity="information")
 
     @on(DefaultsButton.Pressed, "#reset-defaults-btn")
     async def reset_defaults_button_pressed(self) -> None:
-        self.preferences.reset_all()
+        self.settings.reset_all()
         self._update_ui_from_preferences()
         self.notify(
             "Preferences have been reset to factory defaults.\n"
-            "Click 'Save' to overwrite your preferences with these values.", severity="warning"
+            "Click 'Save' to overwrite your settings with these values.", severity="warning"
         )
 
     @on(ChoiceButton.Selected)
@@ -208,16 +208,16 @@ class HomeScreen(Screen[dict]):
         await self._select_all_files()
 
     def _update_ui_from_preferences(self) -> None:
-        """Pulls all values from self.preferences and updates the UI widgets."""
-        p = self.preferences
-        self._selected_dir = Path(p.get("start_dir"))
+        """Pulls all values from self.settings and updates the UI widgets."""
+        s = self.settings
+        self._selected_dir = Path(s.get("start_dir"))
         self._update_path_display()
         self._update_padding_inputs()
         bg_select = self.query_one("#bg-select", Select)
-        bg_select.set_options(p.get("background_color_options"))
-        bg_select.value = p.get("background_color")
-        self.query_one("#split-wide-toggle", Toggle).value = p.get("split_wide_active")
-        self.query_one("#stack-landscape-toggle", Toggle).value = p.get("stack_landscape_active")
+        bg_select.set_options(s.get("background_color_options"))
+        bg_select.value = s.get("background_color")
+        self.query_one("#split-wide-toggle", Toggle).value = s.get("split_wide_active")
+        self.query_one("#stack-landscape-toggle", Toggle).value = s.get("stack_landscape_active")
 
     def _update_path_display(self) -> None:
         """Updates the PathButton label from the internal _selected_dir state."""
@@ -226,12 +226,12 @@ class HomeScreen(Screen[dict]):
         path_btn.label = path
 
     def _update_padding_inputs(self) -> None:
-        """Updates padding input values by reading directly from preferences."""
-        p = self.preferences
-        self.query_one("#pad-left", Input).value = str(p.get("img_pad_left"))
-        self.query_one("#pad-right", Input).value = str(p.get("img_pad_right"))
-        self.query_one("#pad-top", Input).value = str(p.get("img_pad_top"))
-        self.query_one("#pad-bottom", Input).value = str(p.get("img_pad_bottom"))
+        """Updates padding input values by reading directly from settings."""
+        s = self.settings
+        self.query_one("#pad-left", Input).value = str(s.get("img_pad_left"))
+        self.query_one("#pad-right", Input).value = str(s.get("img_pad_right"))
+        self.query_one("#pad-top", Input).value = str(s.get("img_pad_top"))
+        self.query_one("#pad-bottom", Input).value = str(s.get("img_pad_bottom"))
 
     def _file_path_to_tuple(self, path: Path) -> tuple[str, str, bool]:
         """Formats a Path object into a tuple for the ListSelectDialog."""
@@ -273,18 +273,18 @@ class HomeScreen(Screen[dict]):
                 severity="error"
             )
             return
-        p = self.preferences
+        s = self.settings
         settings = {
             "selected_dir": str(self._selected_dir),
             "selected_files": self.selected_files,
-            "background_color": p.get("background_color"),
-            "split_wide_images": p.get("split_wide_active"),
-            "stack_landscape_images": p.get("stack_landscape_active"),
+            "background_color": s.get("background_color"),
+            "split_wide_images": s.get("split_wide_active"),
+            "stack_landscape_images": s.get("stack_landscape_active"),
             "padding": {
-                "left": p.get("img_pad_left"),
-                "right": p.get("img_pad_right"),
-                "top": p.get("img_pad_top"),
-                "bottom": p.get("img_pad_bottom"),
+                "left": s.get("img_pad_left"),
+                "right": s.get("img_pad_right"),
+                "top": s.get("img_pad_top"),
+                "bottom": s.get("img_pad_bottom"),
             },
         }
         self.dismiss(settings)

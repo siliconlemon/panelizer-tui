@@ -9,45 +9,45 @@ from textual.app import App
 from textual_neon.utils.paths import Paths
 
 
-class Preferences:
+class Settings:
     """
-    Manages preferences and default fallbacks using a registry pattern.
+    Manages settings and default fallbacks using a registry pattern.
 
     - The 'registry' holds the original, hardcoded 'factory' defaults.
-    - 'Preferences' holds the user's saved preferences, which are loaded from and saved to a JSON config file.
-    - 'Get' operations prioritize preferences before falling back to the registry.
+    - 'Settings' holds the user's saved settings, which are loaded from and saved to a JSON config file.
+    - 'Get' operations prioritize settings before falling back to the registry.
     """
-    DEFAULT_PREFS_DIR = Paths.app_base_dir() / "preferences"
+    DEFAULT_PREFS_DIR = Paths.app_base_dir() / "settings"
 
     @staticmethod
-    def ensure(*, app: "App") -> "Preferences":
+    def ensure(*, app: "App") -> "Settings":
         """
-        Ensures the app has a 'preferences' attribute.
+        Ensures the app has a 'settings' attribute.
         Use this in your screens to avoid linter warnings and other odd stuff.
 
         Usage:
         ::
             # In your Screen's __init__
-            self.preferences = Preferences.ensure(app=self.app)
-            p = self.preferences
-            self.some_preference: int = p.get("some_preference")
+            self.settings = Settings.ensure(app=self.app)
+            s = self.settings
+            self.some_setting: int = p.get("some_setting")
 
             # The rest of the screen's methods
-            p = self.preferences
-            p.set("some_preference", new_value)
+            s = self.settings
+            p.set("some_setting", new_value)
         """
-        if hasattr(app, "preferences"):
-            if not isinstance(app.preferences, Preferences):
+        if hasattr(app, "settings"):
+            if not isinstance(app.settings, Settings):
                 raise AttributeError(
-                    f"App must have the 'preferences' attribute set to an instance of 'Preferences'. "
-                    f"Different type detected: {type(app.preferences)}"
+                    f"App must have the 'settings' attribute set to an instance of 'Settings'. "
+                    f"Different type detected: {type(app.settings)}"
                 )
             else:
-                return app.preferences
-        app.preferences = Preferences(config_dir=Preferences.DEFAULT_PREFS_DIR)
-        return app.preferences
+                return app.settings
+        app.settings = Settings(config_dir=Settings.DEFAULT_PREFS_DIR)
+        return app.settings
 
-    def __init__(self, config_dir: Path = DEFAULT_PREFS_DIR, config_file: str = "preferences.json"):
+    def __init__(self, config_dir: Path = DEFAULT_PREFS_DIR, config_file: str = "settings.json"):
         self.config_file: Path = config_dir / config_file
         self._registry: Dict[str, Any] = {}
         self._user_prefs: Dict[str, Any] = {}
@@ -67,7 +67,7 @@ class Preferences:
 
         if caller_self is None or not isinstance(caller_self, App):
             print(
-                f"[Warning] Preferences.register_default(key='{key}') was called from a non-App context "
+                f"[Warning] Settings.register_default(key='{key}') was called from a non-App context "
                 f"(from function '{caller_name}').\n"
                 f"Factory defaults should be registered in your App's __init__ or a method "
                 f"called by it to ensure a single source of truth.\n"
@@ -78,7 +78,7 @@ class Preferences:
     def unregister_default(self, key: str) -> None:
         """
         Removes a 'factory default' from the registry.
-        Also removes any corresponding preferences to prevent orphans.
+        Also removes any corresponding settings to prevent orphans.
         """
         self._registry.pop(key, None)
         self._user_prefs.pop(key, None)
@@ -89,7 +89,7 @@ class Preferences:
         Prioritizes the user's saved default, then the factory default.
 
         Raises:
-            KeyError: If the key is not in the preferences *or* the registry.
+            KeyError: If the key is not in the settings *or* the registry.
         """
         if key in self._user_prefs:
             return self._user_prefs[key]
@@ -99,13 +99,13 @@ class Preferences:
 
     def set(self, key: str, value: Any) -> None:
         """
-        Sets a user preference in memory.
+        Sets a user setting in memory.
         This does NOT save it to the file until 'save()' is called.
         """
         self._user_prefs[key] = value
 
     def get_all(self) -> Dict[str, Any]:
-        """Returns a dictionary of all current settings, merging factory defaults with user preferences."""
+        """Returns a dictionary of all current settings, merging factory defaults with user settings."""
         current_settings = self._registry.copy()
         current_settings.update(self._user_prefs)
 
@@ -113,8 +113,8 @@ class Preferences:
 
     def load(self) -> None:
         """
-        Loads user preferences from the config file into memory.
-        If the file doesn't exist or is corrupt, preferences will be empty.
+        Loads user settings from the config file into memory.
+        If the file doesn't exist or is corrupt, settings will be empty.
         """
         if self.config_file.exists():
             try:
@@ -130,37 +130,37 @@ class Preferences:
             self._user_prefs = {}
 
     def save(self) -> None:
-        """Saves the current user preferences from memory to the config file."""
+        """Saves the current user settings from memory to the config file."""
         try:
             self.config_file.parent.mkdir(parents=True, exist_ok=True)
             with self.config_file.open("w") as f:
                 json.dump(self._user_prefs, f, indent=2, sort_keys=True)
         except IOError as e:
-            print(f"[Preferences] Error saving config file: {e}")
+            print(f"[Settings] Error saving config file: {e}")
 
     def reset(self, key: str) -> None:
         """
-        Resets a single user preference back to its factory value by removing it from
-        the user's preferences. Does not persist until saved.
+        Resets a single user setting back to its factory value by removing it from
+        the user's settings. Does not persist until saved.
         """
         self._user_prefs.pop(key, None)
 
     def reset_all(self) -> None:
         """
-        Resets ALL user preferences back to factory defaults by clearing
-        the user preference map. Does not persist until saved.
+        Resets ALL user settings back to factory defaults by clearing
+        the user setting map. Does not persist until saved.
         """
         self._user_prefs.clear()
 
-    def set_preference(self, key: str, value: Any) -> Callable:
+    def save_setting(self, key: str, value: Any) -> Callable:
         """
         Decorator factory. When the decorated function (sync or async)
         finishes successfully, it sets the provided key/value and
-        saves it to the 'preferences' file.
+        saves it to the 'settings' file.
 
-        Usage (assuming self.app.preferences is your Preferences instance):
+        Usage (assuming self.app.settings is your Settings instance):
         ::
-            @self.app.preferences.set_preference("user.name", "Default User")
+            @self.app.settings.save_setting("user.name", "Default User")
             async def on_button_pressed(self, ...):
                 # button logic ...
         """
@@ -169,7 +169,7 @@ class Preferences:
                 @functools.wraps(func)
                 async def async_wrapper(*args, **kwargs):
                     return_value = await func(*args, **kwargs)
-                    print(f"[Preferences] Async func {func.__name__} finished. "
+                    print(f"[Settings] Async func {func.__name__} finished. "
                           f"Setting '{key}' to '{value}' and saving.")
                     self.set(key, value)
                     self.save()
@@ -179,7 +179,7 @@ class Preferences:
                 @functools.wraps(func)
                 def sync_wrapper(*args, **kwargs):
                     return_value = func(*args, **kwargs)
-                    print(f"[Preferences] Sync func {func.__name__} finished. Setting '{key}' to '{value}' and saving.")
+                    print(f"[Settings] Sync func {func.__name__} finished. Setting '{key}' to '{value}' and saving.")
                     self.set(key, value)
                     self.save()
                     return return_value

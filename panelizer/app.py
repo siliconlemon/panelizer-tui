@@ -2,7 +2,7 @@ from pathlib import Path
 
 from textual.theme import Theme
 
-from textual_neon import NeonApp, Preferences, Paths, LoadingScreen
+from textual_neon import NeonApp, Settings, Paths, LoadingScreen
 from .tui import HomeScreen
 from .tui import PanelizerLaunchScreen
 
@@ -44,9 +44,9 @@ class Panelizer(NeonApp):
     def __init__(self) -> None:
         super().__init__()
 
-        self.preferences = Preferences(config_dir=Path("./preferences"))
+        self.settings = Settings(config_dir=Path("./settings"))
         self._register_defaults()
-        self.preferences.load()
+        self.settings.load()
 
         self.state_machine.register(
             "launch",
@@ -81,14 +81,14 @@ class Panelizer(NeonApp):
         Central place to define all default values for the app.
         These are the "factory settings."
         """
-        p = self.preferences
-        p.register_default("start_dir", Paths.pictures().as_posix())
-        p.register_default("allowed_extensions", ["jpg", "jpeg", "png"])
-        p.register_default("img_pad_left", 8)
-        p.register_default("img_pad_right", 8)
-        p.register_default("img_pad_top", 5)
-        p.register_default("img_pad_bottom", 5)
-        p.register_default(
+        s = self.settings
+        s.register_default("start_dir", Paths.pictures().as_posix())
+        s.register_default("allowed_extensions", ["jpg", "jpeg", "png"])
+        s.register_default("img_pad_left", 8)
+        s.register_default("img_pad_right", 8)
+        s.register_default("img_pad_top", 5)
+        s.register_default("img_pad_bottom", 5)
+        s.register_default(
             "background_color_options",
             [
                 ("White", "white"),
@@ -97,9 +97,9 @@ class Panelizer(NeonApp):
                 ("Black", "black"),
             ],
         )
-        p.register_default("background_color", "white")
-        p.register_default("split_wide_active", False)
-        p.register_default("stack_landscape_active", False)
+        s.register_default("background_color", "white")
+        s.register_default("split_wide_active", False)
+        s.register_default("stack_landscape_active", False)
 
 
 def terminal_entry():
