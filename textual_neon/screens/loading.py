@@ -4,10 +4,9 @@ from email.header import Header
 
 from textual import on
 from textual.app import ComposeResult
-from textual.containers import Horizontal
+from textual.containers import Horizontal, Container
 from textual.screen import Screen
 from textual.widgets import Digits, ProgressBar, LoadingIndicator, Log, Static, Header
-from textual_fspicker.base_dialog import Dialog
 
 from textual_neon.widgets.neon_button import NeonButton
 
@@ -22,7 +21,7 @@ class LoadingScreen(Screen):
         align: center middle;
         background: $background;
 
-        Dialog#loading-container {
+        Container#loading-container {
             align: center middle;
             width: 80%;
             max-width: 90;
@@ -130,7 +129,7 @@ class LoadingScreen(Screen):
     def compose(self) -> ComposeResult:
         """Create the child widgets for the loading screen."""
         yield Header(icon="●")
-        with Dialog(id="loading-container"):
+        with Container(id="loading-container"):
             with Horizontal():
                 yield Digits("0".rjust(self._justified_digits, '0'), id="current")
                 yield Static("  ╱\n ╱ \n╱  ")
@@ -143,7 +142,7 @@ class LoadingScreen(Screen):
 
     async def on_mount(self) -> None:
         """Start the processing worker when the screen is mounted."""
-        self.query_one(Dialog).border_title = self._title
+        self.query_one("#loading-container", Container).border_title = self._title
         self.query_one(Log).write("Initializing...\n")
         self.run_worker(self.process_items, exclusive=False)
 
