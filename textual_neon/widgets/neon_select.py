@@ -25,10 +25,12 @@ class NeonSelect(Select, inherit_css=True):
         }
         
         & > SelectOverlay {
+            color: $text;
             padding: 0 0 0 1 !important;
         }
         
         OptionList {
+            color: $text;
             background: transparent;
             padding: 0;
             &:focus-within, &:hover {
@@ -36,7 +38,7 @@ class NeonSelect(Select, inherit_css=True):
             }
         }
         
-        SelectCurrent > #label {
+        SelectCurrent > Static#label {
             color: $text;
             border: round $accent 50%;
             background: transparent;
@@ -45,15 +47,21 @@ class NeonSelect(Select, inherit_css=True):
             }
         }
         
-        &:focus SelectCurrent #label {
+        SelectCurrent.-has-value > Static#label {
+            color: $text;
+        }
+        
+        &:focus SelectCurrent > Static#label {
+            color: $text;
             border: round $accent;
+            text-style: $button-focus-text-style;
             &:hover {
                 border: round $accent 50%;
             }
         }
         
-        &:focus SelectCurrent > #label {
-            text-style: $button-focus-text-style;
+        &:focus SelectCurrent.-has-value > Static#label {
+            color: $text;
         }
         
         SelectCurrent > .arrow {
