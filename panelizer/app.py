@@ -48,6 +48,7 @@ class Panelizer(NeonApp):
         self.settings = Settings(config_dir=Path("./settings"))
         self._register_defaults()
         self.settings.load()
+        self._check_saved_theme()
 
         self.state_machine.register(
             "launch",
@@ -84,12 +85,29 @@ class Panelizer(NeonApp):
             validate=lambda result: result == "home" or result is None,
         )
 
+    def _check_saved_theme(self) -> None:
+        if hasattr(self, "settings"):
+            theme = self.settings.get("theme")
+            if theme:
+                self.theme = self.settings.get("theme")
+                return
+        self.theme = "default"
+
+    def watch_theme(self, old_theme: str, new_theme: str) -> None:
+        if new_theme in self.available_themes:
+            if hasattr(self, "settings") and not new_theme == self.settings.get("theme"):
+                self.settings.set("theme", new_theme)
+                self.settings.save()
+        else:
+            self.theme = old_theme
+
     def _register_defaults(self) -> None:
         """
         Central place to define all default values for the app.
         These are the "factory settings."
         """
         s = self.settings
+        s.register_default("theme", "default")
         s.register_default("start_dir", Paths.pictures().as_posix())
         s.register_default("allowed_extensions", ["jpg", "jpeg", "png"])
         s.register_default("img_pad_left", 8)

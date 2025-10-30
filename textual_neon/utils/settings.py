@@ -13,8 +13,9 @@ class Settings:
     """
     Manages settings and default fallbacks using a registry pattern.
 
-    - The 'registry' holds the original, hardcoded 'factory' defaults.
-    - 'Settings' holds the user's saved settings, which are loaded from and saved to a JSON config file.
+    - The 'registry' holds the original, hardcoded 'factory' defaults using 'register_default'.
+    - 'Settings' holds the user's saved settings, which are loaded from and saved
+      to a JSON config file using 'load', 'set' and 'save'.
     - 'Get' operations prioritize settings before falling back to the registry.
     """
     DEFAULT_PREFS_DIR = Paths.app_base_dir() / "settings"
@@ -31,10 +32,27 @@ class Settings:
             self.settings = Settings.ensure(app=self.app)
             s = self.settings
             self.some_setting: int = p.get("some_setting")
-
+            ...
             # The rest of the screen's methods
             s = self.settings
-            p.set("some_setting", new_value)
+            s.set("some_setting", new_value)
+            ...
+            # A setting watcher example
+            def watch_theme(self, old_theme: str, new_theme: str) -> None:
+                if new_theme in self.available_themes:
+                    if hasattr(self, "settings") and not new_theme == self.settings.get("theme"):
+                        self.settings.set("theme", new_theme)
+                        self.settings.save()
+                else:
+                    self.theme = old_theme
+            ...
+            def watch_theme(self, old_theme: str, new_theme: str) -> None:
+                if new_theme in self.available_themes:
+                    if hasattr(self, "settings"):
+                        self.settings.set("theme", new_theme)
+                        self.settings.save()
+                else:
+                    self.theme = old_theme
         """
         if hasattr(app, "settings"):
             if not isinstance(app.settings, Settings):
@@ -152,37 +170,39 @@ class Settings:
         """
         self._user_prefs.clear()
 
-    def save_setting(self, key: str, value: Any) -> Callable:
+    def save_result(self, key: str) -> Callable:
         """
         Decorator factory. When the decorated function (sync or async)
-        finishes successfully, it sets the provided key/value and
-        saves it to the 'settings' file.
+        finishes successfully, it saves the *return value* of the function
+        to the specified 'key' and persists it to the 'settings' file.
 
         Usage (assuming self.app.settings is your Settings instance):
         ::
-            @self.app.settings.save_setting("user.name", "Default User")
-            async def on_button_pressed(self, ...):
-                # button logic ...
+            @self.app.settings.save_result("user.name")
+            async def get_user_name_from_dialog(self) -> str:
+                #... logic to show a dialog ...
+                return "The User's Name"
+
+            # After this runs, settings will contain {"user.name": "The User's Name"}
         """
         def decorator(func: Callable) -> Callable:
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                return_value = await func(*args, **kwargs)
+                self.set(key, return_value)
+                self.save()
+                return return_value
+
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                return_value = func(*args, **kwargs)
+                self.set(key, return_value)
+                self.save()
+                return return_value
+
             if inspect.iscoroutinefunction(func):
-                @functools.wraps(func)
-                async def async_wrapper(*args, **kwargs):
-                    return_value = await func(*args, **kwargs)
-                    print(f"[Settings] Async func {func.__name__} finished. "
-                          f"Setting '{key}' to '{value}' and saving.")
-                    self.set(key, value)
-                    self.save()
-                    return return_value
                 return async_wrapper
             else:
-                @functools.wraps(func)
-                def sync_wrapper(*args, **kwargs):
-                    return_value = func(*args, **kwargs)
-                    print(f"[Settings] Sync func {func.__name__} finished. Setting '{key}' to '{value}' and saving.")
-                    self.set(key, value)
-                    self.save()
-                    return return_value
                 return sync_wrapper
 
         return decorator
