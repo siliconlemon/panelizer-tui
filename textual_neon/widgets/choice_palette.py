@@ -58,22 +58,25 @@ class ChoicePalette(Widget, inherit_css=True):
     def compose(self):
         self._buttons.clear()
         container = Horizontal if self.orientation == "horizontal" else Vertical
-        num = len(self.labels)
+        num_labels = len(self.labels)
         with container():
             for idx, label in enumerate(self.labels):
+                action = self.actions[idx] if idx < len(self.actions) else None
+                label_selected = self.labels_when_selected[idx] \
+                    if idx < len(self.labels_when_selected) else None
                 btn = ChoiceButton(
                     label=label,
-                    action=self.actions[idx] if idx < len(self.actions) else None,
-                    label_when_selected=self.labels_when_selected[idx]
-                        if idx < len(self.labels_when_selected) else None,
+                    action=action,
+                    label_when_selected=label_selected,
                 )
+                is_last = (idx == num_labels - 1)
                 if self.orientation == "horizontal":
-                    if idx < num - 1:
-                        btn.styles.margin = (0, 2, 0, 1)
-                    else:
-                        btn.styles.margin = (0, 1, 0, 2)
-                elif self.orientation == "vertical" and idx < num - 1:
-                        btn.styles.margin = (0, 0, 1, 0)
+                    right = 1 if is_last else 2
+                    left = 2 if is_last else 1
+                    btn.styles.margin = (0, right, 0, left)
+                else:
+                    bottom = 0 if is_last else 1
+                    btn.styles.margin = (0, 1, bottom, 1)
                 self._buttons.append(btn)
                 yield btn
 
