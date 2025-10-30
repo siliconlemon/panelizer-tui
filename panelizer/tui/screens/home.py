@@ -77,6 +77,7 @@ class HomeScreen(Screen[dict]):
                         label="Default Values",
                     )
             yield ChoicePalette(
+                name="File Selection Mode",
                 labels=["All Files in Dir", "Select Files"],
                 actions=[None, None],
                 default_idx=0,

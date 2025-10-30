@@ -29,6 +29,8 @@ class ChoicePalette(Widget, inherit_css=True):
         height: auto;
         width: 100%;
         Horizontal, Vertical {
+            border: round $foreground 60%;
+            border-title-color: $foreground 70%;
             height: auto;
         }
     }
@@ -37,6 +39,7 @@ class ChoicePalette(Widget, inherit_css=True):
     def __init__(
         self,
         *,
+        name: str,
         labels: list[str],
         actions: list[Callable | None],
         default_idx: int | None = None,
@@ -44,7 +47,7 @@ class ChoicePalette(Widget, inherit_css=True):
         orientation: Literal["horizontal", "vertical"] = "horizontal",
         **kwargs
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(name=name, **kwargs)
         self.orientation = orientation
         self.labels = labels
         self.actions = actions or [None] * len(labels)
@@ -66,15 +69,19 @@ class ChoicePalette(Widget, inherit_css=True):
                 )
                 if self.orientation == "horizontal":
                     if idx < num - 1:
-                        btn.styles.margin = (0, 2, 0, 0)
+                        btn.styles.margin = (0, 2, 0, 1)
                     else:
-                        btn.styles.margin = (0, 0, 0, 2)
+                        btn.styles.margin = (0, 1, 0, 2)
                 elif self.orientation == "vertical" and idx < num - 1:
                         btn.styles.margin = (0, 0, 1, 0)
                 self._buttons.append(btn)
                 yield btn
 
     async def on_mount(self) -> None:
+        if self.orientation == "horizontal":
+            self.query_one(Horizontal).border_title = self.name
+        elif self.orientation == "vertical":
+            self.query_one(Vertical).border_title = self.name
         idx = self._default_idx
         if (
             idx is not None
