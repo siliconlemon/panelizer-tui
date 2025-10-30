@@ -31,7 +31,7 @@ class HomeScreen(Screen[dict]):
     def compose(self) -> ComposeResult:
         s = self.settings
         yield Header(icon="●")
-        with Vertical(id="home-row"):
+        with Vertical(id="home-container"):
             with Horizontal(id="path-row"):
                 yield PathButton(self._selected_dir.as_posix(), id="path-btn")
             with Horizontal(id="main-row"):
