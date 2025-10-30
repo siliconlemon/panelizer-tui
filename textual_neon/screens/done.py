@@ -9,11 +9,11 @@ from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
 
 DEFAULT_ART = """
- █████  ██       ██         ██████   ██████  ███   ██ ███████ ██
-██   ██ ██       ██         ██   ██ ██    ██ ████  ██ ██      ██
-███████ ██       ██         ██   ██ ██    ██ ██ ██ ██ █████   ██
-██   ██ ██       ██         ██   ██ ██    ██ ██  ████ ██        
-██   ██ ███████  ███████    ██████   ██████  ██   ███ ███████ ██
+ █████  ██     ██        ██████   ██████  ███   ██ ███████ ██
+██   ██ ██     ██        ██   ██ ██    ██ ████  ██ ██      ██
+███████ ██     ██        ██   ██ ██    ██ ██ ██ ██ █████   ██
+██   ██ ██     ██        ██   ██ ██    ██ ██  ████ ██        
+██   ██ ██████ ██████    ██████   ██████  ██   ███ ███████ ██
 """
 
 
@@ -42,7 +42,6 @@ class DoneScreen(Screen[str | None]):
                 }
             }
         }
-
         InertLabel#text {
             width: 100%;
             height: auto;
@@ -50,7 +49,6 @@ class DoneScreen(Screen[str | None]):
             margin: 0 0 1 0;
             color: $foreground 70%;
         }
-
         Horizontal#buttons {
             layout: horizontal;
             height: 3;
