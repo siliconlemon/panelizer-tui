@@ -8,7 +8,7 @@ class NeonInput(Input, inherit_css=False):
     DEFAULT_CSS = """
     NeonInput {
         color: $text;
-        border: round $accent 50%;
+        border: round $foreground 80%;
         background: transparent;
         scrollbar-size-horizontal: 0;
         width: 100%;
@@ -20,7 +20,7 @@ class NeonInput(Input, inherit_css=False):
         
         /* Does not allow compact layout */
         &.-textual-compact {
-            border: round $accent 50%;
+            border: round $foreground 80%;
             height: 3;
             padding: 0 1;
             &.-invalid {

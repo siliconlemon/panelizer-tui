@@ -115,6 +115,7 @@ class LaunchScreen(Screen[bool]):
             background: transparent;
             border: none !important;
             margin: 0 0 1 0;
+            padding: 0 1 0 1;
             FooterKey.-command-palette {
                 border: none !important;
             }
