@@ -72,13 +72,14 @@ class StateMachine:
                 if not spec:
                     self._app.exit("No spec in the StateMachine loop.")
                     return
-
                 scr_class = spec.screen
                 screen_instance = scr_class(*args) if args else scr_class()
                 result = await self._app.push_screen_wait(screen_instance)
-
                 if spec.validate(result):
-                    next_state = spec.next
+                    if callable(spec.next):
+                        next_state = spec.next(result)
+                    else:
+                        next_state = spec.next
                     next_args = spec.args_from_result(result)
                 elif spec.fallback:
                     next_state = spec.fallback
@@ -90,6 +91,5 @@ class StateMachine:
                 args = next_args
 
             self._app.exit(args[0] if args else None)
-
         except Exception as e:
-            self._app.exit(e)
+            self._app.exit(f"[Exception caught]: {e}")
