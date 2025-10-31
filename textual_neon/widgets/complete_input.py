@@ -25,7 +25,7 @@ class CompleteInput(Widget):
         }
         
         InertLabel#unit {
-            color: $text-muted;
+            color: $foreground 70%;
             width: 2;
             margin: 1 0 0 1;
         }

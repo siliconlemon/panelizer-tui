@@ -13,9 +13,21 @@ class PathButton(NeonButton):
         overflow-x: hidden;
         width: 1fr;
         max-width: 100%;
+        color: $foreground;
+        border: round $accent;
 
         &:hover {
             text-style: underline;
+            color: $foreground 70%;
+            border: round $accent 60%;
+        }
+        &.-active {
+            color: $foreground 40%;
+            border: round $accent 30%;
+        }
+        &:disabled {
+            color: $foreground 30%;
+            border: round $accent 20%;
         }
     }
     """

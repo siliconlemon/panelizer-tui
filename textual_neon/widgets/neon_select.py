@@ -34,13 +34,13 @@ class NeonSelect(Select, inherit_css=True):
             background: transparent;
             padding: 0;
             &:focus-within, &:hover {
-                border: round $accent 50%;
+                border: round $foreground 80%;
             }
         }
         
         SelectCurrent > Static#label {
             color: $text;
-            border: round $accent 50%;
+            border: round $foreground 80%;
             background: transparent;
             &:hover {
                 border: round $accent;
@@ -56,7 +56,7 @@ class NeonSelect(Select, inherit_css=True):
             border: round $accent;
             text-style: $button-focus-text-style;
             &:hover {
-                border: round $accent 50%;
+                border: round $foreground 80%;
             }
         }
         

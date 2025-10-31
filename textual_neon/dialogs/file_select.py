@@ -25,7 +25,7 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
 
         OptionList {
             background: transparent;
-            border: round $accent 50%;
+            border: round $foreground 80%;
             &:focus-within, &:hover {
                 border: round $accent;
             }
@@ -37,7 +37,8 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
         }
 
         Dialog {
-            border: round $accent 50%;
+            border: round $foreground 60%;
+            border-title-color: $foreground 70%;
             padding: 0;
         }
 
@@ -49,7 +50,7 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
 
         CurrentDirectory {
             color: $text;
-            border: round $accent 50%;
+            border: round $foreground 80%;
         }
         
         Input {
@@ -59,7 +60,7 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
 
         & Input {
             color: $text;
-            border: round $accent 50%;
+            border: round $foreground 80%;
             background: transparent;
         }
 

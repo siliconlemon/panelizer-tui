@@ -37,10 +37,10 @@ class NeonDialog(ModalScreen[Any]):
         Dialog {
             width: 80%;
             height: 80%;
-            border: round $accent 50%;
+            border: round $foreground 60%;
             background: $panel;
-            border-title-color: $text;
-            border-subtitle-color: $text;
+            border-title-color: $foreground 70%;
+            border-subtitle-color: $foreground 70%;
             border-title-background: transparent;
             border-subtitle-background: transparent;
     
@@ -50,8 +50,8 @@ class NeonDialog(ModalScreen[Any]):
             }
             
             NeonButton#close {
-                color: $text 60%;
-                border: round $accent 60%;
+                color: $foreground 80%;
+                border: round $foreground 70%;
             
                 min-width: 5;
                 max-width: 5;
@@ -59,24 +59,24 @@ class NeonDialog(ModalScreen[Any]):
                 dock: right;
                 
                 &:hover {
-                    color: $text;
+                    color: $accent;
                     border: round $accent;
                 }
                 &:focus {
-                    color: $text;
+                    color: $accent;
                     border: round $accent;
                     &:hover {
-                        color: $text 60%;
+                        color: $accent 70%;
                         border: round $accent 60%;
                     }
                 }
                 &.-active {
-                    color: $text 40%;
-                    border: round $accent 40%;
+                    color: $accent 40%;
+                    border: round $accent 30%;
                 }
                 &:disabled {
-                    color: $text 30%;
-                    border: round $accent 30%;
+                    color: $foreground 40%;
+                    border: round $foreground 30%;
                 }
             }
         }

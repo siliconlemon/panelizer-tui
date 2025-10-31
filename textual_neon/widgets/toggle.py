@@ -9,7 +9,8 @@ from textual.widgets import Switch
 
 from ..widgets.inert_label import InertLabel
 
-
+# FIXME: Somehow there is a state where the border on an -on toggle is accent,
+#  not success-lighten-2 (right side of the switch)
 # TODO: Add custom emissions for Toggle, block the switch events
 class Toggle(Widget, inherit_css=False, can_focus=False):
     """A button emulation combining a Switch and a clickable label within a horizontal container."""
@@ -19,20 +20,63 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
         height: 3;
         padding: 0 1 0 0;
         layout: horizontal;
-        border: round $accent 50%;
+        border: round $foreground 80%;
+        
+        Switch {
+            height: 1;
+            padding: 0;
+            margin: 0 1 0 1;
+            background: transparent;
+            border: none;
 
-        &.--hover, &:focus-within {
+            &.-on .switch--slider {
+                color: $success-lighten-2;
+                background: $panel-darken-3;
+                border: none;
+            }
+
+            & .switch--slider {
+                color: $foreground 50%;
+                background: $panel-darken-3;
+                border: none;
+            }
+
+            &:focus {
+                color: $accent;
+                background: $panel-darken-3;
+                border: none;
+            }
+        }
+        
+        &.--hover {
             border: round $accent;
             &.-on {
                 border: round $success;
             }
             Switch {
                 &.-on .switch--slider {
-                    color: $success-lighten-1;
+                    color: $success-lighten-2 80%;
                     background: $panel-darken-3;
                 }
                 & .switch--slider {
-                    color: $accent 70%;
+                    color: $accent 60%;
+                    background: $panel-darken-3;
+                }
+            }
+        }
+
+        &:focus-within {
+            border: round $accent;
+            &.-on {
+                border: round $success;
+            }
+            Switch {
+                &.-on .switch--slider {
+                    color: $success-lighten-2;
+                    background: $panel-darken-3;
+                }
+                & .switch--slider {
+                    color: $accent 80%;
                     background: $panel-darken-3;
                 }
             }
@@ -44,18 +88,18 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
                 border: round $success 60%;
             }
             InertLabel {
-                color: $text 60%;
+                color: $foreground 60%;
             }
             &.-on InertLabel {
-                color: $success-lighten-1 60%;
+                color: $success-lighten-2 60%;
             }
             Switch {
                 &.-on .switch--slider {
-                    color: $success-lighten-1 60%;
+                    color: $success-lighten-2 60%;
                     background: $panel-darken-3;
                 }
                 & .switch--slider {
-                    color: $accent 50%;
+                    color: $accent 60%;
                     background: $panel-darken-3;
                 }
             }
@@ -65,20 +109,20 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
             text-style: $button-focus-text-style;
         }
         &:hover {
-            color: $text 60%;
+            color: $foreground 60%;
             border: round $accent 60%;
         }
         &.-active {
-            color: $text 40%;
-            border: round $accent 40%;
+            color: $foreground 40%;
+            border: round $accent 30%;
         }
         &:disabled {
-            color: $text 30%;
-            border: round $accent 30%;
+            color: $foreground 30%;
+            border: round $accent 20%;
         }
 
         &.-on InertLabel {
-            color: $success-lighten-1;
+            color: $success-lighten-2;
         }
 
         InertLabel {
@@ -88,37 +132,11 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
             padding: 0 1 0 1;
             text-style: bold;
             background: transparent;
-            color: $text;
+            color: $foreground 80%;
         }
 
         &:focus-within InertLabel {
             text-style: $button-focus-text-style;
-        }
-
-        Switch {
-            height: 1;
-            padding: 0;
-            margin: 0 1 0 1;
-            background: transparent;
-            border: none;
-
-            &.-on .switch--slider {
-                color: $success;
-                background: $panel-darken-3;
-                border: none;
-            }
-
-            & .switch--slider {
-                color: $accent 40%;
-                background: $panel-darken-3;
-                border: none;
-            }
-
-            &:focus {
-                color: $accent;
-                background: $panel-darken-3;
-                border: none;
-            }
         }
     }
     """

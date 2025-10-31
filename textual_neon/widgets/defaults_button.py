@@ -13,8 +13,8 @@ class DefaultsButton(Button, inherit_css=False):
     """A skin for textual's native button widget. Used for the save, restore or reset actions."""
     DEFAULT_CSS = """
     DefaultsButton {
-        color: $text;
-        border: round $accent 50%;
+        color: $foreground;
+        border: round $foreground 80%;
         background: transparent;
         height: auto;
         min-width: 8;
@@ -26,54 +26,81 @@ class DefaultsButton(Button, inherit_css=False):
             border: round $accent;
         }
         &:hover {
-            color: $text 60%;
+            color: $foreground 80%;
             border: round $accent;
         }
         &:focus:hover {
-            border: round $accent 50%;
+            border: round $accent 60%;
         }
         &.-active {
-            color: $text 40%;
-            border: round $accent 40%;
+            color: $foreground 40%;
+            border: round $accent 30%;
         }
         &:disabled {
-            color: $text 30%;
-            border: round $accent 30%;
+            color: $foreground 30%;
+            border: round $accent 20%;
         }
         
         &.-save {
-            &:focus, &:hover {
-                color: $success-lighten-1;
+            &:focus {
+                color: $success-lighten-2;
+                border: round $success-lighten-2 80%;
+            }
+            &:hover {
+                color: $foreground 80%;
+                border: round $success-lighten-2 80%;
+            }
+            &:focus:hover {
+                color: $success-lighten-2 70%;
+                border: round $success-lighten-2 60%;
             }
             &.-active {
-                color: $success-lighten-1 40%;
+                color: $success-lighten-2 40%;
             }
             &:disabled {
-                color: $success-lighten-1 20%;
+                color: $success-lighten-2 20%;
             }
         }
         
         &.-restore {
-            &:focus, &:hover {
-                color: $warning-lighten-1;
+            &:focus {
+                color: $warning-lighten-2;
+                border: round $warning-lighten-2 80%;
+            }
+            &:hover {
+                color: $foreground 80%;
+                border: round $warning-lighten-2 80%;
+            }
+            &:focus:hover {
+                color: $warning-lighten-2 70%;
+                border: round $warning-lighten-2 60%;
             }
             &.-active {
-                color: $warning-lighten-1 40%;
+                color: $warning-lighten-2 40%;
             }
             &:disabled {
-                color: $warning-lighten-1 20%;
+                color: $warning-lighten-2 20%;
             }
         }
 
         &.-reset {
-            &:focus, &:hover {
-                color: $error-lighten-1;
+            &:focus {
+                color: $error-lighten-2;
+                border: round $error-lighten-2 80%;
+            }
+            &:hover {
+                color: $foreground 80%;
+                border: round $error-lighten-2 80%;
+            }
+            &:focus:hover {
+                color: $error-lighten-2 70%;
+                border: round $error-lighten-2 60%;
             }
             &.-active {
-                color: $error-lighten-1 40%;
+                color: $error-lighten-2 40%;
             }
             &:disabled {
-                color: $error-lighten-1 20%;
+                color: $error-lighten-2 20%;
             }
         }
     }

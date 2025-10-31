@@ -19,33 +19,33 @@ class ChoiceButton(NeonButton, inherit_css=True):
         min-height: 3;
         min-width: 14;
         padding: 0;
-        color: $accent 60%;
-        border: round $accent 50%;
+        color: $foreground 70%;
+        border: round $foreground 60%;
         
         &:hover {
-            color: $text;
-            border: round $accent;
+            color: $foreground;
+            border: round $foreground;
         }
         &:focus {
-            color: $text;
-            border: round $accent 60%;
+            color: $foreground;
+            border: round $foreground;
             &:hover {
-                color: $text;
-                border: round $accent;
+                color: $foreground 70%;
+                border: round $accent 60%;
             }
         }
         &.--selected {
-            color: $text;
+            color: $foreground;
             border: round $accent;
             &:hover {
-                color: $text;
-                border: round $accent;
+                color: $foreground 70%;
+                border: round $accent 60%;
             }
             &:focus {
-                color: $text;
+                color: $foreground;
                 border: round $accent;
                 &:hover {
-                    color: $text;
+                    color: $foreground 70%;
                     border: round $accent 60%;
                 }
             }

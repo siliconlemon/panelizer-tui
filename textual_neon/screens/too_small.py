@@ -33,7 +33,7 @@ class TooSmallScreen(ModalScreen[None]):
         }
 
         #msg_size {
-            color: $text;
+            color: $foreground;
             text-style: bold;
             margin: 0;
         }

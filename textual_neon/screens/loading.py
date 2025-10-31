@@ -27,9 +27,9 @@ class LoadingScreen(Screen):
             max-width: 90;
             height: auto;
             padding: 1 2 1 2;
-            color: $text;
-            border: round $accent 50%;
-            border-title-color: $text;
+            color: $foreground 70%;
+            border: round $foreground 60%;
+            border-title-color: $foreground 70%;
             background: transparent;
 
             Horizontal {
@@ -79,7 +79,7 @@ class LoadingScreen(Screen):
                 width: 100%;
                 height: 15;
                 padding: 0 1 0 1;
-                border: round $accent 50%;
+                border: round $foreground 60%;
                 background: transparent;
                 scrollbar-size-vertical: 0;
                 scrollbar-size-horizontal: 0;
@@ -87,7 +87,7 @@ class LoadingScreen(Screen):
                     background-tint: transparent;
                     border: round $accent;
                     &:hover {
-                        border: round $accent 50%;
+                        border: round $foreground 60%;
                     }
                 }
                 &:hover {

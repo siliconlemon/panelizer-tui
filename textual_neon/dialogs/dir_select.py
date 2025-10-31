@@ -25,7 +25,7 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
     
         OptionList {
             background: transparent;
-            border: round $accent 50%;
+            border: round $foreground 80%;
             &:focus-within, &:hover {
                 border: round $accent;
             }
@@ -37,7 +37,7 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
         }
         
         Dialog {
-            border: round $accent 50%;
+            border: round $foreground 80%;
             padding: 0;
         }
     
@@ -49,13 +49,13 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
         
         CurrentDirectory {
             color: $text;
-            border: round $accent 50%;
+            border: round $foreground 80%;
             margin-left: 2;
         }
         
         & Input {
             color: $text;
-            border: round $accent 50%;
+            border: round $foreground 80%;
             background: transparent;
         }
         

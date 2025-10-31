@@ -6,7 +6,7 @@ class InertLabel(Label, inherit_css=False):
     ALLOW_SELECT = False
     DEFAULT_CSS = """
     InertLabel {
-        color: $text;
+        color: $foreground;
         height: auto;
         width: auto;
     }
