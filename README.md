@@ -4,15 +4,17 @@
 
 # Panelizer TUI
 
-A TUI (text user interface) tool for laying out pictures onto clean, instagram-ready carousel panels. 
+A TUI (terminal user interface) tool for laying out pictures onto clean, instagram-ready carousel panels. 
 
-<img width="688" alt="launch-screen" src="https://github.com/user-attachments/assets/858d7021-103e-4128-84d1-25f4a125316e" />
+<!--suppress CheckImageSize -->
+<img width="688" alt="launch-screen" src="/assets/launch-screen.png" />
 
 ## Features
 
 - A fast and lightweight `textual-based` TUI 
 - Works with all common aspect ratios like 3:4, 4:5, 3:2, and anything between 16:9 and 5:2
-- Fits every picture onto one or two 2000×2500px portrait mode panels, based on proportional padding for both the horizontal and vertical axis
+- Fits every picture onto one or two portrait-mode panels (4:5 or 3:4), based on proportional padding for both the horizontal and vertical axis
+- In Constant Border mode, the panels are padded with a constant border, defined by a percentage of the image's width.
 
 ## Pricing
 
@@ -33,4 +35,4 @@ for this to work properly.
       
 ## License
 
-MIT License ([@siliconlemon](https://github.com/siliconlemon)) — see the [LICENSE](LICENSE) file for full text.
+MIT License ([@siliconlemon](https://github.com/siliconlemon)) — see [LICENSE](LICENSE) for full text.
