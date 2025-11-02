@@ -14,7 +14,7 @@ class DefaultsButton(Button, inherit_css=False):
     DEFAULT_CSS = """
     DefaultsButton {
         color: $foreground;
-        border: round $foreground 80%;
+        border: round $foreground 70%;
         background: transparent;
         height: auto;
         min-width: 8;

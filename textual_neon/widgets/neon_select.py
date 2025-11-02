@@ -34,7 +34,7 @@ class NeonSelect(Select, inherit_css=True):
             background: transparent;
             padding: 0;
             &:focus-within, &:hover {
-                border: round $foreground 80%;
+                border: round $foreground 70%;
             }
             & > .option-list--option-highlighted {
                 color: $block-cursor-blurred-foreground;
@@ -53,7 +53,7 @@ class NeonSelect(Select, inherit_css=True):
         
         SelectCurrent > Static#label {
             color: $text;
-            border: round $foreground 80%;
+            border: round $foreground 70%;
             background: transparent;
             &:hover {
                 color: $text 70% !important; 

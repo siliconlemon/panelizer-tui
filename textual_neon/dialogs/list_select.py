@@ -31,7 +31,7 @@ class ListSelectDialog(NeonDialog):
         }
     
         & SelectionList {
-            border: round $foreground 80%;
+            border: round $foreground 70%;
             margin: 0;
             padding: 0;
             width: auto;
