@@ -72,9 +72,9 @@ class Panelizer(NeonApp):
         self.state_machine.register(
             "loading",
             screen_class=LoadingScreen,
-            next_state="done",
+            next_state=lambda result: "done" if result[0] == "continue" else "home",
             fallback=None,
-            validate=lambda result: bool(result),
+            validate=lambda result: result in [("continue", True), ("cancel", False), ("cancel", True)],
             args_from_result=lambda result: (),
         )
         self.state_machine.register(

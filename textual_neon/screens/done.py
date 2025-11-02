@@ -1,9 +1,8 @@
-import textual
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
-from textual.widgets import Footer, Header, Static
+from textual.widgets import Header, Footer
 
 from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
