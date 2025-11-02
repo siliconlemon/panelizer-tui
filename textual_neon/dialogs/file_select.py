@@ -85,94 +85,94 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
             height: auto;
             min-width: 8;
             text-align: center;
-            color: $primary-lighten-1;
+            color: $text-primary;
             border: round $primary;
             background: transparent;
             &:hover {
-                color: $primary-lighten-1 60%;
+                color: $text-primary 60%;
                 border: round $primary 60%;
             }
             &.-active {
-                color: $primary-lighten-1 40%;
+                color: $text-primary 40%;
                 border: round $primary 40%;
             }
             &:disabled {
-                color: $primary-lighten-1 20%;
+                color: $text-primary 20%;
                 border: round $primary 20%;
             }
 
             &.-primary {
-                color: $primary-lighten-1;
+                color: $text-primary;
                 border: round $primary;
                 background: transparent;
 
                 &:hover {
-                    color: $primary-lighten-1 60%;
+                    color: $text-primary 60%;
                     border: round $primary 60%;
                 }
                 &.-active {
-                    color: $primary-lighten-1 40%;
+                    color: $text-primary 40%;
                     border: round $primary 40%;
                 }
                 &:disabled {
-                    color: $primary-lighten-1 20%;
+                    color: $text-primary 20%;
                     border: round $primary 20%;
                 }
             }
 
             &.-success {
-                color: $success-lighten-1;
+                color: $text-success;
                 border: round $success;
                 background: transparent;
 
                 &:hover {
-                    color: $success-lighten-1 60%;
+                    color: $text-success 60%;
                     border: round $success 60%;
                 }
                 &.-active {
-                    color: $success-lighten-1 40%;
+                    color: $text-success 40%;
                     border: round $success 40%;
                 }
                 &:disabled {
-                    color: $success-lighten-1 20%;
+                    color: $text-success 20%;
                     border: round $primary 20%;
                 }
             }
 
             &.-warning{
-                color: $warning-lighten-1;
+                color: $text-warning;
                 border: round $warning;
                 background: transparent;
 
                 &:hover {
-                    color: $warning-lighten-1 60%;
+                    color: $text-warning 60%;
                     border: round $warning 60%;
                 }
                 &.-active {
-                    color: $warning-lighten-1 40%;
+                    color: $text-warning 40%;
                     border: round $warning 40%;
                 }
                 &:disabled {
-                    color: $warning-lighten-1 20%;
+                    color: $text-warning 20%;
                     border: round $warning 20%;
                 }
             }
 
             &.-error {
-                color: $error-lighten-1;
+                color: $text-error;
                 border: round $error;
                 background: transparent;
 
                 &:hover {
-                    color: $error-lighten-1 60%;
+                    color: $text-error 60%;
                     border: round $error 60%;
                 }
                 &.-active {
-                    color: $error-lighten-1 40%;
+                    color: $text-error 40%;
                     border: round $error 40%;
                 }
                 &:disabled {
-                    color: $error-lighten-1 20%;
+                    color: $text-error 20%;
                     border: round $error 20%;
                 }
             }

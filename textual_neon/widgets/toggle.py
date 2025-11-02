@@ -68,7 +68,7 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
                 border: none;
             }
             &:focus {
-                color: $accent;
+                color: $text-accent;
                 background: $panel-darken-3;
                 border: none;
             }

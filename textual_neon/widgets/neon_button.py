@@ -40,7 +40,7 @@ class NeonButton(Button, inherit_css=False):
         }
         
         &.-primary {
-            color: $primary-lighten-1;
+            color: $text-primary;
             border: round $primary;
             background: transparent;
             
@@ -49,23 +49,23 @@ class NeonButton(Button, inherit_css=False):
                 border: round $accent;
             }
             &:hover {
-                color: $primary-lighten-1 70%;
+                color: $text-primary 70%;
                 border: round $accent;
             }
             &:focus:hover {
                 border: round $accent 60%;
             }
             &.-active {
-                color: $primary-lighten-1 40%;
+                color: $text-primary 40%;
             }
             &:disabled {
-                color: $primary-lighten-1 40%;
+                color: $text-primary 40%;
                 border: round $primary 30%;
             }
         }
         
         &.-success {
-            color: $success-lighten-1;
+            color: $text-success;
             border: round $success;
             background: transparent;
             
@@ -74,23 +74,23 @@ class NeonButton(Button, inherit_css=False):
                 border: round $accent;
             }
             &:hover {
-                color: $success-lighten-1 70%;
+                color: $text-success 70%;
                 border: round $accent;
             }
             &:focus:hover {
                 border: round $accent 60%;
             }
             &.-active {
-                color: $success-lighten-1 40%;
+                color: $text-success 40%;
             }
             &:disabled {
-                color: $success-lighten-1 40%;
+                color: $text-success 40%;
                 border: round $success 30%;
             }
         }
         
         &.-warning{
-            color: $warning-lighten-1;
+            color: $text-warning;
             border: round $warning;
             background: transparent;
             
@@ -99,23 +99,23 @@ class NeonButton(Button, inherit_css=False):
                 border: round $accent;
             }
             &:hover {
-                color: $warning-lighten-1 70%;
+                color: $text-warning 70%;
                 border: round $accent;
             }
             &:focus:hover {
                 border: round $accent 60%;
             }
             &.-active {
-                color: $warning-lighten-1 40%;
+                color: $text-warning 40%;
             }
             &:disabled {
-                color: $warning-lighten-1 40%;
+                color: $text-warning 40%;
                 border: round $warning 30%;
             }
         }
 
         &.-error {
-            color: $error-lighten-1;
+            color: $text-error;
             border: round $error;
             background: transparent;
             
@@ -124,17 +124,17 @@ class NeonButton(Button, inherit_css=False):
                 border: round $accent;
             }
             &:hover {
-                color: $error-lighten-1 70%;
+                color: $text-error 70%;
                 border: round $accent;
             }
             &:focus:hover {
                 border: round $accent 60%;
             }
             &.-active {
-                color: $error-lighten-1 40%;
+                color: $text-error 40%;
             }
             &:disabled {
-                color: $error-lighten-1 40%;
+                color: $text-error 40%;
                 border: round $error 30%;
             }
         }

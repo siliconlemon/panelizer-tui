@@ -59,19 +59,19 @@ class NeonDialog(ModalScreen[Any]):
                 dock: right;
                 
                 &:hover {
-                    color: $accent;
+                    color: $text-accent;
                     border: round $accent;
                 }
                 &:focus {
-                    color: $accent;
+                    color: $text-accent;
                     border: round $accent;
                     &:hover {
-                        color: $accent 70%;
+                        color: $text-accent 70%;
                         border: round $accent 60%;
                     }
                 }
                 &.-active {
-                    color: $accent 40%;
+                    color: $text-accent 40%;
                     border: round $accent 30%;
                 }
                 &:disabled {

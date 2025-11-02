@@ -85,22 +85,22 @@ class DefaultsButton(Button, inherit_css=False):
 
         &.-reset {
             &:focus {
-                color: $error-lighten-2;
+                color: $text-error;
                 border: round $error-lighten-2 80%;
             }
             &:hover {
                 color: $foreground 80%;
-                border: round $error-lighten-2 80%;
+                border: round $text-error 80%;
             }
             &:focus:hover {
-                color: $error-lighten-2 70%;
-                border: round $error-lighten-2 60%;
+                color: $text-error 70%;
+                border: round $text-error 60%;
             }
             &.-active {
-                color: $error-lighten-2 40%;
+                color: $text-error 40%;
             }
             &:disabled {
-                color: $error-lighten-2 20%;
+                color: $text-error 20%;
             }
         }
     }
