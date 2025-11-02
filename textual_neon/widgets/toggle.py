@@ -9,9 +9,7 @@ from textual.widgets import Switch
 
 from ..widgets.inert_label import InertLabel
 
-# FIXME: Somehow there is a state where the border on an -on toggle is accent,
-#  not success-lighten-2 (right side of the switch)
-# TODO: Add custom emissions for Toggle, block the switch events
+# TODO: Might want to block the switch emissions
 class Toggle(Widget, inherit_css=False, can_focus=False):
     """A button emulation combining a Switch and a clickable label within a horizontal container."""
     DEFAULT_CSS = """
