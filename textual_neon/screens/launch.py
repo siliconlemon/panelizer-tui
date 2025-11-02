@@ -42,7 +42,7 @@ class LaunchScreen(Screen[bool]):
                 (40, 22, "icon-grayscale-40.txt"),
                 (50, 27, "icon-grayscale-50.txt"),
                 (60, 33, "icon-grayscale-60.txt"),
-                (70, 38, "icon-grayscale-70.txt"),
+                (70, 38, "icon-70-17.txt"),
             ]
             ASCII_PAINTER_COLORMAP = {
                 "*": "#b2b2b2",
@@ -82,7 +82,7 @@ class LaunchScreen(Screen[bool]):
         Container#alignment {
             width: 100%;
             height: 1fr;
-            padding: 3 14;
+            padding: 3 8;
             layout: horizontal;
             align: center middle;
         }
@@ -127,21 +127,13 @@ class LaunchScreen(Screen[bool]):
     # Change these in yur inherited versions!
     ASCII_ART_DIR = Path(__file__).parent.parent / "assets"
     ASCII_ART_CACHE: dict[str, str] = {}
-    DEFAULT_ASCII_ART = (40, 21, "icon-grayscale-40.txt")
+    DEFAULT_ASCII_ART = (70, 17, "icon-70-17.txt")
     ASCII_ART_VARIANTS = [
-        (28, 15, "icon-grayscale-28.txt"),
-        (30, 16, "icon-grayscale-30.txt"),
-        (40, 22, "icon-grayscale-40.txt"),
-        (50, 27, "icon-grayscale-50.txt"),
-        (60, 33, "icon-grayscale-60.txt"),
-        (70, 38, "icon-grayscale-70.txt"),
+        (70, 17, "icon-70-17.txt"),
     ]
     ASCII_PAINTER_COLORMAP = {
-        "*": "#b2b2b2",
-        "@": "#ffffff",
-        "%": "#a8d6e5",
-        "i": "#6b92bb",
-        ":": "#577f7e",
+        "█": "#ffffff",
+        "╱": "#23c47d",
     }
 
     class DismissRequested(Message):

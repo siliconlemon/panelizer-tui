@@ -19,6 +19,7 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
         padding: 0 1 0 0;
         layout: horizontal;
         border: round $foreground 70%;
+        text-style: none;
         
         &:focus {
             text-style: $button-focus-text-style;
