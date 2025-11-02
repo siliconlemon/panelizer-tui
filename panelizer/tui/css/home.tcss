@@ -1,0 +1,67 @@
+/*
+ * Don't mind the dollar sign assignment warnings, pycharm just doesnt have a textual plugin yet.
+ * Just disable all inspections for this file, also use scopes to enable css highlighting,
+ * with no css inspections for the textual css scope.
+ * The "term expected" warning is the only one that the scope can't suppress right now,
+ * awaiting a fix from jetbrains.
+ */
+
+HomeScreen {
+    align: center middle;
+    layout: vertical;
+}
+
+#home-container {
+    height: 100%;
+    max-height: 50;
+    min-width: 80;
+    max-width: 120;
+    padding: 2 8 2 8;
+}
+
+#path-row {
+    height: auto;
+    layout: horizontal;
+    align-horizontal: center;
+    align-vertical: middle;
+    margin-bottom: 1;
+}
+
+#main-row {
+    width: 1fr;
+    height: 1fr;
+    padding: 0 0 1 0;
+    margin-bottom: 1;
+}
+
+#first-column, #second-column {
+    width: 1fr;
+    height: auto;
+    align: left top;
+}
+
+#first-column {
+    padding: 0;
+}
+
+#second-column {
+    padding: 0 0 0 1;
+}
+
+#split-wide-toggle {
+    margin-top: 1;
+    margin-right: 5;
+}
+
+Toggle {
+    margin-right: 5;
+}
+
+#file-select-grid {
+    width: 1fr;
+    height: auto;
+    layout: grid;
+    grid-size: 2;
+    grid-columns: 1fr 1fr;
+    margin-bottom: 1;
+}
