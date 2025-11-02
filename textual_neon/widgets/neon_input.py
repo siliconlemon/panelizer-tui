@@ -27,19 +27,22 @@ class NeonInput(Input, inherit_css=False):
                 border: round $error 60%;
             }
         }
-                
         &:focus, &:hover {
             color: $text;
             background: transparent;
             border: round $accent;
         }
+        &:focus:hover {
+            color: $text 70%;
+            border: round $accent 60%;
+        }
         &:ansi {
             background: ansi_default;
             color: ansi_default;
-            &>.input--cursor {
+            & > .input--cursor {
                 text-style: reverse;
             }
-            &>.input--placeholder, &>.input--suggestion {
+            & > .input--placeholder, & > .input--suggestion {
                 text-style: dim;
                 color: ansi_default;
             }

@@ -22,93 +22,14 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
         layout: horizontal;
         border: round $foreground 80%;
         
-        Switch {
-            height: 1;
-            padding: 0;
-            margin: 0 1 0 1;
-            background: transparent;
-            border: none;
-
-            &.-on .switch--slider {
-                color: $success-lighten-2;
-                background: $panel-darken-3;
-                border: none;
-            }
-
-            & .switch--slider {
-                color: $foreground 50%;
-                background: $panel-darken-3;
-                border: none;
-            }
-
-            &:focus {
-                color: $accent;
-                background: $panel-darken-3;
-                border: none;
-            }
-        }
-        
-        &.--hover {
-            border: round $accent;
-            &.-on {
-                border: round $success;
-            }
-            Switch {
-                &.-on .switch--slider {
-                    color: $success-lighten-2 80%;
-                    background: $panel-darken-3;
-                }
-                & .switch--slider {
-                    color: $accent 60%;
-                    background: $panel-darken-3;
-                }
-            }
-        }
-
-        &:focus-within {
-            border: round $accent;
-            &.-on {
-                border: round $success;
-            }
-            Switch {
-                &.-on .switch--slider {
-                    color: $success-lighten-2;
-                    background: $panel-darken-3;
-                }
-                & .switch--slider {
-                    color: $accent 80%;
-                    background: $panel-darken-3;
-                }
-            }
-        }
-
-        &:focus-within.--hover {
-            border: round $accent 60%;
-            &.-on {
-                border: round $success 60%;
-            }
-            InertLabel {
-                color: $foreground 60%;
-            }
-            &.-on InertLabel {
-                color: $success-lighten-2 60%;
-            }
-            Switch {
-                &.-on .switch--slider {
-                    color: $success-lighten-2 60%;
-                    background: $panel-darken-3;
-                }
-                & .switch--slider {
-                    color: $accent 60%;
-                    background: $panel-darken-3;
-                }
-            }
-        }
-
         &:focus {
             text-style: $button-focus-text-style;
         }
         &:hover {
+            color: $foreground 60%;
+            border: round $accent;
+        }
+        &:focus:hover {
             color: $foreground 60%;
             border: round $accent 60%;
         }
@@ -120,11 +41,39 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
             color: $foreground 30%;
             border: round $accent 20%;
         }
-
+        &:focus-within InertLabel {
+            text-style: $button-focus-text-style;
+        }
         &.-on InertLabel {
             color: $success-lighten-2;
         }
-
+        
+        Switch {
+            height: 1;
+            padding: 0;
+            margin: 0 1 0 1;
+            background: transparent;
+            border: none;
+            
+            /*TODO: The values for success and foreground do not match */
+            
+            &.-on .switch--slider {
+                color: $success-lighten-2;
+                background: $panel-darken-3;
+                border: none;
+            }
+            & .switch--slider {
+                color: $foreground 50%;
+                background: $panel-darken-3;
+                border: none;
+            }
+            &:focus {
+                color: $accent;
+                background: $panel-darken-3;
+                border: none;
+            }
+        }
+        
         InertLabel {
             width: 1fr;
             min-height: 1;
@@ -134,9 +83,53 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
             background: transparent;
             color: $foreground 80%;
         }
+        
+        &.--hover {
+            border: round $accent;
+            Switch {
+                &.-on .switch--slider {
+                    color: $success-lighten-2;
+                    background: $panel-darken-3;
+                }
+                & .switch--slider {
+                    color: $foreground 80%;
+                    background: $panel-darken-3;
+                }
+            }
+        }
 
-        &:focus-within InertLabel {
-            text-style: $button-focus-text-style;
+        &:focus-within {
+            border: round $accent;
+            Switch {
+                &.-on .switch--slider {
+                    color: $success-lighten-2;
+                    background: $panel-darken-3;
+                }
+                & .switch--slider {
+                    color: $foreground 80%;
+                    background: $panel-darken-3;
+                }
+            }
+        }
+
+        &:focus-within.--hover {
+            border: round $accent 60%;
+            InertLabel {
+                color: $foreground 60%;
+            }
+            &.-on InertLabel {
+                color: $success-lighten-2 60%;
+            }
+            Switch {
+                &.-on .switch--slider {
+                    color: $success-lighten-2 80%;
+                    background: $panel-darken-3;
+                }
+                & .switch--slider {
+                    color: $foreground 60%;
+                    background: $panel-darken-3;
+                }
+            }
         }
     }
     """

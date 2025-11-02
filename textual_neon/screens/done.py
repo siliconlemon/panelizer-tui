@@ -47,7 +47,7 @@ class DoneScreen(Screen[str | None]):
             height: auto;
             text-align: center;
             margin: 0 0 1 0;
-            color: $foreground 70%;
+            color: $foreground 80%;
         }
         Horizontal#buttons {
             layout: horizontal;

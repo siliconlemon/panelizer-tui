@@ -85,13 +85,13 @@ class LoadingScreen(Screen):
                 scrollbar-size-horizontal: 0;
                 &:focus {
                     background-tint: transparent;
-                    border: round $accent;
+                    border: round $foreground;
                     &:hover {
                         border: round $foreground 60%;
                     }
                 }
                 &:hover {
-                    border: round $accent;
+                    border: round $foreground;
                 }
             }
         }

@@ -27,7 +27,7 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
             background: transparent;
             border: round $foreground 80%;
             &:focus-within, &:hover {
-                border: round $accent;
+                border: round $primary;
             }
         }
 
@@ -66,7 +66,7 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
 
         & Input:focus, & Input:hover {
             color: $text;
-            border: round $accent;
+            border: round $primary;
             background: transparent;
         }
 

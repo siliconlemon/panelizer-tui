@@ -14,12 +14,11 @@ class PathButton(NeonButton):
         width: 1fr;
         max-width: 100%;
         color: $foreground;
-        border: round $accent;
+        border: round $foreground;
 
         &:hover {
             text-style: underline;
-            color: $foreground 70%;
-            border: round $accent 60%;
+            color: $foreground;
         }
         &.-active {
             color: $foreground 40%;

@@ -24,30 +24,30 @@ class ChoiceButton(NeonButton, inherit_css=True):
         
         &:hover {
             color: $foreground;
-            border: round $foreground;
+            border: round $accent;
         }
         &:focus {
             color: $foreground;
-            border: round $foreground;
-            &:hover {
-                color: $foreground 70%;
-                border: round $accent 60%;
-            }
+            border: round $accent;
+        }
+        &:focus:hover {
+            color: $foreground 70%;
+            border: round $accent 60%;
         }
         &.--selected {
             color: $foreground;
-            border: round $accent;
+            border: round $foreground;
             &:hover {
                 color: $foreground 70%;
-                border: round $accent 60%;
+                border: round $accent;
             }
             &:focus {
                 color: $foreground;
                 border: round $accent;
-                &:hover {
-                    color: $foreground 70%;
-                    border: round $accent 60%;
-                }
+            }
+            &:focus:hover {
+                color: $foreground 70%;
+                border: round $accent 60%;
             }
         }
     }

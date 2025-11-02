@@ -25,9 +25,9 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
     
         OptionList {
             background: transparent;
-            border: round $foreground 80%;
+            border: round $foreground 70%;
             &:focus-within, &:hover {
-                border: round $accent;
+                border: round $foreground;
             }
         }
         
@@ -37,7 +37,7 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
         }
         
         Dialog {
-            border: round $foreground 80%;
+            border: round $foreground 70%;
             padding: 0;
         }
     
@@ -49,19 +49,19 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
         
         CurrentDirectory {
             color: $text;
-            border: round $foreground 80%;
+            border: round $foreground 70%;
             margin-left: 2;
         }
         
         & Input {
             color: $text;
-            border: round $foreground 80%;
+            border: round $foreground 70%;
             background: transparent;
         }
         
         & Input:focus, & Input:hover {
             color: $text;
-            border: round $accent;
+            border: round $foreground;
             background: transparent;
         }
         
@@ -85,14 +85,14 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
             background: transparent;
             &:hover {
                 color: $primary-lighten-1 60%;
-                border: round $primary 60%;
+                border: round $accent;
             }
             &.-active {
                 color: $primary-lighten-1 40%;
-                border: round $primary 40%;
+                border: round $primary 30%;
             }
             &:disabled {
-                color: $primary-lighten-1 20%;
+                color: $primary-lighten-1 30%;
                 border: round $primary 20%;
             }
             
@@ -103,14 +103,14 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 
                 &:hover {
                     color: $primary-lighten-1 60%;
-                    border: round $primary 60%;
+                    border: round $accent;
                 }
                 &.-active {
                     color: $primary-lighten-1 40%;
-                    border: round $primary 40%;
+                    border: round $primary 30%;
                 }
                 &:disabled {
-                    color: $primary-lighten-1 20%;
+                    color: $primary-lighten-1 30%;
                     border: round $primary 20%;
                 }
             }
@@ -126,10 +126,10 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 }
                 &.-active {
                     color: $success-lighten-1 40%;
-                    border: round $success 40%;
+                    border: round $success 30%;
                 }
                 &:disabled {
-                    color: $success-lighten-1 20%;
+                    color: $success-lighten-1 30%;
                     border: round $primary 20%;
                 }
             }
@@ -145,10 +145,10 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 }
                 &.-active {
                     color: $warning-lighten-1 40%;
-                    border: round $warning 40%;
+                    border: round $warning 30%;
                 }
                 &:disabled {
-                    color: $warning-lighten-1 20%;
+                    color: $warning-lighten-1 30%;
                     border: round $warning 20%;
                 }
             }
@@ -164,10 +164,10 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 }
                 &.-active {
                     color: $error-lighten-1 40%;
-                    border: round $error 40%;
+                    border: round $error 30%;
                 }
                 &:disabled {
-                    color: $error-lighten-1 20%;
+                    color: $error-lighten-1 30%;
                     border: round $error 20%;
                 }
             }

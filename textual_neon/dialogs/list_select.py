@@ -40,7 +40,7 @@ class ListSelectDialog(NeonDialog):
             min-height: 20;
             
             &:focus, &:hover, &:focus-within {
-                border: round $accent;
+                border: round $foreground;
             }
         }
         

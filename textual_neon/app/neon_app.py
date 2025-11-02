@@ -73,18 +73,18 @@ class NeonApp(App[Any]):
         Horizontal#--input {
             max-height: 3;
             margin: 0;
-            border-top: round $accent 70%;
+            border-top: round $foreground 70%;
             border-bottom: none !important;
-            border-left: round $accent 70%;
-            border-right: round $accent 70%;
+            border-left: round $foreground 70%;
+            border-right: round $foreground 70%;
             visibility: visible;
         }
         Vertical#--results {
             margin: 0;
             padding: 0;
-            border-bottom: round $accent 50%;
-            border-left: round $accent 50%;
-            border-right: round $accent 50%;
+            border-bottom: round $foreground 70%;
+            border-left: round $foreground 70%;
+            border-right: round $foreground 70%;
         }
     }
     CommandInput {
@@ -98,6 +98,15 @@ class NeonApp(App[Any]):
         margin: 0;
         & > .option-list--option {
             padding: 0 1 0 1 !important;
+        }
+        & > .option-list--option-highlighted {
+            background: $primary 50% !important;
+        }
+        &:focus {
+            background-tint: $foreground 5%;
+            & > .option-list--option-highlighted {
+                background: $primary 50% !important;
+            }
         }
     }
     """

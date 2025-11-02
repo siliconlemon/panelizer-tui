@@ -36,6 +36,19 @@ class NeonSelect(Select, inherit_css=True):
             &:focus-within, &:hover {
                 border: round $foreground 80%;
             }
+            & > .option-list--option-highlighted {
+                color: $block-cursor-blurred-foreground;
+                background: $accent;
+                text-style: $block-cursor-blurred-text-style;
+            }
+            &:focus {
+                background-tint: $foreground 5%;
+                & > .option-list--option-highlighted {
+                    color: $block-cursor-foreground;
+                    background: $accent;
+                    text-style: $block-cursor-text-style;
+                }
+            }
         }
         
         SelectCurrent > Static#label {
@@ -43,6 +56,7 @@ class NeonSelect(Select, inherit_css=True):
             border: round $foreground 80%;
             background: transparent;
             &:hover {
+                color: $text 70% !important; 
                 border: round $accent;
             }
         }
@@ -56,7 +70,8 @@ class NeonSelect(Select, inherit_css=True):
             border: round $accent;
             text-style: $button-focus-text-style;
             &:hover {
-                border: round $foreground 80%;
+                color: $text 70% !important; 
+                border: round $accent 60%;
             }
         }
         
