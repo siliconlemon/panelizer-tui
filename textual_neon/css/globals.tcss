@@ -6,8 +6,6 @@
  * awaiting a fix from jetbrains.
  */
 
-/* Generic Textual Elements */
-
 /* Custom element classes for common use caes */
 .wide-btn {
     width: 100;
@@ -22,28 +20,6 @@
     min-width: 20;
     padding: 0 3;
     margin: 0;
-}
-
-/* TODO: This shoudl be long gone */
-
-.choice-btn {
-    width: 1fr;
-    min-height: 3;
-    min-width: 14;
-    padding: 0;
-    color: $foreground 60%;
-    border: round $foreground 80%;
-}
-
-.choice-btn.toggled {
-    color: $foreground;
-    border: round $accent;
-}
-
-.choice-btn:hover,
-.choice-btn:focus {
-    color: $foreground;
-    border: round $foreground 80%;
 }
 
 .gap-left {
