@@ -75,8 +75,7 @@ class ChoicePalette(Widget, inherit_css=True):
                     left = 2 if is_last else 1
                     btn.styles.margin = (0, right, 0, left)
                 else:
-                    bottom = 0 if is_last else 1
-                    btn.styles.margin = (0, 1, bottom, 1)
+                    btn.styles.margin = (0, 1, 0, 1)
                 self._buttons.append(btn)
                 yield btn
 

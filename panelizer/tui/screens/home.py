@@ -11,7 +11,7 @@ from textual.widgets import Input, Header, Select
 
 from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Settings, ChoiceButton, DefaultsButton, Paths, NeonInput
+    PathButton, Settings, ChoiceButton, DefaultsButton, Paths, NeonInput, Sequence
 
 
 class HomeScreen(Screen[dict]):
@@ -76,6 +76,8 @@ class HomeScreen(Screen[dict]):
                         widget_id="defaults-widget",
                         label="Default Values",
                     )
+                    yield self._build_test_sequence()
+
             yield ChoicePalette(
                 name="File Selection Mode",
                 labels=["All Files in Dir", "Select Files"],
@@ -101,6 +103,66 @@ class HomeScreen(Screen[dict]):
         self._update_path_display()
         self._update_padding_inputs()
         await self._select_all_files()
+
+    #  ===== DEMO =====
+
+    def _build_test_sequence(self) -> Sequence:
+        """Creates and configures the test Sequence widget."""
+        seq = Sequence(
+            name="Test Sequence",
+            orientation="vertical",
+            id="my-sequence"
+        )
+        seq.register_step(
+            label="Step 1: Pass",
+            task=self._task_pass,
+            validator=self._demo_validator
+        )
+        seq.register_step(
+            label="Step 2: Pass",
+            task=self._task_pass,
+            validator=self._demo_validator
+        )
+        seq.register_step(
+            label="Step 3: Fail",
+            task=self._task_fail,
+            validator=self._demo_validator
+        )
+        return seq
+
+    async def _task_pass(self) -> str:
+        self.notify("Running step (will pass)...", title="Sequence Task")
+        await asyncio.sleep(0.75)  # Simulate I/O
+        return "Task Succeeded"
+
+    async def _task_fail(self) -> str:
+        self.notify("Running step (will fail)...", title="Sequence Task")
+        await asyncio.sleep(0.75)  # Simulate I/O
+        return "Task Reported Failure"
+
+    @staticmethod
+    def _demo_validator(result) -> bool:
+        if isinstance(result, str):
+            return result == "Task Succeeded"
+        return False
+
+    @on(Sequence.StateChange, "#my-sequence")
+    def on_sequence_state_change(self, event: Sequence.StateChange) -> None:
+        """Handles messages from our new sequence widget."""
+        if event.success:
+            self.notify(
+                f"Step {event.step_index + 1} Succeeded!\n"
+                f"Result: [b]{event.task_result}[/b]",
+                severity="information"
+            )
+        else:
+            self.notify(
+                f"Step {event.step_index + 1} Failed!\n"
+                f"Result: [b]{event.task_result}[/b]",
+                severity="error"
+            )
+
+    #  ===== /DEMO =====
 
     def _get_all_files_in_dir_blocking(self) -> list[Path]:
         """A blocking method to get all allowed files in the selected directory."""

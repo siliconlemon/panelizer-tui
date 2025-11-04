@@ -14,6 +14,7 @@ from .neon_button import NeonButton, NeonButtonVariant
 from .neon_input import NeonInput
 from .neon_select import NeonSelect
 from .path_button import PathButton
+from .sequence import Sequence
 from .toggle import Toggle
 
 __all__ = [
@@ -31,5 +32,6 @@ __all__ = [
     "NeonInput",
     "NeonSelect",
     "PathButton",
+    "Sequence",
     "Toggle"
 ]
