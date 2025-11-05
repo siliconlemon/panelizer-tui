@@ -111,7 +111,7 @@ class HomeScreen(Screen[dict]):
         seq = Sequence(
             name="Test Sequence",
             orientation="vertical",
-            id="my-sequence"
+            id="demo-sequence"
         )
         seq.register_step(
             label="Step 1: Pass",
@@ -132,12 +132,12 @@ class HomeScreen(Screen[dict]):
 
     async def _task_pass(self) -> str:
         self.notify("Running step (will pass)...", title="Sequence Task")
-        await asyncio.sleep(0.75)  # Simulate I/O
+        await asyncio.sleep(0.75)
         return "Task Succeeded"
 
     async def _task_fail(self) -> str:
         self.notify("Running step (will fail)...", title="Sequence Task")
-        await asyncio.sleep(0.75)  # Simulate I/O
+        await asyncio.sleep(0.75)
         return "Task Reported Failure"
 
     @staticmethod
@@ -146,8 +146,8 @@ class HomeScreen(Screen[dict]):
             return result == "Task Succeeded"
         return False
 
-    @on(Sequence.StateChange, "#my-sequence")
-    def on_sequence_state_change(self, event: Sequence.StateChange) -> None:
+    @on(Sequence.StateChange, "#demo-sequence")
+    def sequence_state_changed(self, event: Sequence.StateChange) -> None:
         """Handles messages from our new sequence widget."""
         if event.success:
             self.notify(
@@ -173,7 +173,7 @@ class HomeScreen(Screen[dict]):
         self.run_worker(self._select_dir_worker, exclusive=True)
 
     @on(NeonInput.Blurred)
-    async def input_blurred(self, event: Input.Submitted) -> None:
+    def input_blurred(self, event: Input.Submitted) -> None:
         mapping = {
             "pad-left": "img_pad_left",
             "pad-right": "img_pad_right",
@@ -181,26 +181,38 @@ class HomeScreen(Screen[dict]):
             "pad-bottom": "img_pad_bottom",
         }
         if event.input.id in mapping:
+            setting_key = mapping[event.input.id]
+            try:
+                old_val = int(self.settings.get(setting_key))
+            except ValueError:
+                old_val = 0
+
             try:
                 val = int(event.value)
             except ValueError:
                 self.notify(f"Invalid value for {event.input.id}", severity="error")
                 val = 0
             val = max(0, min(self.max_pad_percentage, val))
-            self.settings.set(mapping[event.input.id], val)
+
+            if val != old_val:
+                self.settings.set(setting_key, val)
+                self.query_one("#demo-sequence", Sequence).current_step = 0
             self._update_padding_inputs()
 
     @on(Select.Changed, "#bg-select")
-    async def bg_select_changed(self, event: Select.Changed) -> None:
+    def bg_select_changed(self, event: Select.Changed) -> None:
         self.settings.set("background_color", str(event.value))
+        self.query_one("#demo-sequence", Sequence).current_step = 0
 
     @on(Toggle.Changed, "#split-wide-toggle")
-    async def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
+    def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
         self.settings.set("split_wide_active", event.active)
+        self.query_one("#demo-sequence", Sequence).current_step = 0
 
     @on(Toggle.Changed, "#stack-landscape-toggle")
-    async def stack_landscape_toggle_changed(self, event: Toggle.Changed) -> None:
+    def stack_landscape_toggle_changed(self, event: Toggle.Changed) -> None:
         self.settings.set("stack_landscape_active", event.active)
+        self.query_one("#demo-sequence", Sequence).current_step = 0
 
     @on(DefaultsButton.Pressed, "#save-defaults-btn")
     async def save_defaults_button_pressed(self) -> None:
@@ -209,15 +221,17 @@ class HomeScreen(Screen[dict]):
         self.notify("Preferences have been saved.", severity="information")
 
     @on(DefaultsButton.Pressed, "#restore-defaults-btn")
-    async def restore_defaults_button_pressed(self) -> None:
+    def restore_defaults_button_pressed(self) -> None:
         self.settings.load()
         self._update_ui_from_preferences()
+        self.query_one("#demo-sequence", Sequence).current_step = 0
         self.notify("Preferences have been restored.", severity="information")
 
     @on(DefaultsButton.Pressed, "#reset-defaults-btn")
-    async def reset_defaults_button_pressed(self) -> None:
+    def reset_defaults_button_pressed(self) -> None:
         self.settings.reset_all()
         self._update_ui_from_preferences()
+        self.query_one("#demo-sequence", Sequence).current_step = 0
         self.notify(
             "Preferences have been reset to factory defaults.\n"
             "Click 'Save' to overwrite your settings with these values.", severity="warning"
@@ -238,6 +252,7 @@ class HomeScreen(Screen[dict]):
 
     async def _select_files_worker(self) -> None:
         """A screen-level worker that pushes a file select dialog and updates the UI."""
+        old_files_set = set(self.selected_files)
         all_matching_files = await asyncio.to_thread(self._get_all_files_in_dir_blocking)
         files = list(map(self._file_path_to_tuple, all_matching_files))
 
@@ -255,19 +270,25 @@ class HomeScreen(Screen[dict]):
         files_from_dialog = await self.app.push_screen_wait(
             ListSelectDialog(dialog_title, files)
         )
-        if files_from_dialog is not None:
-            self.selected_files = files_from_dialog
+        self.selected_files = files_from_dialog
+        new_files_set = set(self.selected_files)
+
         if not self.selected_files:
             await self._select_all_files()
 
+        elif new_files_set != old_files_set:
+            self.query_one("#demo-sequence", Sequence).current_step = 0
         self.query_one("#file-mode-palette", ChoicePalette).refresh_disp_state()
 
     async def _select_dir_worker(self) -> None:
         """A screen-level worker that pushes a dir select dialog and updates the UI."""
         new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self._selected_dir))
         if new_dir:
-            self._selected_dir = Path(new_dir)
-            self._update_path_display()
+            new_path = Path(new_dir)
+            if new_path != self._selected_dir:
+                self._selected_dir = new_path
+                self._update_path_display()
+                self.query_one("#demo-sequence", Sequence).current_step = 0
         await self._select_all_files()
 
     def _update_ui_from_preferences(self) -> None:
@@ -304,10 +325,15 @@ class HomeScreen(Screen[dict]):
 
     async def _select_all_files(self) -> None:
         """Sets the file mode to 'all' and populates selected_files with all valid files."""
+        old_files_set = set(self.selected_files)
+        old_mode = self.file_mode
         self.file_mode = "all"
         all_files = await asyncio.to_thread(self._get_all_files_in_dir_blocking)
         self.selected_files = [path.as_posix() for path in all_files]
         self.query_one("#file-mode-palette", ChoicePalette).select(0)
+        new_files_set = set(self.selected_files)
+        if old_mode != "all" or new_files_set != old_files_set:
+            self.query_one("#demo-sequence", Sequence).current_step = 0
 
     def _select_individual_files(self) -> None:
         """Sets the file mode to 'select' and launches the file selection worker."""

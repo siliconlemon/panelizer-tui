@@ -39,7 +39,6 @@ class Sequence(Widget, inherit_css=True):
             border-title-color: $foreground 70%;
             height: auto;
         }
-        
         & NeonButton {
             width: 1fr;
         }
@@ -169,8 +168,32 @@ class Sequence(Widget, inherit_css=True):
         if self._container:
             self._container.border_title = self.border_title
 
+    def set_step(self, target_index: int) -> None:
+        """
+        Sets the current active step, rolling back if necessary.
+        Does not execute any button logic, only moves focused based on external needs, like a change of settings.
+        Resets the result and status of all the steps left behind when rolling back.
+
+        Args:
+            target_index: The index of the step to make active.
+        """
+        if not (0 <= target_index < len(self._steps)):
+            self.app.log.warning(
+                f"Attempted to set invalid sequence step: {target_index}"
+            )
+            return
+        current_index = self._current_step_index
+        if target_index > current_index:
+            self.screen.notify(
+                "Cannot programmatically advance the sequence.",
+                severity="error",
+                title="Invalid Step"
+            )
+        elif target_index < current_index:
+            self._reset_to(target_index)
+
     @on(NeonButton.Pressed)
-    async def _handle_step_press(self, event: NeonButton.Pressed) -> None:
+    async def _handle_press(self, event: NeonButton.Pressed) -> None:
         """Handles all button presses within the sequence."""
         event.stop()
         pressed_button = cast(NeonButton, event.button)
@@ -181,7 +204,7 @@ class Sequence(Widget, inherit_css=True):
             return
 
         if self._processing_step_index is not None:
-            self.notify("A step is already in progress.", severity="warning")
+            self.screen.notify("A step is already in progress.", severity="warning")
             return
 
         is_completed = (
@@ -189,8 +212,7 @@ class Sequence(Widget, inherit_css=True):
                 and not self._steps[pressed_index].button.disabled
         )
         if is_completed:
-            self._reset_to_step(pressed_index)
-            return
+            self._reset_to(pressed_index)
 
         if pressed_index == self._current_step_index:
             self._processing_step_index = pressed_index
@@ -205,10 +227,7 @@ class Sequence(Widget, inherit_css=True):
     async def _execute_step(
             self, task: SequenceTask, validator: SequenceValidator, step_index: int
     ) -> None:
-        """
-        The worker function that executes the task and its validator.
-        Posts a StateChange message with the result.
-        """
+        """A worker function to execute a task and its validator. Posts a StateChange message with the result."""
         try:
             task_result: Any
             if inspect.iscoroutinefunction(task):
@@ -233,16 +252,14 @@ class Sequence(Widget, inherit_css=True):
         )
 
     @on(StateChange)
-    def _on_state_change(self, event: StateChange) -> None:
+    def _handle_state_change(self, event: StateChange) -> None:
         """Listens for our own message to update the UI state."""
         if event.control is not self:
             return
-
         event.stop()
         step_index = event.step_index
         if self._processing_step_index != step_index:
             return
-
         step = self._steps[step_index]
         self._steps[step_index] = step._replace(
             result=event.task_result, is_valid=event.success
@@ -263,8 +280,8 @@ class Sequence(Widget, inherit_css=True):
             step.button.variant = "error"
         self._processing_step_index = None
 
-    def _reset_to_step(self, target_index: int) -> None:
-        """ Resets the sequence state back to the target_index, clearing all later step states. """
+    def _reset_to(self, target_index: int) -> None:
+        """Resets the sequence state back to the target_index, clearing all later step states."""
         self._current_step_index = target_index
         target_step = self._steps[target_index]
         target_step.button.variant = "primary"
@@ -303,3 +320,8 @@ class Sequence(Widget, inherit_css=True):
     def current_step(self) -> int:
         """Returns the index of the current active (primary) step."""
         return self._current_step_index
+
+    @current_step.setter
+    def current_step(self, target_index: int) -> None:
+        """Sets the current active step, does not execute any button logic or go over the last available step."""
+        self.set_step(target_index)
