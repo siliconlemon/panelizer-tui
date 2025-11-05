@@ -265,17 +265,18 @@ class HomeScreen(Screen[dict]):
             self.query_one("#file-mode-palette", ChoicePalette).select(0)
             await self._select_all_files()
             return
-
         dialog_title = f"Select Files ({", ".join(self.allowed_extensions)})"
         files_from_dialog = await self.app.push_screen_wait(
             ListSelectDialog(dialog_title, files)
         )
+        if files_from_dialog is None:
+            return
+
         self.selected_files = files_from_dialog
         new_files_set = set(self.selected_files)
 
         if not self.selected_files:
             await self._select_all_files()
-
         elif new_files_set != old_files_set:
             self.query_one("#demo-sequence", Sequence).current_step = 0
         self.query_one("#file-mode-palette", ChoicePalette).refresh_disp_state()

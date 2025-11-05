@@ -109,4 +109,4 @@ class ListSelectDialog(NeonDialog):
 
     @on(NeonButton.Pressed, "#cancel")
     def cancel_button_pressed(self) -> None:
-        self.dismiss(self._initial_selection)
+        self.dismiss(None)
