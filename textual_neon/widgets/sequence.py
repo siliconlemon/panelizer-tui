@@ -196,8 +196,6 @@ class Sequence(Widget, inherit_css=True):
             self._processing_step_index = pressed_index
             step = self._steps[pressed_index]
 
-            step.button.styles.opacity = 0.5
-
             self.run_worker(
                 self._execute_step(step.task, step.validator, pressed_index),
                 exclusive=True,
@@ -246,7 +244,6 @@ class Sequence(Widget, inherit_css=True):
             return
 
         step = self._steps[step_index]
-        step.button.styles.opacity = 1.0
         self._steps[step_index] = step._replace(
             result=event.task_result, is_valid=event.success
         )
