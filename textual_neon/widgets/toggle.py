@@ -34,11 +34,11 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
         }
         &.-active {
             color: $foreground 40%;
-            border: round $accent 30%;
+            border: round $accent 40%;
         }
         &:disabled {
-            color: $foreground 30%;
-            border: round $accent 20%;
+            color: $foreground 40%;
+            border: round $accent 40%;
         }
         &:focus-within InertLabel {
             text-style: $button-focus-text-style;

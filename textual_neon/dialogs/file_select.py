@@ -97,8 +97,8 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
                 border: round $primary 40%;
             }
             &:disabled {
-                color: $text-primary 20%;
-                border: round $primary 20%;
+                color: $text-primary 40%;
+                border: round $primary 30%;
             }
 
             &.-primary {
@@ -115,8 +115,8 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
                     border: round $primary 40%;
                 }
                 &:disabled {
-                    color: $text-primary 20%;
-                    border: round $primary 20%;
+                    color: $text-primary 40%;
+                    border: round $primary 40%;
                 }
             }
 
@@ -134,8 +134,8 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
                     border: round $success 40%;
                 }
                 &:disabled {
-                    color: $text-success 20%;
-                    border: round $primary 20%;
+                    color: $text-success 40%;
+                    border: round $success 40%;
                 }
             }
 
@@ -153,8 +153,8 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
                     border: round $warning 40%;
                 }
                 &:disabled {
-                    color: $text-warning 20%;
-                    border: round $warning 20%;
+                    color: $text-warning 40%;
+                    border: round $warning 40%;
                 }
             }
 
@@ -172,8 +172,8 @@ class FileSelectDialog(BaseFileDialog, inherit_css=True):
                     border: round $error 40%;
                 }
                 &:disabled {
-                    color: $text-error 20%;
-                    border: round $error 20%;
+                    color: $text-error 40%;
+                    border: round $error 40%;
                 }
             }
         }

@@ -30,77 +30,77 @@ class DefaultsButton(Button, inherit_css=False):
             border: round $accent;
         }
         &:focus:hover {
-            border: round $accent 60%;
+            border: round $accent 70%;
         }
         &.-active {
             color: $foreground 40%;
-            border: round $accent 30%;
+            border: round $accent 40%;
         }
         &:disabled {
-            color: $foreground 30%;
-            border: round $accent 20%;
+            color: $foreground 40%;
+            border: round $accent 40%;
         }
         
         &.-save {
             &:focus {
-                color: $success-lighten-2;
-                border: round $success-lighten-2 80%;
+                color: $text-success;
+                border: round $success;
             }
             &:hover {
                 color: $foreground 80%;
-                border: round $success-lighten-2 80%;
+                border: round $success;
             }
             &:focus:hover {
-                color: $success-lighten-2 70%;
-                border: round $success-lighten-2 60%;
+                color: $text-success 70%;
+                border: round $success 70%;
             }
             &.-active {
-                color: $success-lighten-2 40%;
+                color: $text-success 40%;
             }
             &:disabled {
-                color: $success-lighten-2 20%;
+                color: $text-success 40%;
             }
         }
         
         &.-restore {
             &:focus {
-                color: $warning-lighten-2;
-                border: round $warning-lighten-2 80%;
+                color: $text-warning;
+                border: round $warning;
             }
             &:hover {
                 color: $foreground 80%;
-                border: round $warning-lighten-2 80%;
+                border: round $warning;
             }
             &:focus:hover {
-                color: $warning-lighten-2 70%;
-                border: round $warning-lighten-2 60%;
+                color: $text-warning 70%;
+                border: round $warning-lighten-2 70%;
             }
             &.-active {
-                color: $warning-lighten-2 40%;
+                color: $text-warning 40%;
             }
             &:disabled {
-                color: $warning-lighten-2 20%;
+                color: $text-warning 40%;
             }
         }
 
         &.-reset {
             &:focus {
                 color: $text-error;
-                border: round $error-lighten-2 80%;
+                border: round $error;
             }
             &:hover {
                 color: $foreground 80%;
-                border: round $text-error 80%;
+                border: round $error;
             }
             &:focus:hover {
                 color: $text-error 70%;
-                border: round $text-error 60%;
+                border: round $text-error 70%;
             }
             &.-active {
                 color: $text-error 40%;
             }
             &:disabled {
-                color: $text-error 20%;
+                color: $text-error 40%;
             }
         }
     }

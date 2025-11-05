@@ -89,11 +89,11 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
             }
             &.-active {
                 color: $text-primary 40%;
-                border: round $primary 30%;
+                border: round $primary 40%;
             }
             &:disabled {
-                color: $text-primary 30%;
-                border: round $primary 20%;
+                color: $text-primary 40%;
+                border: round $primary 40%;
             }
             
             &.-primary {
@@ -107,11 +107,11 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 }
                 &.-active {
                     color: $text-primary 40%;
-                    border: round $primary 30%;
+                    border: round $primary 40%;
                 }
                 &:disabled {
-                    color: $text-primary 30%;
-                    border: round $primary 20%;
+                    color: $text-primary 40%;
+                    border: round $primary 40%;
                 }
             }
             
@@ -126,11 +126,11 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 }
                 &.-active {
                     color: $text-success 40%;
-                    border: round $success 30%;
+                    border: round $success 40%;
                 }
                 &:disabled {
-                    color: $text-success 30%;
-                    border: round $primary 20%;
+                    color: $text-success 40%;
+                    border: round $primary 40%;
                 }
             }
             
@@ -145,11 +145,11 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 }
                 &.-active {
                     color: $text-warning 40%;
-                    border: round $warning 30%;
+                    border: round $warning 40%;
                 }
                 &:disabled {
-                    color: $text-warning 30%;
-                    border: round $warning 20%;
+                    color: $text-warning 40%;
+                    border: round $warning 40%;
                 }
             }
     
@@ -164,11 +164,11 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 }
                 &.-active {
                     color: $text-error 40%;
-                    border: round $error 30%;
+                    border: round $error 40%;
                 }
                 &:disabled {
-                    color: $text-error 30%;
-                    border: round $error 20%;
+                    color: $text-error 40%;
+                    border: round $error 40%;
                 }
             }
         }
