@@ -28,6 +28,13 @@ class Settings:
 
         Usage:
         ::
+            # In your App (cal inside init, after setting up the Settings object)
+            def _register_defaults(self) -> None:
+                s = self.settings
+                s.register_default("theme", "default")
+                s.register_default("start_dir", Paths.documents().as_posix())
+                s.register_default("allowed_extensions", ["xls", "xlsx", "xlsm", "csv"])
+            ...
             # In your Screen's __init__
             self.settings = Settings.ensure(app=self.app)
             s = self.settings

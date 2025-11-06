@@ -307,7 +307,7 @@ class HomeScreen(Screen[dict]):
 
     def _update_path_display(self) -> None:
         """Updates the PathButton label from the internal _selected_dir state."""
-        path_btn = self.query_one("#path-btn", NeonButton)
+        path_btn = self.query_one("#path-btn", PathButton)
         path = self._selected_dir.as_posix()
         path_btn.label = path
 

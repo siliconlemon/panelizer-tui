@@ -85,22 +85,6 @@ class Panelizer(NeonApp):
             validate=lambda result: result == "home" or result is None,
         )
 
-    def _check_saved_theme(self) -> None:
-        if hasattr(self, "settings"):
-            theme = self.settings.get("theme")
-            if theme:
-                self.theme = self.settings.get("theme")
-                return
-        self.theme = "default"
-
-    def watch_theme(self, old_theme: str, new_theme: str) -> None:
-        if new_theme in self.available_themes:
-            if hasattr(self, "settings") and not new_theme == self.settings.get("theme"):
-                self.settings.set("theme", new_theme)
-                self.settings.save()
-        else:
-            self.theme = old_theme
-
     def _register_defaults(self) -> None:
         """
         Central place to define all default values for the app.

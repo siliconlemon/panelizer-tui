@@ -56,12 +56,3 @@ HomeScreen {
 Toggle {
     margin-right: 5;
 }
-
-#file-select-grid {
-    width: 1fr;
-    height: auto;
-    layout: grid;
-    grid-size: 2;
-    grid-columns: 1fr 1fr;
-    margin-bottom: 1;
-}
