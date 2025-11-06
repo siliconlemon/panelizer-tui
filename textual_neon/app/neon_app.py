@@ -98,13 +98,16 @@ class NeonApp(App[Any]):
         margin: 0;
         & > .option-list--option {
             padding: 0 1 0 1 !important;
+            color: $text !important;
         }
         & > .option-list--option-highlighted {
+            color: $text !important;
             background: $primary 50% !important;
         }
         &:focus {
             background-tint: $foreground 5%;
             & > .option-list--option-highlighted {
+                color: $text !important;
                 background: $primary 50% !important;
             }
         }
