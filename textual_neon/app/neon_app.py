@@ -114,7 +114,7 @@ class NeonApp(App[Any]):
         name="default",
         primary="#26d889",
         secondary="#98a1a5",
-        accent="#26bdd6",
+        accent="#23d4c9",
         foreground="#c0c5cd",
         background="#1e1e1e",
         success="#5da643",
