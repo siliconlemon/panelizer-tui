@@ -13,7 +13,6 @@ from textual_neon.widgets.neon_button import NeonButton
 SequenceTask: TypeAlias = Callable[[], Any]
 SequenceValidator: TypeAlias = Callable[[Any], bool]
 
-
 class _StepState(NamedTuple):
     """Internal dataclass to store the state of each step."""
     button: NeonButton
@@ -28,6 +27,55 @@ class Sequence(Widget, inherit_css=True):
     A widget that manages a sequence of steps, each represented by a NeonButton.
     It ensures steps are executed in order and handles success, failure, and
     rolling back to previous steps.
+
+    Usage:
+    ::
+        # Inside your Screen (a widget would call self.screen.notify)
+        ...
+        def compose(self) -> ComposeResult:
+            yield self._build_my_sequence()
+        ...
+        def _build_my_sequence(self) -> Sequence:
+            seq = Sequence(name="Processing Steps", id="my-sequence")
+            seq.register_step(
+                label="Step 1: Validate Data",
+                task=self._run_validation_task,
+                validator=self._check_task_result
+            )
+            seq.register_step(
+                label="Step 2: Run Process",
+                task=self._run_main_task,
+                validator=self._check_task_result
+            )
+            return seq
+        ...
+        async def _task_pass(self) -> str:
+            self.notify("Running step (will pass)...", title="Sequence Task")
+            await asyncio.sleep(0.75)
+            return "Task Succeeded"
+        ...
+        async def _task_fail(self) -> str:
+            self.notify("Running step (will fail)...", title="Sequence Task")
+            await asyncio.sleep(0.75)
+            return "Task Reported Failure"
+        ...
+        @staticmethod
+        def _demo_validator(result) -> bool:
+            if isinstance(result, str):
+                return result == "Task Succeeded"
+            return False
+        ...
+        @on(Sequence.StateChange, "#my-sequence")
+        def sequence_state_changed(self, event: Sequence.StateChange) -> None:
+            if event.success:
+                self.notify(f"Step {event.step_index + 1} Succeeded!")
+            else:
+                self.notify(f"Step {event.step_index + 1} Failed!", severity="error")
+        ...
+        # Reset the sequence if a relevant setting changes
+        @on(Input.Changed, "#some-input")
+        def input_changed(self) -> None:
+            self.query_one("#my-sequence", Sequence).current_step = 0
     """
     DEFAULT_CSS = """
     Sequence {
