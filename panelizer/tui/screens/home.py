@@ -230,6 +230,7 @@ class HomeScreen(Screen[dict]):
     @on(DefaultsButton.Pressed, "#reset-defaults-btn")
     def reset_defaults_button_pressed(self) -> None:
         self.settings.reset_all()
+        self.settings.save()
         self._update_ui_from_preferences()
         self.query_one("#demo-sequence", Sequence).current_step = 0
         self.notify(

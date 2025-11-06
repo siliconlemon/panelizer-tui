@@ -7,7 +7,28 @@ from ..widgets.defaults_button import DefaultsButton
 
 
 class DefaultsPalette(Widget):
-    """A widget with a label, a horizontal line, and three buttons: Save, Restore, Reset."""
+    """
+    A widget with a label, a horizontal line, and three buttons: Save, Restore, Reset.
+
+    Usage:
+    ::
+        # Inside your screen (using textual_neon.Settings)
+        @on(DefaultsButton.Pressed, "#save-defaults-btn")
+        async def save_defaults_button_pressed(self) -> None:
+            self.settings.set("start_dir", self._selected_dir.as_posix())
+            self.settings.save()
+        ...
+        @on(DefaultsButton.Pressed, "#restore-defaults-btn")
+        def restore_defaults_button_pressed(self) -> None:
+            self.settings.load()
+            self._update_ui_from_preferences()
+        ...
+        @on(DefaultsButton.Pressed, "#reset-defaults-btn")
+        def reset_defaults_button_pressed(self) -> None:
+            self.settings.reset_all()
+            self.settings.save()
+            self._update_ui_from_preferences()
+    """
 
     DEFAULT_CSS = """
     DefaultsPalette {
