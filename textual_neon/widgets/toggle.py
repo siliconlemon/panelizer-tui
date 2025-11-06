@@ -9,7 +9,6 @@ from textual.widgets import Switch
 
 from ..widgets.inert_label import InertLabel
 
-# TODO: Might want to block the switch emissions
 class Toggle(Widget, inherit_css=False, can_focus=False):
     """A button emulation combining a Switch and a clickable label within a horizontal container."""
     DEFAULT_CSS = """
@@ -145,8 +144,6 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
             """The Toggle widget that sent the message."""
             return self.ref
 
-    is_active: reactive[bool] = reactive(False)
-
     def __init__(
             self,
             *,
@@ -156,23 +153,32 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
             **kwargs
     ):
         super().__init__(**kwargs)
-        self.is_active = is_active
-
         self._switch = Switch(value=is_active, animate=False, id=switch_id if switch_id else self.id)
-        self._label = InertLabel(" " + text + " ",)
+        self._label = InertLabel(" " + text + " ", )
+        self.set_class(is_active, "-on")
+
+    @property
+    def is_active(self) -> bool:
+        """The active state of the toggle, sourced from the internal Switch."""
+        return self._switch.value
+
+    @is_active.setter
+    def is_active(self, new_value: bool) -> None:
+        """
+        Sets the active state of the toggle.
+        This will command the internal Switch to change.
+        """
+        self._switch.value = new_value
 
     def compose(self) -> ComposeResult:
         yield self._switch
         yield self._label
 
-    def watch_is_active(self, is_active: bool) -> None:
-        self.set_class(is_active, "-on")
-
     def on_switch_changed(self, event: Switch.Changed) -> None:
+        """When the switch changes, update our CSS and notify parent."""
         event.stop()
-        self.is_active = event.value
-        local_is_active = event.value
-        self.post_message(self.Changed(self, local_is_active))
+        self.set_class(event.value, "-on")
+        self.post_message(self.Changed(self, event.value))
 
     def on_click(self, event: Click) -> None:
         if event.widget is self._label or event.widget is self:

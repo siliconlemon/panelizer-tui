@@ -74,7 +74,7 @@ class HomeScreen(Screen[dict]):
                         restore_btn_id="restore-defaults-btn",
                         reset_btn_id="reset-defaults-btn",
                         widget_id="defaults-widget",
-                        label="Default Values",
+                        label="Manage Settings",
                     )
                     yield self._build_test_sequence()
 
@@ -301,8 +301,8 @@ class HomeScreen(Screen[dict]):
         bg_select = self.query_one("#bg-select", Select)
         bg_select.set_options(s.get("background_color_options"))
         bg_select.value = s.get("background_color")
-        self.query_one("#split-wide-toggle", Toggle).value = s.get("split_wide_active")
-        self.query_one("#stack-landscape-toggle", Toggle).value = s.get("stack_landscape_active")
+        self.query_one("#split-wide-toggle", Toggle).is_active = s.get("split_wide_active")
+        self.query_one("#stack-landscape-toggle", Toggle).is_active = s.get("stack_landscape_active")
 
     def _update_path_display(self) -> None:
         """Updates the PathButton label from the internal _selected_dir state."""
