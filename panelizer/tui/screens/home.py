@@ -259,7 +259,7 @@ class HomeScreen(Screen[dict]):
 
         if not files:
             self.notify(
-                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"
+                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)}) "
                 f"found in dir {self._selected_dir.as_posix()}",
                 severity="warning"
             )
