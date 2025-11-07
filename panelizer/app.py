@@ -3,8 +3,8 @@ from pathlib import Path
 from textual.theme import Theme
 
 from textual_neon import NeonApp, Settings, Paths, LoadingScreen, DoneScreen
-from .tui import HomeScreen
-from .tui import PanelizerLaunchScreen
+from panelizer.tui import HomeScreen
+from panelizer.tui import PanelizerLaunchScreen
 
 
 class Panelizer(NeonApp):
