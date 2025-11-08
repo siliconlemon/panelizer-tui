@@ -19,7 +19,7 @@ class NeonLog(Widget):
             border: none !important;
             align: left middle !important;
         }
-        
+
         Log#log {
             color: $text 70%;
             border: round $foreground 60%;
@@ -95,7 +95,6 @@ class NeonLog(Widget):
 
         try:
             pyperclip.copy(all_text)
-            self.notify("Logs copied to clipboard!")
+            self.notify("Logs have been copied to clipboard!")
         except Exception as e:
-            # This can fail on some systems (e.g., headless CI)
             self.notify(f"Clipboard error: {e}", severity="error")
