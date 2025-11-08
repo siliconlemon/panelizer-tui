@@ -1,5 +1,4 @@
 import pyperclip
-from click.termui import visible_prompt_func
 from textual import on
 from textual.containers import Horizontal
 from textual.widget import Widget
