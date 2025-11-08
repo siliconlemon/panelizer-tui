@@ -90,7 +90,7 @@ class NeonLog(Widget):
         all_text = "\n".join(str(line) for line in log.lines)
 
         if not all_text:
-            self.notify("There is nothing to copy.", severity="warning")
+            self.notify("There are no logs to copy.", severity="warning")
             return
 
         try:
