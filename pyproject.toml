@@ -13,6 +13,7 @@ dependencies = [
     "textual>=0.40.0",
     "textual-dev>=1.8.0",
     "textual-fspicker>=0.6.0",
+    "pyperclip>=1.10",
     "pillow>=10.0.0",
     "rich>=13.0.0"
 ]

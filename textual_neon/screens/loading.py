@@ -5,9 +5,11 @@ from email.header import Header
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Container
+from textual.css.query import NoMatches
 from textual.screen import Screen
-from textual.widgets import Digits, ProgressBar, LoadingIndicator, Log, Header
+from textual.widgets import Digits, ProgressBar, LoadingIndicator, Header
 
+from textual_neon.widgets.neon_log import NeonLog
 from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
 
@@ -15,7 +17,7 @@ from textual_neon.widgets.neon_button import NeonButton
 class LoadingScreen(Screen):
     """
     A loading screen displaying progress and logs, centered on the screen.
-    Uses the Digits, ProgressBar, LoadingIndicator, and Log widgets.
+    Uses the Digits, ProgressBar, LoadingIndicator, and NeonLog widgets.
     """
     DEFAULT_CSS = """
     LoadingScreen {
@@ -72,32 +74,13 @@ class LoadingScreen(Screen):
             }
             LoadingIndicator {
                 width: 100%;
-                height: auto;
+                height: 1fr;
                 margin-bottom: 1;
+                height: 1 !important;
             }
-            Log {
-                color: $text 70%;
-                border: round $foreground 60%;
-                text-style: none;
+            NeonLog {
+                height: 18;
                 width: 100%;
-                height: 15;
-                padding: 0 1 0 1;
-                background: transparent;
-                scrollbar-size-vertical: 0;
-                scrollbar-size-horizontal: 0;
-                &:focus {
-                    color: $text;
-                    border: round $foreground;
-                    background-tint: transparent;
-                    &:hover {
-                        color: $text 70%;
-                        border: round $foreground 60%;
-                    }
-                }
-                &:hover {
-                    color: $text;
-                    border: round $foreground;
-                }
             }
         }
 
@@ -137,7 +120,7 @@ class LoadingScreen(Screen):
         self._justified_digits: int = len(str(self._total))
         self._function = function
         self._results = []
-        self._finished = False  # Internal state
+        self._finished = False
         self._continue_text = continue_text
         self._cancel_text = cancel_text
 
@@ -151,18 +134,15 @@ class LoadingScreen(Screen):
                 yield Digits(f"{self._total}".rjust(self._justified_digits, '0'), id="total")
             yield ProgressBar(self._total, show_bar=True, show_percentage=False, show_eta=False)
             yield LoadingIndicator()
-            yield Log()
+            yield NeonLog(show_clear_button=False)
         with Horizontal():
-            # "Continue" button is added here, to the left
             yield NeonButton(self._continue_text, variant="primary", id="continue")
             yield NeonButton(self._cancel_text, variant="primary", id="cancel")
 
     async def on_mount(self) -> None:
         """Start the processing worker when the screen is mounted."""
         self.query_one("#loading-container", Container).border_title = self._title
-        self.query_one(Log).write("Initializing...\n")
-
-        # Hide and disable the continue button initially
+        self.query_one(NeonLog).write("Initializing...\n")
         continue_button = self.query_one("#continue", NeonButton)
         continue_button.visible = False
         continue_button.disabled = True
@@ -173,21 +153,18 @@ class LoadingScreen(Screen):
     def cancel_button_pressed(self) -> None:
         """Handle cancel button press."""
         if self._finished:
-            # Canceled *after* finishing
             self.dismiss(("cancel", True))
         else:
-            # Canceled *before* finishing
             self.dismiss(("cancel", False))
 
     @on(NeonButton.Pressed, "#continue")
     def continue_button_pressed(self) -> None:
-        """Handle the continue button press."""
-        # This button is only pressable if self._finished is True
+        """Handle the continued button press."""
         self.dismiss(("continue", True))
 
     async def process_items(self) -> None:
         """The worker method to process items and update the UI."""
-        log = self.query_one(Log)
+        log = self.query_one(NeonLog)
         progress_bar = self.query_one(ProgressBar)
         current_digits = self.query_one("#current", Digits)
         loading_indicator = self.query_one(LoadingIndicator)
@@ -224,4 +201,4 @@ class LoadingScreen(Screen):
             continue_button.disabled = False
 
         except asyncio.CancelledError:
-            log.write_line("\nProcessing canceled.")
+            self.screen.notify("Loading screen has been abruptly closed.", severity="warning")

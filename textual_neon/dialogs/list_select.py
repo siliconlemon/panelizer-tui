@@ -6,6 +6,7 @@ from textual.containers import Horizontal
 from textual.widgets import SelectionList
 from textual_fspicker.base_dialog import Dialog
 
+from textual_neon.widgets.minimal_button import MinimalButton
 from textual_neon.dialogs.neon_dialog import NeonDialog
 from textual_neon.widgets.neon_button import NeonButton
 
@@ -49,12 +50,6 @@ class ListSelectDialog(NeonDialog):
             width: auto;
             height: auto;
             margin: 1 0 0 0;
-            
-            & > NeonButton {
-                width: auto;
-                border: none;
-                margin: 0;
-            }   
         }
     
         & Horizontal#dialog-buttons {
@@ -85,8 +80,8 @@ class ListSelectDialog(NeonDialog):
         dialog.border_title = self._title
         with dialog:
             with Horizontal(id="selection-buttons"):
-                yield NeonButton("Select All", variant="primary", id="all")
-                yield NeonButton("Select None", variant="primary", id="none")
+                yield MinimalButton("Select All", variant="primary", id="all")
+                yield MinimalButton("Select None", variant="primary", id="none")
             yield SelectionList(*self._items, id="list")
             with Horizontal(id="dialog-buttons"):
                 yield NeonButton("Confirm", variant="primary", id="confirm")

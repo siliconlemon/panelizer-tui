@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 from textual.theme import Theme
@@ -57,6 +58,10 @@ class Panelizer(NeonApp):
             fallback=None,
             validate=lambda result: result is True,
         )
+        async def process_file_demo(file_path: str) -> str:
+            await asyncio.sleep(0.01)
+            filename = file_path.rsplit('/', 1)[-1]
+            return f"{filename} processed"
         self.state_machine.register(
             "home",
             screen_class=HomeScreen,
@@ -66,7 +71,7 @@ class Panelizer(NeonApp):
             args_from_result=lambda result: (
                 result["selected_files"],
                 list(map(lambda path: path.split("/")[-1], result["selected_files"])),
-                lambda file_path: f"{file_path.split('/')[-1]} processed"
+                lambda file_path: process_file_demo(file_path.split('/')[-1])
             ),
         )
         self.state_machine.register(

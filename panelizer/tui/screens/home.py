@@ -73,8 +73,8 @@ class HomeScreen(Screen[dict]):
                         save_btn_id="save-settings-btn",
                         restore_btn_id="restore-settings-btn",
                         reset_btn_id="reset-settings-btn",
-                        widget_id="settings-widget",
                         label="Manage Settings",
+                        id="settings-widget",
                     )
                     yield self._build_test_sequence()
 
