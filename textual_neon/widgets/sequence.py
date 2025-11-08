@@ -1,6 +1,6 @@
 import asyncio
 import inspect
-from typing import NamedTuple,Literal, Callable, Any, TypeAlias, cast
+from typing import NamedTuple, Literal, Callable, Any, TypeAlias, cast
 
 from textual import on
 from textual.containers import Horizontal, Vertical
@@ -9,9 +9,9 @@ from textual.widget import Widget
 
 from textual_neon.widgets.neon_button import NeonButton
 
-
 SequenceTask: TypeAlias = Callable[[], Any]
 SequenceValidator: TypeAlias = Callable[[Any], bool]
+
 
 class _StepState(NamedTuple):
     """Internal dataclass to store the state of each step."""
@@ -81,7 +81,7 @@ class Sequence(Widget, inherit_css=True):
     Sequence {
         height: auto;
         width: 100%;
-        
+
         Horizontal, Vertical {
             border: round $foreground 60%;
             border-title-color: $foreground 70%;
@@ -98,6 +98,7 @@ class Sequence(Widget, inherit_css=True):
         Posted *after* a step's task and validator have run.
         This signals the outcome of the step.
         """
+
         def __init__(
                 self,
                 sender: "Sequence",
@@ -121,11 +122,10 @@ class Sequence(Widget, inherit_css=True):
             """A convenient alias for self.control."""
             return self.control
 
-
     def __init__(
             self,
             *,
-            name: str,
+            title: str,
             orientation: Literal["horizontal", "vertical"] = "horizontal",
             **kwargs,
     ) -> None:
@@ -137,9 +137,9 @@ class Sequence(Widget, inherit_css=True):
             orientation: The layout orientation ("horizontal" or "vertical").
             **kwargs: Additional keyword arguments for the Widget.
         """
-        super().__init__(name=name, **kwargs)
+        super().__init__(**kwargs)
         self.orientation = orientation
-        self.border_title = name
+        self.border_title = title
         self._steps: list[_StepState] = []
         self._buttons: list[NeonButton] = []
         self._container: Horizontal | Vertical | None = None
@@ -226,10 +226,11 @@ class Sequence(Widget, inherit_css=True):
             target_index: The index of the step to make active.
         """
         if not (0 <= target_index < len(self._steps)):
-            self.app.log.warning(
-                f"Attempted to set invalid sequence step: {target_index}"
+            self.screen.notify(
+                f"Attempted to set invalid sequence step: {target_index}",
+                severity="warning",
+                title="Sequence Warning"
             )
-            return
         current_index = self._current_step_index
         if target_index > current_index:
             self.screen.notify(
@@ -286,12 +287,16 @@ class Sequence(Widget, inherit_css=True):
             try:
                 is_valid = validator(task_result)
             except Exception as e:
-                self.app.log.error(f"Sequence validator for step {step_index} failed: {e}")
+                self.screen.notify(
+                    f"Validator for step {step_index + 1} failed: {e}", severity="error", title="Sequence Error"
+                )
                 is_valid = False
                 task_result = e
 
         except Exception as e:
-            self.app.log.error(f"Sequence task for step {step_index} failed: {e}")
+            self.screen.notify(
+                f"Task for step {step_index + 1} failed: {e}", severity="error", title="Sequence Error"
+            )
             is_valid = False
             task_result = e
 
@@ -323,9 +328,14 @@ class Sequence(Widget, inherit_css=True):
                 next_step.button.variant = "primary"
             else:
                 self._current_step_index = len(self._steps)
-                self.notify("Sequence complete!", severity="information")
+                self.screen.notify("Sequence complete!", severity="information")
         else:
             step.button.variant = "error"
+            self.screen.notify(
+                f"Step {step_index + 1} failed: {event.task_result}",
+                title="Sequence Failure",
+                severity="warning"
+            )
         self._processing_step_index = None
 
     def _reset_to(self, target_index: int) -> None:

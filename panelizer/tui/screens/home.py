@@ -109,7 +109,7 @@ class HomeScreen(Screen[dict]):
     def _build_test_sequence(self) -> Sequence:
         """Creates and configures the test Sequence widget."""
         seq = Sequence(
-            name="Test Sequence",
+            title="Test Sequence",
             orientation="vertical",
             id="demo-sequence"
         )
