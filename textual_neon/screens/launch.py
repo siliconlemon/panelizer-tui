@@ -7,8 +7,10 @@ from textual.events import Resize
 from textual.geometry import Size
 from textual.message import Message
 from textual.screen import Screen
-from textual.widgets import Header, Footer
+from textual.widgets import Header
 
+from textual_neon.widgets.neon_header import NeonHeader
+from textual_neon.widgets.neon_footer import  NeonFooter
 from textual_neon.utils import AsciiPainter
 from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
@@ -110,21 +112,10 @@ class LaunchScreen(Screen[bool]):
             width: 20;
             margin: 0 2;
         }
-        
-        Footer {
-            background: transparent;
-            border: none !important;
-            margin: 0 0 1 0;
-            padding: 0 1 0 1;
-            FooterKey.-command-palette {
-                border: none !important;
-            }
-        }
     }
     """
     ESCAPE_TO_MINIMIZE = True
 
-    # Change these in yur inherited versions!
     ASCII_ART_DIR = Path(__file__).parent.parent / "assets"
     ASCII_ART_CACHE: dict[str, str] = {}
     DEFAULT_ASCII_ART = (70, 17, "icon-70-17.txt")
@@ -167,7 +158,7 @@ class LaunchScreen(Screen[bool]):
         self._update_layout(event.size)
 
     def compose(self) -> ComposeResult:
-        yield Header(icon="●")
+        yield NeonHeader()
         with Container(id="main"):
             with Container(id="alignment"):
                 with Container(id="art-container"):
@@ -175,7 +166,7 @@ class LaunchScreen(Screen[bool]):
             with Container(id="buttons"):
                 yield NeonButton(self.enter_label, id="enter", classes="launch-btn", variant="primary")
                 yield NeonButton(self.exit_label, id="exit", classes="launch-btn", variant="primary")
-        yield Footer(id="footer")
+        yield NeonFooter(id="footer")
 
     async def on_button_pressed(self, event: textual.widgets.Button.Pressed) -> None:
         """Handles enter/exit button presses."""

@@ -2,10 +2,11 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
-from textual.widgets import Header, Footer
 
 from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
+from textual_neon.widgets.neon_footer import NeonFooter
+from textual_neon.widgets.neon_header import NeonHeader
 
 DEFAULT_ART = """
  █████  ██     ██        ██████   ██████  ███   ██ ███████ ██
@@ -62,15 +63,6 @@ class DoneScreen(Screen[str | None]):
             min-width: 22;
             margin: 0 2;
         }
-        Footer {
-            background: transparent;
-            border: none !important;
-            margin: 0 0 1 0;
-            padding: 0 1 0 1;
-            FooterKey.-command-palette {
-                border: none !important;
-            }
-        }
     }
     """
 
@@ -91,7 +83,7 @@ class DoneScreen(Screen[str | None]):
         self.go_back_screen = go_back_screen
 
     def compose(self) -> ComposeResult:
-        yield Header(icon="●")
+        yield NeonHeader()
         with Container(id="wrapper"):
             with Container(id="art"):
                 yield InertLabel(self.ascii_art)
@@ -108,7 +100,7 @@ class DoneScreen(Screen[str | None]):
                 id="quit",
                 variant="primary",
             )
-        yield Footer()
+        yield NeonFooter()
 
     @on(NeonButton.Pressed, "#home")
     def home_button_pressed(self) -> None:

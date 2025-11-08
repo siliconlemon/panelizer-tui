@@ -10,6 +10,8 @@ from textual.screen import Screen
 from textual.widgets import Digits, ProgressBar, LoadingIndicator, Header
 
 from textual_neon.widgets.neon_log import NeonLog
+from textual_neon.widgets.neon_header import NeonHeader
+from textual_neon.widgets.neon_footer import  NeonFooter
 from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
 
@@ -29,7 +31,7 @@ class LoadingScreen(Screen):
             width: 80%;
             max-width: 90;
             height: auto;
-            padding: 1 2 1 2;
+            padding: 0 2 0 2;
             color: $foreground 70%;
             border: round $foreground 60%;
             border-title-color: $foreground 70%;
@@ -39,7 +41,6 @@ class LoadingScreen(Screen):
                 height: auto;
                 align: center middle;
                 padding: 1;
-                margin: 0 0 1 0;
 
                 Digits {
                     width: 1fr;
@@ -69,17 +70,17 @@ class LoadingScreen(Screen):
                     width: 100%;
                 }
                 &.-complete {
-                    margin: 0 0 3 0;
+                    margin: 0 0 2 0;
                 }
             }
             LoadingIndicator {
                 width: 100%;
                 height: 1fr;
-                margin-bottom: 1;
+                margin-bottom: 0;
                 height: 1 !important;
             }
             NeonLog {
-                height: 18;
+                height: 14;
                 width: 100%;
             }
         }
@@ -126,7 +127,7 @@ class LoadingScreen(Screen):
 
     def compose(self) -> ComposeResult:
         """Create the child widgets for the loading screen."""
-        yield Header(icon="●")
+        yield NeonHeader()
         with Container(id="loading-container"):
             with Horizontal():
                 yield Digits("0".rjust(self._justified_digits, '0'), id="current")

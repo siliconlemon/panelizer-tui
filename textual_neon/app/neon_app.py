@@ -43,7 +43,7 @@ class NeonApp(App[Any]):
     and the absense of light themes.
     """
     CSS_PATH = [resources.files("textual_neon.css").joinpath("globals.tcss")]
-    MIN_ROWS: int = 30
+    MIN_ROWS: int = 32
     MIN_COLS: int = 90
     SCREENS = {}
     BINDINGS = [

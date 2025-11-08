@@ -14,7 +14,7 @@ class NeonLog(Widget):
         Horizontal#log-controls-row {
             width: 100%;
             height: 1 !important;
-            margin: 1 0 0 0 !important;
+            margin: 1 0 0 1 !important;
             padding: 0 0 0 0 !important;
             border: none !important;
             align: left middle !important;
