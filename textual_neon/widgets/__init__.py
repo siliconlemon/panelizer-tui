@@ -7,8 +7,8 @@ from .choice_palette import ChoicePalette
 from .complete_input import CompleteInput
 from .complete_input_grid import CompleteInputGrid
 from .complete_select import CompleteSelect
-from .defaults_button import DefaultsButton, DefaultsButtonVariant
-from .defaults_palette import DefaultsPalette
+from .settings_button import SettingsButton, SettingsButtonVariant
+from .settings_palette import SettingsPalette
 from .inert_label import InertLabel
 from .neon_button import NeonButton, NeonButtonVariant
 from .neon_input import NeonInput
@@ -23,9 +23,9 @@ __all__ = [
     "CompleteInput",
     "CompleteInputGrid",
     "CompleteSelect",
-    "DefaultsButton",
-    "DefaultsButtonVariant",
-    "DefaultsPalette",
+    "SettingsButton",
+    "SettingsButtonVariant",
+    "SettingsPalette",
     "InertLabel",
     "NeonButton",
     "NeonButtonVariant",

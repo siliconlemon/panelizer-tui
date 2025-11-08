@@ -4,15 +4,15 @@ from textual.geometry import Size
 from textual.widgets import Button
 from typing_extensions import override
 
-DefaultsButtonVariant = Literal["default", "save", "restore", "reset"]
+SettingsButtonVariant = Literal["default", "save", "restore", "reset"]
 """A literal defining which variants the NeonButton is prepared for."""
 
-DEFAULTS_BUTTON_VARIANTS = {"default", "save", "restore", "reset"}
+SETTINGS_BUTTON_VARIANTS = {"default", "save", "restore", "reset"}
 
-class DefaultsButton(Button, inherit_css=False):
+class SettingsButton(Button, inherit_css=False):
     """A skin for textual's native button widget. Used for the save, restore or reset actions."""
     DEFAULT_CSS = """
-    DefaultsButton {
+    SettingsButton {
         color: $foreground;
         border: round $foreground 70%;
         background: transparent;
@@ -106,25 +106,25 @@ class DefaultsButton(Button, inherit_css=False):
     }
     """
 
-    def __init__(self, label: str, *, variant: DefaultsButtonVariant, **kwargs):
+    def __init__(self, label: str, *, variant: SettingsButtonVariant, **kwargs):
         super().__init__(f" {label.strip()} ", **kwargs)
         self.variant = self.validate_variant(variant)
 
     @override
     def validate_variant(self, variant: str) -> str:
         """
-        A custom variant validator for when DefaultsButton variants differ from NeonButton variants.
+        A custom variant validator for when SettingsButton variants differ from NeonButton variants.
         """
-        if variant not in DEFAULTS_BUTTON_VARIANTS:
+        if variant not in SETTINGS_BUTTON_VARIANTS:
             raise ValueError(
-                f"Valid DefaultsButton variants are {list(DEFAULTS_BUTTON_VARIANTS)}. Current variant: {variant}"
+                f"Valid SettingsButton variants are {list(SETTINGS_BUTTON_VARIANTS)}. Current variant: {variant}"
             )
         return variant
 
     @override
     def get_content_width(self, container: Size, viewport: Size) -> int:
         """
-        Overrides internal button label handling to make the DefaultsButtons 2 symbols narrower than usual.
+        Overrides internal button label handling to make the SettingsButtons 2 symbols narrower than usual.
         """
         width = super().get_content_width(container, viewport)
         return width - 2 if width >= 4 else width

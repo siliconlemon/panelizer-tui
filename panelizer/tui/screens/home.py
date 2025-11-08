@@ -9,9 +9,9 @@ from textual.screen import Screen
 from textual.validation import Integer
 from textual.widgets import Input, Header, Select
 
-from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
+from textual_neon import SettingsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Settings, ChoiceButton, DefaultsButton, Paths, NeonInput, Sequence
+    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, Sequence
 
 
 class HomeScreen(Screen[dict]):
@@ -69,11 +69,11 @@ class HomeScreen(Screen[dict]):
                         initial=s.get("background_color"),
                         options=s.get("background_color_options"),
                     )
-                    yield DefaultsPalette(
-                        save_btn_id="save-defaults-btn",
-                        restore_btn_id="restore-defaults-btn",
-                        reset_btn_id="reset-defaults-btn",
-                        widget_id="defaults-widget",
+                    yield SettingsPalette(
+                        save_btn_id="save-settings-btn",
+                        restore_btn_id="restore-settings-btn",
+                        reset_btn_id="reset-settings-btn",
+                        widget_id="settings-widget",
                         label="Manage Settings",
                     )
                     yield self._build_test_sequence()
@@ -214,20 +214,20 @@ class HomeScreen(Screen[dict]):
         self.settings.set("stack_landscape_active", event.active)
         self.query_one("#demo-sequence", Sequence).current_step = 0
 
-    @on(DefaultsButton.Pressed, "#save-defaults-btn")
+    @on(SettingsButton.Pressed, "#save-settings-btn")
     async def save_defaults_button_pressed(self) -> None:
         self.settings.set("start_dir", self._selected_dir.as_posix())
         self.settings.save()
         self.notify("Preferences have been saved.", severity="information")
 
-    @on(DefaultsButton.Pressed, "#restore-defaults-btn")
+    @on(SettingsButton.Pressed, "#restore-settings-btn")
     def restore_defaults_button_pressed(self) -> None:
         self.settings.load()
         self._update_ui_from_preferences()
         self.query_one("#demo-sequence", Sequence).current_step = 0
         self.notify("Preferences have been restored.", severity="information")
 
-    @on(DefaultsButton.Pressed, "#reset-defaults-btn")
+    @on(SettingsButton.Pressed, "#reset-defaults-btn")
     def reset_defaults_button_pressed(self) -> None:
         self.settings.reset_all()
         self.settings.save()
