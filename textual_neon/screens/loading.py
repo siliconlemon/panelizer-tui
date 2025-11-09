@@ -1,19 +1,16 @@
 import asyncio
-from collections.abc import Callable
-from email.header import Header
 
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Container
-from textual.css.query import NoMatches
 from textual.screen import Screen
-from textual.widgets import Digits, ProgressBar, LoadingIndicator, Header
+from textual.widgets import Digits, ProgressBar, LoadingIndicator
 
-from textual_neon.widgets.neon_log import NeonLog
-from textual_neon.widgets.neon_header import NeonHeader
-from textual_neon.widgets.neon_footer import  NeonFooter
+from textual_neon.utils.screen_data import ScreenData
 from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
+from textual_neon.widgets.neon_header import NeonHeader
+from textual_neon.widgets.neon_log import NeonLog
 
 
 class LoadingScreen(Screen):
@@ -105,21 +102,21 @@ class LoadingScreen(Screen):
 
     def __init__(
             self,
-            items: list | tuple,
-            names: list[str] | tuple[str],
-            function: Callable,
+            data: ScreenData,
+            *,
             title: str = "Loading",
             continue_text: str = "Continue",
             cancel_text: str = "Cancel",
             **kwargs
     ):
         super().__init__(**kwargs)
+        self.data = data
+        self._items = data.payload
+        self._names = data.payload_names
+        self._function = data.function
         self._title = title
-        self._items = items
-        self._names = names
-        self._total = len(items)
+        self._total = len(self._items)
         self._justified_digits: int = len(str(self._total))
-        self._function = function
         self._results = []
         self._finished = False
         self._continue_text = continue_text

@@ -11,15 +11,16 @@ from textual.widgets import Input, Header, Select
 
 from textual_neon import SettingsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, Sequence
+    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, Sequence, ScreenData
 
 
 class HomeScreen(Screen[dict]):
     CSS_PATH = ["../css/home.tcss"]
     BINDINGS = []
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, data: ScreenData, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.data = data
         self.settings = Settings.ensure(app=self.app)
         s = self.settings
         self.allowed_extensions: list[str] = s.get("allowed_extensions")

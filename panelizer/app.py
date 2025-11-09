@@ -3,7 +3,7 @@ from pathlib import Path
 
 from textual.theme import Theme
 
-from textual_neon import NeonApp, Settings, Paths, LoadingScreen, DoneScreen
+from textual_neon import NeonApp, Settings, Paths, LoadingScreen, DoneScreen, ScreenData
 from panelizer.tui import HomeScreen
 from panelizer.tui import PanelizerLaunchScreen
 
@@ -57,21 +57,26 @@ class Panelizer(NeonApp):
             next_state="home",
             fallback=None,
             validate=lambda result: result is True,
+            data_from_result=lambda result: ScreenData(
+                source="launch",
+                payload=None
+            ),
         )
-        async def process_file_demo(file_path: str) -> str:
+        # noinspection PyUnusedLocal
+        async def process_file_demo(file_path: str) -> bool:
             await asyncio.sleep(0.01)
-            filename = file_path.rsplit('/', 1)[-1]
-            return f"{filename} processed"
+            return True
         self.state_machine.register(
             "home",
             screen_class=HomeScreen,
             next_state="loading",
             fallback=None,
             validate=lambda result: bool(result),
-            args_from_result=lambda result: (
-                result["selected_files"],
-                list(map(lambda path: path.split("/")[-1], result["selected_files"])),
-                lambda file_path: process_file_demo(file_path.split('/')[-1])
+            data_from_result=lambda result: ScreenData(
+                source="home",
+                payload=result["selected_files"],
+                payload_names=list(map(lambda path: path.split("/")[-1], result["selected_files"])),
+                function=process_file_demo,
             ),
         )
         self.state_machine.register(
@@ -80,7 +85,10 @@ class Panelizer(NeonApp):
             next_state=lambda result: "done" if result[0] == "continue" else "home",
             fallback=None,
             validate=lambda result: result in [("continue", True), ("cancel", False), ("cancel", True)],
-            args_from_result=lambda result: (),
+            data_from_result=lambda result: ScreenData(
+                source="loading",
+                payload=result
+            ),
         )
         self.state_machine.register(
             "done",
@@ -88,6 +96,10 @@ class Panelizer(NeonApp):
             next_state=lambda result: result,
             fallback=None,
             validate=lambda result: result == "home" or result is None,
+            data_from_result=lambda result: ScreenData(
+                source="done",
+                payload=result
+            ),
         )
 
     def _register_defaults(self) -> None:

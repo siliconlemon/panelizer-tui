@@ -3,6 +3,7 @@ from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
 
+from textual_neon.utils.screen_data import ScreenData
 from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
 from textual_neon.widgets.neon_footer import NeonFooter
@@ -69,6 +70,7 @@ class DoneScreen(Screen[str | None]):
     # noinspection PyShadowingBuiltins
     def __init__(
             self,
+            data: ScreenData | None = None,
             *,
             ascii_art: str | None = None,
             text: str | None = None,
@@ -78,6 +80,7 @@ class DoneScreen(Screen[str | None]):
             classes: str | None = None,
     ):
         super().__init__(name=name, id=id, classes=classes)
+        self.data = data
         self.ascii_art = ascii_art or DEFAULT_ART
         self.text = text or "You can close the terminal now."
         self.go_back_screen = go_back_screen

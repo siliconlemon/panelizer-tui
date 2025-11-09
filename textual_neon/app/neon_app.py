@@ -32,7 +32,7 @@ NOT_REGISTERED_MSG = """
 |               screen="launch",
 |               next_state="home",
 |               validate=lambda result: result is True,
-|               args_from_result=lambda result: (),
+|               data_from_result=lambda result: (),
 |           )
 |
 """

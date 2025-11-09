@@ -63,8 +63,9 @@ class LaunchScreen(Screen[bool]):
                     screen=MyLaunchScreen,
                     next_state="home",
                     validate=lambda result: result is True,
-                    args_from_result=lambda result: (),
+                    data_from_result=lambda result: (),
                 )
+        ...
     """
     DEFAULT_CSS = """
     LaunchScreen {
