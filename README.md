@@ -11,7 +11,7 @@ A TUI (terminal user interface) tool for laying out pictures onto clean, instagr
 
 ## Features
 
-- A fast and lightweight `textual-based` TUI.
+- A fast and lightweight TUI utilizing `textual-neon`, an opinionated superset of `textual` and `textual_fspicker`.
 - Works with all common aspect ratios like 3:4, 4:5, 3:2, and anything between 16:9 and 5:2.
 - Fits each picture onto one or two portrait-mode panels (4:5 or 3:4), based on proportional padding for both the horizontal and vertical axis.
 - In Constant Border mode, the panels are padded with a constant border, defined by a percentage of the image's width.
