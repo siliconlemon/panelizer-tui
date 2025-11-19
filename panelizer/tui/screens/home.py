@@ -51,6 +51,13 @@ class HomeScreen(Screen[dict]):
                         units=["%", "%", "%", "%"],
                         id="pad-grid"
                     )
+                    yield CompleteSelect(
+                        select_id="bg-select",
+                        label="Background Color",
+                        initial=s.get("background_color"),
+                        options=s.get("background_color_options"),
+                    )
+                with Vertical(id="second-column"):
                     yield Toggle(
                         switch_id="split-wide-toggle-switch",
                         text="Split Wide Images",
@@ -62,13 +69,6 @@ class HomeScreen(Screen[dict]):
                         text="Stack Landscape Images",
                         is_active=s.get("stack_landscape_active"),
                         id="stack-landscape-toggle",
-                    )
-                with Vertical(id="second-column"):
-                    yield CompleteSelect(
-                        select_id="bg-select",
-                        label="Background Color",
-                        initial=s.get("background_color"),
-                        options=s.get("background_color_options"),
                     )
                     yield SettingsPalette(
                         save_btn_id="save-settings-btn",
