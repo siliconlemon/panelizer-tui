@@ -16,7 +16,7 @@ class Panelizer(NeonApp):
     """
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
-    MIN_ROWS = 32
+    MIN_ROWS = 34
     MIN_COLS = 90
     SCREENS = {
         "launch": PanelizerLaunchScreen,
