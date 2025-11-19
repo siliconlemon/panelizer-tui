@@ -11,7 +11,7 @@ from textual.widgets import Input, Header, Select
 
 from textual_neon import SettingsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, Sequence, ScreenData
+    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, Sequence, ScreenData, CompleteInput
 
 
 class HomeScreen(Screen[dict]):
@@ -43,6 +43,16 @@ class HomeScreen(Screen[dict]):
                         initial=s.get("layout"),
                         options=s.get("layout_options"),
                     )
+                    # TODO: Here should be a single CompleteInput that shows and disappears based on the layout
+                    with Horizontal(id="uniform-pad-container"):
+                        yield CompleteInput(
+                            id="img_pad_uniform",
+                            label="All Sides (% of Height)",
+                            value=s.get("img_pad_uniform"),
+                            type_="number",
+                            unit="%"
+                        )
+                    # TODO: This should disappear when layout it set to "uniform", visible if "framing"
                     yield CompleteInputGrid(
                         rows=2,
                         columns=2,
