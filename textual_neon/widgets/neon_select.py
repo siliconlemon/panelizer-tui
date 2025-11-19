@@ -37,16 +37,16 @@ class NeonSelect(Select, inherit_css=True):
                 border: round $foreground 70%;
             }
             & > .option-list--option-highlighted {
-                color: $block-cursor-blurred-foreground;
+                color: $background;
                 background: $accent;
-                text-style: $block-cursor-blurred-text-style;
+                text-style: bold;
             }
             &:focus {
                 background-tint: $foreground 5%;
                 & > .option-list--option-highlighted {
-                    color: $block-cursor-foreground;
+                    color: $background;
                     background: $accent;
-                    text-style: $block-cursor-text-style;
+                    text-style: bold;
                 }
             }
         }
