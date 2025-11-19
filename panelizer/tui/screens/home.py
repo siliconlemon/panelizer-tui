@@ -37,6 +37,12 @@ class HomeScreen(Screen[dict]):
                 yield PathButton(self._selected_dir.as_posix(), id="path-btn")
             with Horizontal(id="main-row"):
                 with Vertical(id="first-column"):
+                    yield CompleteSelect(
+                        select_id="layout-select",
+                        label="Layout",
+                        initial=s.get("layout"),
+                        options=s.get("layout_options"),
+                    )
                     yield CompleteInputGrid(
                         rows=2,
                         columns=2,
@@ -74,7 +80,7 @@ class HomeScreen(Screen[dict]):
                         save_btn_id="save-settings-btn",
                         restore_btn_id="restore-settings-btn",
                         reset_btn_id="reset-settings-btn",
-                        label="Manage Settings",
+                        label="Current Settings",
                         id="settings-widget",
                     )
 

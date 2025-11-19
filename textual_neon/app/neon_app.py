@@ -128,7 +128,6 @@ class NeonApp(App[Any]):
         dark=True,
         variables={
             "block-cursor-text-style": "none",
-            "footer-key-foreground": "#88c0d0",
         },
     )
 

@@ -79,7 +79,7 @@ class Toggle(Widget, inherit_css=False, can_focus=False):
             padding: 0 1 0 1;
             text-style: bold;
             background: transparent;
-            color: $foreground 80%;
+            color: $foreground 90%;
         }
         
         &.--hover {

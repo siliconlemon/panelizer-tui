@@ -39,7 +39,6 @@ class Panelizer(NeonApp):
         dark=True,
         variables={
             "block-cursor-text-style": "none",
-            "footer-key-foreground": "#88c0d0",
         },
     )
 
@@ -115,16 +114,27 @@ class Panelizer(NeonApp):
         s.register_default("img_pad_right", 8)
         s.register_default("img_pad_top", 5)
         s.register_default("img_pad_bottom", 5)
+        s.register_default("img_pad_uniform", 5)
+
+        s.register_default("background_color", "white")
         s.register_default(
             "background_color_options",
             [
                 ("White", "white"),
                 ("Light Gray", "lightgray"),
                 ("Dark Gray", "darkgray"),
-                ("Black", "black"),
-            ],
+                ("Black", "black")
+            ]
         )
-        s.register_default("background_color", "white")
+        s.register_default("layout", "framing")
+        s.register_default(
+            "layout_options",
+            [
+                ("Framing", "framing"),
+                ("Uniform Border", "uniform")
+            ]
+        )
+
         s.register_default("split_wide_active", False)
         s.register_default("stack_landscape_active", False)
 
