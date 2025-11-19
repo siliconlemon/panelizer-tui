@@ -2,6 +2,7 @@
 A textual_neon package containing elements based on the Widget class from `textual`.
 """
 
+from .app_level_log import AppLevelLog
 from .choice_button import ChoiceButton
 from .choice_palette import ChoicePalette
 from .complete_input import CompleteInput
@@ -22,6 +23,7 @@ from .sequence import Sequence
 from .toggle import Toggle
 
 __all__ = [
+    "AppLevelLog",
     "ChoiceButton",
     "ChoicePalette",
     "CompleteInput",

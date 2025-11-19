@@ -130,7 +130,7 @@ class DirSelectDialog(SelectDirectory, inherit_css=True):
                 }
                 &:disabled {
                     color: $text-success 40%;
-                    border: round $primary 40%;
+                    border: round $success 40%;
                 }
             }
             

@@ -11,6 +11,17 @@ class NeonFooter(Footer, inherit_css=True):
         padding: 0 1 0 1;
         FooterKey.-command-palette {
             border: none !important;
+            background: $background !important;
+        }
+        .footer-key--key {
+            color: $primary !important;
+            padding: 0 0 0 1 !important;
+        }
+        FooterKey:hover {
+            background: $background-lighten-1 !important;
+            .footer-key--key {
+                color: $accent !important;
+            }
         }
     }
     """

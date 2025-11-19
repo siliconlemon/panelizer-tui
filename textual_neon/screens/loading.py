@@ -1,11 +1,15 @@
 import asyncio
+import inspect
+from typing import Any, Literal
 
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Container
+from textual.css.query import NoMatches
 from textual.screen import Screen
 from textual.widgets import Digits, ProgressBar, LoadingIndicator
 
+from textual_neon.utils.errors import Errors
 from textual_neon.utils.screen_data import ScreenData
 from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
@@ -69,6 +73,12 @@ class LoadingScreen(Screen):
                 &.-complete {
                     margin: 0 0 2 0;
                 }
+                &.-stopped {
+                    margin: 0 0 2 0;
+                    Bar > .bar--bar {
+                        color: $error !important;
+                    }
+                }
             }
             LoadingIndicator {
                 width: 100%;
@@ -86,11 +96,18 @@ class LoadingScreen(Screen):
             height: auto;
             width: 80%;
             max-width: 90;
-            align: right middle;
-            
+
+            NeonButton#stop {
+                width: 20;
+                margin-left: 1;
+            }
+            Container#spacer {
+                width: 1fr;
+                height: auto;
+            }
             NeonButton#continue {
                 width: 20;
-                margin-right: 2;
+                margin-right: 1;
             }
             NeonButton#cancel {
                 width: 20;
@@ -107,6 +124,10 @@ class LoadingScreen(Screen):
             title: str = "Loading",
             continue_text: str = "Continue",
             cancel_text: str = "Cancel",
+            stop_text: str = "Stop",
+            allow_failures: bool = False,
+            allow_duplicates: bool = False,
+            show_clear_button: bool = False,
             **kwargs
     ):
         super().__init__(**kwargs)
@@ -117,10 +138,29 @@ class LoadingScreen(Screen):
         self._title = title
         self._total = len(self._items)
         self._justified_digits: int = len(str(self._total))
+
         self._results = []
-        self._finished = False
+        self._n_successes = 0
+        self._n_failed = 0
+        self._n_duplicates = 0
+
+        self.allow_failures = allow_failures
+        self.allow_duplicates = allow_duplicates
+
+        self._success = False
+        self._is_cancelled = False
         self._continue_text = continue_text
         self._cancel_text = cancel_text
+        self._stop_text = stop_text
+        self.show_clear_button = show_clear_button
+
+        self._log: NeonLog | None = None
+        self._progress_bar: ProgressBar | None = None
+        self._current_digits: Digits | None = None
+        self._loading_indicator: LoadingIndicator | None = None
+        self._continue_button: NeonButton | None = None
+        self._cancel_button: NeonButton | None = None
+        self._stop_button: NeonButton | None = None
 
     def compose(self) -> ComposeResult:
         """Create the child widgets for the loading screen."""
@@ -132,71 +172,241 @@ class LoadingScreen(Screen):
                 yield Digits(f"{self._total}".rjust(self._justified_digits, '0'), id="total")
             yield ProgressBar(self._total, show_bar=True, show_percentage=False, show_eta=False)
             yield LoadingIndicator()
-            yield NeonLog(show_clear_button=False)
+            yield NeonLog(show_clear_button=self.show_clear_button, id="log")
         with Horizontal():
+            yield NeonButton(self._stop_text, variant="primary", id="stop")
+            yield Container(id="spacer")
             yield NeonButton(self._continue_text, variant="primary", id="continue")
             yield NeonButton(self._cancel_text, variant="primary", id="cancel")
 
     async def on_mount(self) -> None:
         """Start the processing worker when the screen is mounted."""
         self.query_one("#loading-container", Container).border_title = self._title
-        self.query_one(NeonLog).write("Initializing...\n")
-        continue_button = self.query_one("#continue", NeonButton)
-        continue_button.visible = False
-        continue_button.disabled = True
 
+        try:
+            self._log = self.query_one(NeonLog)
+            self._progress_bar = self.query_one(ProgressBar)
+            self._current_digits = self.query_one("#current", Digits)
+            self._loading_indicator = self.query_one(LoadingIndicator)
+            self._continue_button = self.query_one("#continue", NeonButton)
+            self._cancel_button = self.query_one("#cancel", NeonButton)
+            self._stop_button = self.query_one("#stop", NeonButton)
+        except NoMatches:
+            await self.dismiss(("error", "Failed to mount loading screen widgets."))
+            return
+
+        self._log.write("Initializing...\n")
+        self._continue_button.visible = False
+        self._continue_button.disabled = True
         self.run_worker(self.process_items, exclusive=False)
+
+    @on(NeonButton.Pressed, "#stop")
+    def stop_button_pressed(self) -> None:
+        """Handle stop button press. Hides a button and signals the worker to stop."""
+        if self._stop_button:
+            self._stop_button.display = False
+            self._stop_button.disabled = True
+        if self._loading_indicator:
+            self._loading_indicator.display = False
+        if self._progress_bar:
+            self._progress_bar.add_class("-stopped")
+
+        self._is_cancelled = True
 
     @on(NeonButton.Pressed, "#cancel")
     def cancel_button_pressed(self) -> None:
-        """Handle cancel button press."""
-        if self._finished:
-            self.dismiss(("cancel", True))
-        else:
-            self.dismiss(("cancel", False))
+        """Handle cancel button press. Always dismisses with a 'cancel' status and no data."""
+        self._is_cancelled = True
+        self.dismiss(("cancel", None))
 
     @on(NeonButton.Pressed, "#continue")
     def continue_button_pressed(self) -> None:
-        """Handle the continued button press."""
-        self.dismiss(("continue", True))
+        """Handle the continued button press. Dismisses with 'continue' and the processed data."""
+        self.dismiss(("continue", self._results))
 
     async def process_items(self) -> None:
-        """The worker method to process items and update the UI."""
-        log = self.query_one(NeonLog)
-        progress_bar = self.query_one(ProgressBar)
-        current_digits = self.query_one("#current", Digits)
-        loading_indicator = self.query_one(LoadingIndicator)
-
+        """
+        The main worker method to process all items and update the UI.
+        Coordinates helper methods for setup, looping, and finalization.
+        """
+        if self._is_cancelled:
+            return
+        if not self._log:
+            return
         if len(self._items) != len(self._names):
-            log.write_line("Error: The number of items and names does not match!")
-            log.write_line("\nAborting...")
+            self._log.write_line("Error: The number of items and names does not match!")
+            self._log.write_line("\nAborting...")
+            return
+
+        action: Literal[
+            "continue", "stop_processing_error", "stop_unexpected_error", "stop_cancelled"
+        ] = "continue"
 
         try:
+            is_async_func = inspect.iscoroutinefunction(self._function)
             for i, item in enumerate(self._items):
+                if self._is_cancelled:
+                    action = "stop_cancelled"
+                    break
+
                 current_step = i + 1
-                log.write_line(f"Processing [{current_step}/{self._total}]: {self._names[i][:50]}...")
-                maybe_coroutine = self._function(item)
-                if asyncio.iscoroutine(maybe_coroutine):
-                    result = await maybe_coroutine
-                else:
-                    if i % 30 == 0:
-                        await asyncio.sleep(0)
-                    result = maybe_coroutine
-                self._results.append(result)
-                progress_bar.advance(1)
-                current_digits.update(f"{current_step}".rjust(self._justified_digits, '0'))
+                item_name = self._names[i][:50]
 
-            loading_indicator.display = False
-            progress_bar.add_class("-complete")
-            current_digits.update(
-                f"{self._total}".rjust(self._justified_digits, '0')
-            )
-            log.write_line("\nProcessing complete!")
+                try:
+                    self._log.write_line(f"Processing [{current_step}/{self._total}]: {item_name}...")
+                except NoMatches:
+                    action = "stop_unexpected_error"
+                    break
 
-            self._finished = True
-            continue_button = self.query_one("#continue", NeonButton)
-            continue_button.visible = True
-            continue_button.disabled = False
+                action = await self._process_single_item(
+                    item, item_name, is_async_func
+                )
+                if action != "continue":
+                    break
+
+                try:
+                    if self._progress_bar:
+                        self._progress_bar.advance(1)
+                    if self._current_digits:
+                        self._current_digits.update(f"{current_step}".rjust(self._justified_digits, '0'))
+                except NoMatches:
+                    action = "stop_unexpected_error"
+                    break
+
+            self._finalize_processing(action)
 
         except asyncio.CancelledError:
-            self.screen.notify("Loading screen has been abruptly closed.", severity="warning")
+            self._is_cancelled = True
+            pass
+        except NoMatches:
+            self._is_cancelled = True
+            pass
+
+    # region Helper Methods
+
+    async def _process_single_item(
+            self, item: Any, item_name: str, is_async: bool
+    ) -> Literal["continue", "stop_processing_error", "stop_unexpected_error", "stop_cancelled"]:
+        """
+        Processes a single item, handles results/exceptions, and updates counts.
+
+        Args:
+            item: The payload for the single item.
+            item_name: The display name of the item for logging.
+            is_async: Whether the function to run is asynchronous.
+
+        Returns:
+            A string literal indicating the processing outcome.
+        """
+        if not self._log:
+            return "stop_unexpected_error"
+
+        try:
+            result: Any
+            if is_async:
+                result = await self._function(item)
+            else:
+                result = await asyncio.to_thread(self._function, item)
+
+            if self._is_cancelled:
+                return "stop_cancelled"
+
+            if result is False:
+                self._n_failed += 1
+                self._log.write_line(f"VALIDATION FAILED: {item_name} (Skipping)")
+            else:
+                self._n_successes += 1
+                self._results.append(result)
+
+        except Errors.DuplicateError as e:
+            if self._is_cancelled:
+                return "stop_cancelled"
+            self._n_duplicates += 1
+            log_msg = f"DUPLICATE FOUND: {item_name}. {e}"
+            self._log.write_line(f"{log_msg} Skipping, first instance kept.")
+
+        except Errors.ProcessingError as e:
+            if self._is_cancelled:
+                return "stop_cancelled"
+            self._n_failed += 1
+            self._log.write_line(f"\nPROCESSING ERROR: {item_name} - {e}")
+            return "stop_processing_error"
+
+        except Exception as e:
+            if self._is_cancelled:
+                return "stop_cancelled"
+            if "NoMatches" in str(e):
+                return "stop_unexpected_error"
+            self._n_failed += 1
+            self._log.write_line(f"\nUNEXPECTED ERROR: {item_name} - {e}")
+            return "stop_unexpected_error"
+
+        return "continue"
+
+    def _finalize_processing(
+            self,
+            action: Literal[
+                "continue", "stop_processing_error", "stop_unexpected_error", "stop_cancelled"
+            ]
+    ) -> None:
+        """
+        Writes final summary logs and updates the UI state after the loop finishes.
+        """
+        if not all([
+            self._log, self._progress_bar, self._current_digits,
+            self._loading_indicator, self._continue_button,
+            self._cancel_button, self._stop_button
+        ]):
+            return
+
+        self._stop_button.display = False
+        self._stop_button.disabled = True
+
+        self._loading_indicator.display = False
+        self._progress_bar.add_class("-complete")
+
+        processing_stopped = (action != "continue")
+
+        if processing_stopped:
+            if action == "stop_processing_error":
+                self._log.write_line("\nStopped due to a critical processing error.")
+            elif action == "stop_unexpected_error":
+                self._log.write_line("\nStopped due to an unexpected error.")
+            elif action == "stop_cancelled":
+                self._log.write_line("\nProcessing stopped by user.")
+
+            self._log.write_line("Press 'Cancel' to return.")
+            self._success = False
+        else:
+            self._current_digits.update(
+                f"{self._total}".rjust(self._justified_digits, '0')
+            )
+
+            has_failures = self._n_failed > 0
+            if not has_failures:
+                self._log.write_line("\nAll items processed without failures!")
+                self._success = True
+            elif has_failures and self.allow_failures:
+                self._log.write_line("\nProcessing complete, copy the logs to review failures.")
+                self._success = True
+            else:
+                self._log.write_line("\nProcessing complete, with failures.")
+                self._log.write_line("Press 'Cancel' to return.")
+                self._success = False
+
+        self._log.write_line(
+            f"Successes: {self._n_successes}, Duplicates: {self._n_duplicates}, Failed: {self._n_failed}"
+        )
+
+        if self._success:
+            self._continue_button.visible = True
+            self._continue_button.disabled = False
+            self._cancel_button.display = False
+            self._cancel_button.disabled = True
+        else:
+            self._continue_button.visible = False
+            self._continue_button.disabled = True
+            self._cancel_button.visible = True
+            self._cancel_button.disabled = False
+
+    # endregion

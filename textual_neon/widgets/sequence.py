@@ -81,7 +81,7 @@ class Sequence(Widget, inherit_css=True):
     Sequence {
         height: auto;
         width: 100%;
-
+        
         Horizontal, Vertical {
             border: round $foreground 60%;
             border-title-color: $foreground 70%;
@@ -260,6 +260,7 @@ class Sequence(Widget, inherit_css=True):
                 pressed_index < self._current_step_index
                 and not self._steps[pressed_index].button.disabled
         )
+
         if is_completed:
             self._reset_to(pressed_index)
 
@@ -287,16 +288,10 @@ class Sequence(Widget, inherit_css=True):
             try:
                 is_valid = validator(task_result)
             except Exception as e:
-                self.screen.notify(
-                    f"Validator for step {step_index + 1} failed: {e}", severity="error", title="Sequence Error"
-                )
                 is_valid = False
                 task_result = e
 
         except Exception as e:
-            self.screen.notify(
-                f"Task for step {step_index + 1} failed: {e}", severity="error", title="Sequence Error"
-            )
             is_valid = False
             task_result = e
 
@@ -328,14 +323,13 @@ class Sequence(Widget, inherit_css=True):
                 next_step.button.variant = "primary"
             else:
                 self._current_step_index = len(self._steps)
-                self.screen.notify("Sequence complete!", severity="information")
         else:
-            step.button.variant = "error"
-            self.screen.notify(
-                f"Step {step_index + 1} failed: {event.task_result}",
-                title="Sequence Failure",
-                severity="warning"
-            )
+            task_result = event.task_result
+            stopped_gracefully = (task_result == "cancel")
+            if stopped_gracefully:
+                pass
+            else:
+                step.button.variant = "error"
         self._processing_step_index = None
 
     def _reset_to(self, target_index: int) -> None:

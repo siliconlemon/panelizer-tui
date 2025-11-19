@@ -13,6 +13,9 @@ class StateMachine:
     Handles UI workflow and screen transitions for the NeonApp.
     States are registered by the descendants of NeonApp, allowing data-driven configuration
     of screens, validation, and flow, detached from the base class.
+
+    Note: In some use cases, it might be better to only register the launch and home screens with the app
+    and handle multiple screen pushes from the home screen (or whatever you might call it, it's user-defined).
     """
     class StateSpec:
         def __init__(

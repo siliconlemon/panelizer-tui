@@ -179,7 +179,10 @@ class LaunchScreen(Screen[bool]):
 
     def on_launch_screen_dismiss_requested(self, message: DismissRequested) -> None:
         """Handle dismissal request from button press."""
-        self.dismiss(message.should_enter)
+        if message.should_enter:
+            self.dismiss(message.should_enter)
+        else:
+            self.dismiss(None)
 
     def _pick_fitting_ascii(self, cols: int, rows: int) -> tuple[int, int, str]:
         """Picks the largest ASCII art that will fit in cols×rows."""

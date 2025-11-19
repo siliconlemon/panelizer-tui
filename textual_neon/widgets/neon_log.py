@@ -1,4 +1,5 @@
 import pyperclip
+from click.termui import visible_prompt_func
 from textual import on
 from textual.containers import Horizontal
 from textual.widget import Widget
@@ -14,11 +15,15 @@ class NeonLog(Widget):
             width: 100%;
             height: 1 !important;
             margin: 1 0 0 1 !important;
-            padding: 0 0 0 0 !important;
+            padding: 0 !important;
             border: none !important;
             align: left middle !important;
+            
+            & > MinimalButton {
+                margin: 0 1 0 0 !important;
+            }
         }
-
+        
         Log#log {
             color: $text 70%;
             border: round $foreground 60%;
@@ -49,18 +54,23 @@ class NeonLog(Widget):
 
     def __init__(
             self,
+            *,
             show_copy_button: bool = True,
             show_clear_button: bool = True,
+            copy_button_label: str = "Copy Logs",
+            clear_button_label: str = "Clear Logs",
             **kwargs
     ) -> None:
         super().__init__(**kwargs)
         self._show_copy_button = show_copy_button
         self._show_clear_button = show_clear_button
+        self._copy_button_label = copy_button_label
+        self._clear_button_label = clear_button_label
 
     def compose(self):
         with Horizontal(id="log-controls-row"):
-            yield MinimalButton("Copy Logs", id="copy-logs-btn", variant="primary")
-            yield MinimalButton("Clear Logs", id="clear-logs-btn", variant="primary")
+            yield MinimalButton(self._copy_button_label, id="copy-logs-btn", variant="primary")
+            yield MinimalButton(self._clear_button_label, id="clear-logs-btn", variant="primary")
         yield Log(id="log")
 
     def on_mount(self) -> None:
@@ -77,23 +87,25 @@ class NeonLog(Widget):
         self.query_one(Log).write(content)
 
     @on(MinimalButton.Pressed, "#clear-logs-btn")
-    def clear_logs(self) -> None:
+    def clear_logs(self, event: MinimalButton.Pressed) -> None:
         """Called when the 'Clear Logs' button is pressed."""
         self.query_one(Log).clear()
-        self.notify("Logs cleared.")
+        self.screen.notify("Logs cleared.")
+        event.stop()
 
     @on(MinimalButton.Pressed, "#copy-logs-btn")
-    def copy_logs(self) -> None:
+    def copy_logs(self, event: MinimalButton.Pressed) -> None:
         """Called when the 'Copy Logs' button is pressed."""
         log = self.query_one(Log)
         all_text = "\n".join(str(line) for line in log.lines)
 
         if not all_text:
-            self.notify("There are no logs to copy.", severity="warning")
+            self.screen.notify("There are no logs to copy.", severity="warning")
             return
 
         try:
             pyperclip.copy(all_text)
-            self.notify("Logs have been copied to clipboard!")
+            self.screen.notify("Logs have been copied to clipboard!")
         except Exception as e:
-            self.notify(f"Clipboard error: {e}", severity="error")
+            self.screen.notify(f"Clipboard error: {e}", severity="error")
+        event.stop()

@@ -71,14 +71,14 @@ class NeonButton(Button, inherit_css=False):
             
             &:focus {
                 text-style: $button-focus-text-style;
-                border: round $accent;
+                border: round $success;
             }
             &:hover {
                 color: $text-success 70%;
-                border: round $accent;
+                border: round $success;
             }
             &:focus:hover {
-                border: round $accent 60%;
+                border: round $success 60%;
             }
             &.-active {
                 color: $text-success 40%;
@@ -96,14 +96,14 @@ class NeonButton(Button, inherit_css=False):
             
             &:focus {
                 text-style: $button-focus-text-style;
-                border: round $accent;
+                border: round $warning;
             }
             &:hover {
                 color: $text-warning 70%;
-                border: round $accent;
+                border: round $warning;
             }
             &:focus:hover {
-                border: round $accent 60%;
+                border: round $warning 60%;
             }
             &.-active {
                 color: $text-warning 40%;
