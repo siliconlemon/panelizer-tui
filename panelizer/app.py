@@ -28,7 +28,7 @@ class Panelizer(NeonApp):
         name="default",
         primary="#36c8de",
         secondary="#98a1a5",
-        accent="#4d84f5",
+        accent="#009ef5",
         foreground="#c0c5cd",
         background="#1e1e1e",
         success="#63bd4a",
