@@ -56,6 +56,10 @@ HomeScreen {
     height: 4;
 }
 
+.hidden {
+    display: none;
+}
+
 CompleteInputGrid {
     margin: 0 0 1 0;
 }

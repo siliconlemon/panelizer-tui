@@ -11,7 +11,7 @@ from textual.widgets import Input, Header, Select
 
 from textual_neon import SettingsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, Sequence, ScreenData, CompleteInput
+    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, ScreenData, CompleteInput
 
 
 class HomeScreen(Screen[dict]):
@@ -43,7 +43,6 @@ class HomeScreen(Screen[dict]):
                         initial=s.get("layout"),
                         options=s.get("layout_options"),
                     )
-                    # TODO: Here should be a single CompleteInput that shows and disappears based on the layout
                     with Horizontal(id="uniform-pad-container"):
                         yield CompleteInput(
                             id="img_pad_uniform",
@@ -52,7 +51,6 @@ class HomeScreen(Screen[dict]):
                             type_="number",
                             unit="%"
                         )
-                    # TODO: This should disappear when layout it set to "uniform", visible if "framing"
                     yield CompleteInputGrid(
                         rows=2,
                         columns=2,
@@ -116,9 +114,18 @@ class HomeScreen(Screen[dict]):
         for input_id in ["#pad-left", "#pad-right", "#pad-top", "#pad-bottom"]:
             input_widget = self.query_one(input_id, Input)
             input_widget.validators.append(img_pad_validator)
+        self.query_one("#img_pad_uniform", Input).validators.append(img_pad_validator)
         self._update_path_display()
         self._update_padding_inputs()
+        current_layout = self.settings.get("layout")
+        self._refresh_layout_inputs(current_layout)
         await self._select_all_files()
+
+    def _refresh_layout_inputs(self, layout: str) -> None:
+        """Toggles visibility between the grid and the uniform input."""
+        is_uniform = layout == "uniform"
+        self.query_one("#uniform-pad-container").set_class(not is_uniform, "hidden")
+        self.query_one("#pad-grid").set_class(is_uniform, "hidden")
 
     def _get_all_files_in_dir_blocking(self) -> list[Path]:
         """A blocking method to get all allowed files in the selected directory."""
@@ -135,7 +142,9 @@ class HomeScreen(Screen[dict]):
             "pad-right": "img_pad_right",
             "pad-top": "img_pad_top",
             "pad-bottom": "img_pad_bottom",
+            "img_pad_uniform": "img_pad_uniform",
         }
+
         if event.input.id in mapping:
             setting_key = mapping[event.input.id]
             try:
@@ -148,15 +157,23 @@ class HomeScreen(Screen[dict]):
             except ValueError:
                 self.notify(f"Invalid value for {event.input.id}", title="Invalid Input", severity="error")
                 val = 0
+
             val = max(0, min(self.max_pad_percentage, val))
 
             if val != old_val:
                 self.settings.set(setting_key, val)
+            event.input.value = str(val)
             self._update_padding_inputs()
 
     @on(Select.Changed, "#bg-select")
     def bg_select_changed(self, event: Select.Changed) -> None:
         self.settings.set("background_color", str(event.value))
+
+    @on(Select.Changed, "#layout-select")
+    def layout_select_changed(self, event: Select.Changed) -> None:
+        new_layout = str(event.value)
+        self.settings.set("layout", new_layout)
+        self._refresh_layout_inputs(new_layout)
 
     @on(Toggle.Changed, "#split-wide-toggle")
     def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
@@ -263,6 +280,7 @@ class HomeScreen(Screen[dict]):
         self.query_one("#pad-right", Input).value = str(s.get("img_pad_right"))
         self.query_one("#pad-top", Input).value = str(s.get("img_pad_top"))
         self.query_one("#pad-bottom", Input).value = str(s.get("img_pad_bottom"))
+        self.query_one("#img_pad_uniform", Input).value = str(s.get("img_pad_uniform"))
 
     def _file_path_to_tuple(self, path: Path) -> tuple[str, str, bool]:
         """Formats a Path object into a tuple for the ListSelectDialog."""
