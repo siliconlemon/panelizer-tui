@@ -7,11 +7,12 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.validation import Integer
-from textual.widgets import Input, Header, Select
+from textual.widgets import Input, Select
 
 from textual_neon import SettingsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, ScreenData, CompleteInput
+    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, ScreenData, CompleteInput, NeonHeader, \
+    NeonSelect
 
 
 class HomeScreen(Screen[dict]):
@@ -31,7 +32,7 @@ class HomeScreen(Screen[dict]):
 
     def compose(self) -> ComposeResult:
         s = self.settings
-        yield Header(icon="●")
+        yield NeonHeader()
         with Vertical(id="home-container"):
             with Horizontal(id="path-row"):
                 yield PathButton(self._selected_dir.as_posix(), id="path-btn")
@@ -66,12 +67,25 @@ class HomeScreen(Screen[dict]):
                         id="pad-grid"
                     )
                     yield CompleteSelect(
+                        select_id="height-select",
+                        label="Canvas Height",
+                        initial=s.get("canvas_height"),
+                        options=s.get("canvas_height_options"),
+                    )
+                    yield CompleteSelect(
+                        select_id="ratio-select",
+                        label="Aspect Ratio",
+                        initial=s.get("canvas_ratio"),
+                        options=s.get("canvas_ratio_options"),
+                        id="ratio-wrapper"
+                    )
+                with Vertical(id="second-column"):
+                    yield CompleteSelect(
                         select_id="bg-select",
                         label="Background Color",
                         initial=s.get("background_color"),
                         options=s.get("background_color_options"),
                     )
-                with Vertical(id="second-column"):
                     yield Toggle(
                         switch_id="split-wide-toggle-switch",
                         text="Split Wide Images",
@@ -122,10 +136,12 @@ class HomeScreen(Screen[dict]):
         await self._select_all_files()
 
     def _refresh_layout_inputs(self, layout: str) -> None:
-        """Toggles visibility between the grid and the uniform input."""
+        """Toggles visibility between the grid and the uniform input container."""
         is_uniform = layout == "uniform"
         self.query_one("#uniform-pad-container").set_class(not is_uniform, "hidden")
         self.query_one("#pad-grid").set_class(is_uniform, "hidden")
+        self.query_one("#ratio-select", NeonSelect).parent.parent.set_class(is_uniform, "hidden")
+        self.query_one("#ratio-wrapper").set_class(is_uniform, "hidden")
 
     def _get_all_files_in_dir_blocking(self) -> list[Path]:
         """A blocking method to get all allowed files in the selected directory."""
@@ -174,6 +190,14 @@ class HomeScreen(Screen[dict]):
         new_layout = str(event.value)
         self.settings.set("layout", new_layout)
         self._refresh_layout_inputs(new_layout)
+
+    @on(Select.Changed, "#height-select")
+    def height_select_changed(self, event: Select.Changed) -> None:
+        self.settings.set("canvas_height", str(event.value))
+
+    @on(Select.Changed, "#ratio-select")
+    def ratio_select_changed(self, event: Select.Changed) -> None:
+        self.settings.set("canvas_ratio", str(event.value))
 
     @on(Toggle.Changed, "#split-wide-toggle")
     def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
@@ -323,18 +347,33 @@ class HomeScreen(Screen[dict]):
                 severity="error"
             )
             return
+
         s = self.settings
-        settings = {
-            "selected_dir": str(self._selected_dir),
-            "selected_files": self.selected_files,
-            "background_color": s.get("background_color"),
-            "split_wide_images": s.get("split_wide_active"),
-            "stack_landscape_images": s.get("stack_landscape_active"),
-            "padding": {
+        layout = s.get("layout")
+
+        if layout == "uniform":
+            padding = {
+                "uniform": s.get("img_pad_uniform")
+            }
+            canvas_ratio = None
+        else:
+            padding = {
                 "left": s.get("img_pad_left"),
                 "right": s.get("img_pad_right"),
                 "top": s.get("img_pad_top"),
                 "bottom": s.get("img_pad_bottom"),
-            },
+            }
+            canvas_ratio = s.get("canvas_ratio")
+
+        settings = {
+            "selected_dir": str(self._selected_dir),
+            "selected_files": self.selected_files,
+            "background_color": s.get("background_color"),
+            "layout": layout,
+            "canvas_height": int(s.get("canvas_height")),
+            "canvas_ratio": canvas_ratio,
+            "split_wide_images": s.get("split_wide_active"),
+            "stack_landscape_images": s.get("stack_landscape_active"),
+            "padding": padding,
         }
         self.dismiss(settings)

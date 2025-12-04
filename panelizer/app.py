@@ -16,7 +16,7 @@ class Panelizer(NeonApp):
     """
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
-    MIN_ROWS = 36
+    MIN_ROWS = 40
     MIN_COLS = 90
     SCREENS = {
         "launch": PanelizerLaunchScreen,
@@ -116,6 +116,29 @@ class Panelizer(NeonApp):
         s.register_default("img_pad_bottom", 5)
         s.register_default("img_pad_uniform", 5)
 
+        s.register_default("canvas_height", "2500")
+        s.register_default(
+            "canvas_height_options",
+            [
+                ("2000 px", "2000"),
+                ("2500 px", "2500"),
+                ("3000 px", "3000"),
+                ("4000 px", "4000"),
+                ("5000 px", "5000"),
+            ]
+        )
+
+        s.register_default("canvas_ratio", "4:5")
+        s.register_default(
+            "canvas_ratio_options",
+            [
+                ("Portrait (3:4)", "3:4"),
+                ("Portrait (4:5)", "4:5"),
+                ("Standard (2:3)", "2:3"),
+                ("Vertical (9:16)", "9:16"),
+            ]
+        )
+
         s.register_default("background_color", "white")
         s.register_default(
             "background_color_options",
@@ -126,6 +149,7 @@ class Panelizer(NeonApp):
                 ("Black", "black")
             ]
         )
+
         s.register_default("layout", "framing")
         s.register_default(
             "layout_options",
