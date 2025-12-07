@@ -106,11 +106,11 @@ class Panelizer(NeonApp):
         s.register_default("theme", "default")
         s.register_default("start_dir", Paths.pictures().as_posix())
         s.register_default("allowed_extensions", ["jpg", "jpeg", "png"])
-        s.register_default("img_pad_left", 8)
-        s.register_default("img_pad_right", 8)
-        s.register_default("img_pad_top", 5)
-        s.register_default("img_pad_bottom", 5)
-        s.register_default("img_pad_uniform", 5)
+        s.register_default("img_pad_left", 4)
+        s.register_default("img_pad_right", 4)
+        s.register_default("img_pad_top", 3)
+        s.register_default("img_pad_bottom", 3)
+        s.register_default("img_pad_uniform", 3)
 
         s.register_default("canvas_height", "2500")
         s.register_default(
