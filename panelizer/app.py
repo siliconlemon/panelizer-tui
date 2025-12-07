@@ -4,15 +4,14 @@ from textual.theme import Theme
 
 from panelizer.tui import HomeScreen
 from panelizer.tui import PanelizerLaunchScreen
-from panelizer.toolkit import Toolkit
-from textual_neon import NeonApp, Settings, Paths, LoadingScreen, DoneScreen, ScreenData
+from textual_neon import NeonApp, Settings, Paths, ScreenData
 
 
 class Panelizer(NeonApp):
     """
-    The main app class for the Panelizer, a textual-based terminal user interface
-    for batch-fitting images onto single-color backgrounds.
-    Inherits from NeonApp and implements features from textual_neon, textual_fspicker.
+    The main app class for the Panelizer.
+    Migrated to Controller Pattern: Launch -> Home.
+    Home handles the Loading/Done cycle internally.
     """
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
@@ -21,8 +20,6 @@ class Panelizer(NeonApp):
     SCREENS = {
         "launch": PanelizerLaunchScreen,
         "home": HomeScreen,
-        "loading": LoadingScreen,
-        "done": DoneScreen,
     }
     DEFAULT_THEME = Theme(
         name="default",
@@ -64,37 +61,8 @@ class Panelizer(NeonApp):
         self.state_machine.register(
             "home",
             screen_class=HomeScreen,
-            next_state="loading",
+            next_state=None,
             fallback=None,
-            validate=lambda result: bool(result),
-            data_from_result=lambda result: ScreenData(
-                source="home",
-                payload=Toolkit.prepare_queue(result["selected_files"], result),
-                payload_names=Toolkit.get_queue_names(result["selected_files"], result),
-                function=Toolkit.process_image,
-            ),
-        )
-        self.state_machine.register(
-            "loading",
-            screen_class=LoadingScreen,
-            next_state=lambda result: "done" if result[0] == "continue" else "home",
-            fallback=None,
-            validate=lambda result: result in [("continue", True), ("cancel", False), ("cancel", True)],
-            data_from_result=lambda result: ScreenData(
-                source="loading",
-                payload=result
-            ),
-        )
-        self.state_machine.register(
-            "done",
-            screen_class=DoneScreen,
-            next_state=lambda result: result,
-            fallback=None,
-            validate=lambda result: result == "home" or result is None,
-            data_from_result=lambda result: ScreenData(
-                source="done",
-                payload=result
-            ),
         )
 
     def _register_defaults(self) -> None:

@@ -9,10 +9,11 @@ from textual.screen import Screen
 from textual.validation import Integer
 from textual.widgets import Input, Select
 
+from panelizer.toolkit import Toolkit
 from textual_neon import SettingsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, ScreenData, CompleteInput, NeonHeader, \
-    NeonSelect
+    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, ScreenData, \
+    NeonHeader, NeonSelect, LoadingScreen, DoneScreen, CompleteInput
 
 
 class HomeScreen(Screen[dict]):
@@ -254,7 +255,93 @@ class HomeScreen(Screen[dict]):
 
     @on(NeonButton.Pressed, "#start-btn")
     async def start_button_pressed(self) -> None:
-        self._handle_dismiss()
+        """
+        Triggered when user clicks 'Start Processing'.
+        Replaces the old dismiss logic. Launches the worker.
+        """
+        self.run_worker(self._processing_workflow, exclusive=True)
+
+    async def _processing_workflow(self) -> None:
+        """
+        The orchestrator method.
+        Validates settings, prepares the payload, runs the loading screen,
+        and finally shows the done screen.
+        """
+        # noinspection DuplicatedCode
+        if not self.selected_files:
+            self.notify(
+                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"
+                f"found in dir {self._selected_dir.as_posix()}",
+                title="No Files Selected",
+                severity="error"
+            )
+            return
+
+        s = self.settings
+        layout = s.get("layout")
+
+        if layout == "uniform":
+            padding = {
+                "uniform": s.get("img_pad_uniform"),
+                "orientation": s.get("uniform_border_orientation")
+            }
+            canvas_ratio = None
+        else:
+            padding = {
+                "left": s.get("img_pad_left"),
+                "right": s.get("img_pad_right"),
+                "top": s.get("img_pad_top"),
+                "bottom": s.get("img_pad_bottom"),
+            }
+            canvas_ratio = s.get("canvas_ratio")
+
+        settings_dict = {
+            "selected_dir": str(self._selected_dir),
+            "background_color": s.get("background_color"),
+            "layout": layout,
+            "canvas_height": int(s.get("canvas_height")),
+            "canvas_ratio": canvas_ratio,
+            "split_wide_images": s.get("split_wide_active"),
+            "stack_landscape_images": s.get("stack_landscape_active"),
+            "padding": padding,
+        }
+
+        payload = Toolkit.prepare_queue(self.selected_files, settings_dict)
+        payload_names = Toolkit.get_queue_names(self.selected_files, settings_dict)
+
+        data = ScreenData(
+            source="home",
+            payload=payload,
+            payload_names=payload_names,
+            function=Toolkit.process_image,
+        )
+        status, results = await self.app.push_screen_wait(
+            LoadingScreen(
+                data,
+                title="Processing Images",
+                allow_failures=True,
+                allow_duplicates=True
+            )
+        )
+
+        if status == "cancel":
+            self.notify("Processing cancelled.", severity="warning")
+            return
+        success_count = 0
+        if results:
+            success_count = sum(1 for r in results if r is True)
+        total_count = len(payload)
+        done_msg = (
+            f"Processed {success_count} out of {total_count} items.\n"
+            f"Check the 'panelizer_output' folder inside your source directory."
+        )
+
+        await self.app.push_screen(
+            DoneScreen(
+                text=done_msg,
+                go_back_screen=("Home", "home")
+            )
+        )
 
     async def _select_files_worker(self) -> None:
         """A screen-level worker that pushes a file select dialog and updates the UI."""
@@ -270,7 +357,7 @@ class HomeScreen(Screen[dict]):
             self.query_one("#file-mode-palette", ChoicePalette).select(0)
             await self._select_all_files()
             return
-        dialog_title = f"Select Files ({", ".join(self.allowed_extensions)})"
+        dialog_title = f"Select Files ({', '.join(self.allowed_extensions)})"
         files_from_dialog = await self.app.push_screen_wait(
             ListSelectDialog(dialog_title, files)
         )
@@ -351,6 +438,7 @@ class HomeScreen(Screen[dict]):
 
     def _handle_dismiss(self) -> None:
         """Validates file selection and bundles all settings into a dict to dismiss the screen."""
+        # noinspection DuplicatedCode
         if not self.selected_files:
             self.notify(
                 f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"

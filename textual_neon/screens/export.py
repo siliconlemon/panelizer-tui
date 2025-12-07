@@ -155,6 +155,7 @@ class ExportScreen(Screen[str | None]):
                 disabled=True,
             )
 
+        # noinspection DuplicatedCode
         with Horizontal(id="back-and-quit-container", classes="buttons-container"):
             if self.go_back_screen is not None:
                 yield NeonButton(
@@ -163,7 +164,7 @@ class ExportScreen(Screen[str | None]):
                     variant="primary",
                 )
             yield NeonButton(
-                "Quit to Terminal",
+                f"Quit {self.app.TITLE}",
                 id="quit",
                 variant="primary",
             )

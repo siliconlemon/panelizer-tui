@@ -102,6 +102,7 @@ class DoneScreen(Screen[str | None]):
                 yield InertLabel(self.ascii_art)
         yield InertLabel(self.text, id="text")
 
+        # noinspection DuplicatedCode
         with Horizontal(id="back-and-quit-container", classes="buttons-container"):
             if self.go_back_screen is not None:
                 yield NeonButton(
@@ -110,7 +111,7 @@ class DoneScreen(Screen[str | None]):
                     variant="primary",
                 )
             yield NeonButton(
-                "Quit to Terminal",
+                f"Quit {self.app.TITLE}",
                 id="quit",
                 variant="primary",
             )
