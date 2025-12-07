@@ -8,6 +8,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 class Toolkit:
     """
     A static container for all image processing business logic for Panelizer.
+    Updated to support dynamic output directory naming via settings.
     """
     RATIO_MAP = {
         "3:4": 3 / 4,
@@ -141,8 +142,10 @@ class Toolkit:
             return True
 
         except (OSError, UnidentifiedImageError, ValueError, TypeError) as e:
-            output_dir = path.parent / "panelizer_output"
+            out_name = settings.get("output_dir_name", "panelizer_output")
+            output_dir = path.parent / out_name
             output_dir.mkdir(exist_ok=True)
+
             fail_file = output_dir / f"{path.name}.failed"
             error_msg = f"Export failed for {path.name} (or stack).\nDetails: {e}"
 
@@ -219,7 +222,6 @@ class Toolkit:
             ratio_val = Toolkit.RATIO_MAP.get(ratio_str) or 4 / 5
             canvas_w = int(ref_h * ratio_val)
 
-            # Determine Padding first to set Gap
             _, _, pad_t, _ = Toolkit._calculate_base_padding(canvas_w, ref_h, settings)
             gap_px = pad_t
             total_gaps = gap_px * (len(images) - 1)
@@ -244,7 +246,6 @@ class Toolkit:
 
             stack_content_h = sum(img.height for img in resized_images) + total_gaps
 
-            # Re-use the pad_t we calculated earlier for vertical centering offset
             local_y_offset = (safe_h - stack_content_h) // 2
             current_y = pad_t + local_y_offset
 
@@ -253,8 +254,10 @@ class Toolkit:
                 canvas.paste(r_img, (current_x, current_y))
                 current_y += r_img.height + gap_px
 
-        output_dir = paths[0].parent / "panelizer_output"
+        out_name = settings.get("output_dir_name", "panelizer_output")
+        output_dir = paths[0].parent / out_name
         output_dir.mkdir(exist_ok=True)
+
         stem = paths[0].stem + "_stacked"
         save_path = output_dir / f"{stem}.jpg"
 
@@ -386,8 +389,11 @@ class Toolkit:
             )
 
         canvas.paste(final_img, pos)
-        output_dir = source_dir / "panelizer_output"
+
+        out_name = settings.get("output_dir_name", "panelizer_output")
+        output_dir = source_dir / out_name
         output_dir.mkdir(exist_ok=True)
+
         save_path = output_dir / f"{stem}{Toolkit.FILENAME_SUFFIX}.jpg"
 
         if canvas.mode in ("RGBA", "P"):

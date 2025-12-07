@@ -256,16 +256,41 @@ class HomeScreen(Screen[dict]):
     @on(NeonButton.Pressed, "#start-btn")
     async def start_button_pressed(self) -> None:
         """
-        Triggered when user clicks 'Start Processing'.
-        Replaces the old dismiss logic. Launches the worker.
+        Triggered when the user clicks 'Start Processing'.
+        Replaces the old dismissed logic. Launches the worker.
         """
         self.run_worker(self._processing_workflow, exclusive=True)
+
+    @staticmethod
+    def _get_output_dir_name(parent_dir: Path) -> str:
+        """
+        Determines a safe output directory name.
+        - If 'panelizer_output' doesn't exist, use it.
+        - If 'panelizer_output' exists but is empty, use it.
+        - If 'panelizer_output' exists and has files, try '_2', '_3', etc.
+        """
+        base_name = "panelizer_output"
+        counter = 1
+
+        while True:
+            suffix = "" if counter == 1 else f"_{counter}"
+            candidate_name = f"{base_name}{suffix}"
+            candidate_path = parent_dir / candidate_name
+            if not candidate_path.exists():
+                return candidate_name
+            try:
+                if not any(candidate_path.iterdir()):
+                    return candidate_name
+            except (OSError, PermissionError):
+                pass
+
+            counter += 1
 
     async def _processing_workflow(self) -> None:
         """
         The orchestrator method.
-        Validates settings, prepares the payload, runs the loading screen,
-        and finally shows the done screen.
+        Validates settings, calculates a unique output directory, prepares the payload,
+        runs the loading screen, and finally shows the done screen.
         """
         # noinspection DuplicatedCode
         if not self.selected_files:
@@ -295,6 +320,9 @@ class HomeScreen(Screen[dict]):
             }
             canvas_ratio = s.get("canvas_ratio")
 
+        # Calculate the unique output directory name ONCE for the whole batch
+        output_dir_name = self._get_output_dir_name(self._selected_dir)
+
         settings_dict = {
             "selected_dir": str(self._selected_dir),
             "background_color": s.get("background_color"),
@@ -304,6 +332,7 @@ class HomeScreen(Screen[dict]):
             "split_wide_images": s.get("split_wide_active"),
             "stack_landscape_images": s.get("stack_landscape_active"),
             "padding": padding,
+            "output_dir_name": output_dir_name,  # Passed to Toolkit
         }
 
         payload = Toolkit.prepare_queue(self.selected_files, settings_dict)
@@ -315,6 +344,7 @@ class HomeScreen(Screen[dict]):
             payload_names=payload_names,
             function=Toolkit.process_image,
         )
+
         status, results = await self.app.push_screen_wait(
             LoadingScreen(
                 data,
@@ -327,13 +357,16 @@ class HomeScreen(Screen[dict]):
         if status == "cancel":
             self.notify("Processing cancelled.", severity="warning")
             return
+
         success_count = 0
         if results:
             success_count = sum(1 for r in results if r is True)
+
         total_count = len(payload)
+
         done_msg = (
             f"Processed {success_count} out of {total_count} items.\n"
-            f"Check the 'panelizer_output' folder inside your source directory."
+            f"Saved to folder: '{output_dir_name}'"
         )
 
         await self.app.push_screen(
@@ -435,46 +468,3 @@ class HomeScreen(Screen[dict]):
                 return f"{count} File Selected"
             case _:
                 return f"{count} Files Selected"
-
-    def _handle_dismiss(self) -> None:
-        """Validates file selection and bundles all settings into a dict to dismiss the screen."""
-        # noinspection DuplicatedCode
-        if not self.selected_files:
-            self.notify(
-                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"
-                f"found in dir {self._selected_dir.as_posix()}",
-                title="No Files Selected",
-                severity="error"
-            )
-            return
-
-        s = self.settings
-        layout = s.get("layout")
-
-        if layout == "uniform":
-            padding = {
-                "uniform": s.get("img_pad_uniform"),
-                "orientation": s.get("uniform_border_orientation")
-            }
-            canvas_ratio = None
-        else:
-            padding = {
-                "left": s.get("img_pad_left"),
-                "right": s.get("img_pad_right"),
-                "top": s.get("img_pad_top"),
-                "bottom": s.get("img_pad_bottom"),
-            }
-            canvas_ratio = s.get("canvas_ratio")
-
-        settings = {
-            "selected_dir": str(self._selected_dir),
-            "selected_files": self.selected_files,
-            "background_color": s.get("background_color"),
-            "layout": layout,
-            "canvas_height": int(s.get("canvas_height")),
-            "canvas_ratio": canvas_ratio,
-            "split_wide_images": s.get("split_wide_active"),
-            "stack_landscape_images": s.get("stack_landscape_active"),
-            "padding": padding,
-        }
-        self.dismiss(settings)
