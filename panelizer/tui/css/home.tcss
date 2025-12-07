@@ -64,8 +64,8 @@ CompleteInputGrid {
     margin: 0;
 }
 
-CompleteInput {
-    margin: 0 1 0 0;
+#img-pad-uniform {
+    margin: 0 2 0 0;
     height: auto;
 }
 

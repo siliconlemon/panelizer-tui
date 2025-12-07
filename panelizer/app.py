@@ -159,6 +159,15 @@ class Panelizer(NeonApp):
             ]
         )
 
+        s.register_default("uniform_border_orientation", "inward")
+        s.register_default(
+            "uniform_border_orientation_options",
+            [
+                ("Inward (Crop Edges)", "inward"),
+                ("Outward (Add Border)", "outward")
+            ]
+        )
+
         s.register_default("split_wide_active", False)
         s.register_default("stack_landscape_active", False)
 

@@ -46,12 +46,19 @@ class HomeScreen(Screen[dict]):
                     )
                     with Horizontal(id="uniform-pad-container"):
                         yield CompleteInput(
-                            id="img_pad_uniform",
+                            id="img-pad-uniform",
                             label="All Sides (% of Height)",
                             value=s.get("img_pad_uniform"),
                             type_="number",
                             unit="%"
                         )
+                    yield CompleteSelect(
+                        select_id="uniform-orientation-select",
+                        label="Border Orientation",
+                        initial=s.get("uniform_border_orientation"),
+                        options=s.get("uniform_border_orientation_options"),
+                        id="uniform-orientation-wrapper"
+                    )
                     yield CompleteInputGrid(
                         rows=2,
                         columns=2,
@@ -128,7 +135,7 @@ class HomeScreen(Screen[dict]):
         for input_id in ["#pad-left", "#pad-right", "#pad-top", "#pad-bottom"]:
             input_widget = self.query_one(input_id, Input)
             input_widget.validators.append(img_pad_validator)
-        self.query_one("#img_pad_uniform", Input).validators.append(img_pad_validator)
+        self.query_one("#img-pad-uniform", Input).validators.append(img_pad_validator)
         self._update_path_display()
         self._update_padding_inputs()
         current_layout = self.settings.get("layout")
@@ -139,6 +146,7 @@ class HomeScreen(Screen[dict]):
         """Toggles visibility between the grid and the uniform input container."""
         is_uniform = layout == "uniform"
         self.query_one("#uniform-pad-container").set_class(not is_uniform, "hidden")
+        self.query_one("#uniform-orientation-wrapper").set_class(not is_uniform, "hidden")
         self.query_one("#pad-grid").set_class(is_uniform, "hidden")
         self.query_one("#ratio-select", NeonSelect).parent.parent.set_class(is_uniform, "hidden")
         self.query_one("#ratio-wrapper").set_class(is_uniform, "hidden")
@@ -158,7 +166,7 @@ class HomeScreen(Screen[dict]):
             "pad-right": "img_pad_right",
             "pad-top": "img_pad_top",
             "pad-bottom": "img_pad_bottom",
-            "img_pad_uniform": "img_pad_uniform",
+            "img-pad-uniform": "img-pad-uniform",
         }
 
         if event.input.id in mapping:
@@ -190,6 +198,10 @@ class HomeScreen(Screen[dict]):
         new_layout = str(event.value)
         self.settings.set("layout", new_layout)
         self._refresh_layout_inputs(new_layout)
+
+    @on(Select.Changed, "#uniform-orientation-select")
+    def uniform_orientation_changed(self, event: Select.Changed) -> None:
+        self.settings.set("uniform_border_orientation", str(event.value))
 
     @on(Select.Changed, "#height-select")
     def height_select_changed(self, event: Select.Changed) -> None:
@@ -304,7 +316,7 @@ class HomeScreen(Screen[dict]):
         self.query_one("#pad-right", Input).value = str(s.get("img_pad_right"))
         self.query_one("#pad-top", Input).value = str(s.get("img_pad_top"))
         self.query_one("#pad-bottom", Input).value = str(s.get("img_pad_bottom"))
-        self.query_one("#img_pad_uniform", Input).value = str(s.get("img_pad_uniform"))
+        self.query_one("#img-pad-uniform", Input).value = str(s.get("img_pad_uniform"))
 
     def _file_path_to_tuple(self, path: Path) -> tuple[str, str, bool]:
         """Formats a Path object into a tuple for the ListSelectDialog."""
@@ -353,7 +365,8 @@ class HomeScreen(Screen[dict]):
 
         if layout == "uniform":
             padding = {
-                "uniform": s.get("img_pad_uniform")
+                "uniform": s.get("img_pad_uniform"),
+                "orientation": s.get("uniform_border_orientation")
             }
             canvas_ratio = None
         else:
