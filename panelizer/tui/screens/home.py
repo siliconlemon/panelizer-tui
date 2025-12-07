@@ -7,19 +7,22 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.validation import Integer
-from textual.widgets import Input, Header, Select
+from textual.widgets import Input, Select
 
-from textual_neon import DefaultsPalette, CompleteInputGrid, CompleteSelect, \
+from panelizer.toolkit import Toolkit
+from textual_neon import SettingsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Settings, ChoiceButton, DefaultsButton, Paths, NeonInput
+    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, ScreenData, \
+    NeonHeader, NeonSelect, LoadingScreen, DoneScreen, CompleteInput
 
 
 class HomeScreen(Screen[dict]):
     CSS_PATH = ["../css/home.tcss"]
     BINDINGS = []
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, data: ScreenData, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.data = data
         self.settings = Settings.ensure(app=self.app)
         s = self.settings
         self.allowed_extensions: list[str] = s.get("allowed_extensions")
@@ -30,12 +33,33 @@ class HomeScreen(Screen[dict]):
 
     def compose(self) -> ComposeResult:
         s = self.settings
-        yield Header(icon="●")
+        yield NeonHeader()
         with Vertical(id="home-container"):
             with Horizontal(id="path-row"):
                 yield PathButton(self._selected_dir.as_posix(), id="path-btn")
             with Horizontal(id="main-row"):
                 with Vertical(id="first-column"):
+                    yield CompleteSelect(
+                        select_id="layout-select",
+                        label="Layout",
+                        initial=s.get("layout"),
+                        options=s.get("layout_options"),
+                    )
+                    with Horizontal(id="uniform-pad-container"):
+                        yield CompleteInput(
+                            id="img-pad-uniform",
+                            label="All Sides (% of Height)",
+                            value=s.get("img_pad_uniform"),
+                            type_="number",
+                            unit="%"
+                        )
+                    yield CompleteSelect(
+                        select_id="uniform-orientation-select",
+                        label="Border Orientation",
+                        initial=s.get("uniform_border_orientation"),
+                        options=s.get("uniform_border_orientation_options"),
+                        id="uniform-orientation-wrapper"
+                    )
                     yield CompleteInputGrid(
                         rows=2,
                         columns=2,
@@ -50,6 +74,26 @@ class HomeScreen(Screen[dict]):
                         units=["%", "%", "%", "%"],
                         id="pad-grid"
                     )
+                    yield CompleteSelect(
+                        select_id="height-select",
+                        label="Canvas Height",
+                        initial=s.get("canvas_height"),
+                        options=s.get("canvas_height_options"),
+                    )
+                    yield CompleteSelect(
+                        select_id="ratio-select",
+                        label="Aspect Ratio",
+                        initial=s.get("canvas_ratio"),
+                        options=s.get("canvas_ratio_options"),
+                        id="ratio-wrapper"
+                    )
+                with Vertical(id="second-column"):
+                    yield CompleteSelect(
+                        select_id="bg-select",
+                        label="Background Color",
+                        initial=s.get("background_color"),
+                        options=s.get("background_color_options"),
+                    )
                     yield Toggle(
                         switch_id="split-wide-toggle-switch",
                         text="Split Wide Images",
@@ -62,20 +106,14 @@ class HomeScreen(Screen[dict]):
                         is_active=s.get("stack_landscape_active"),
                         id="stack-landscape-toggle",
                     )
-                with Vertical(id="second-column"):
-                    yield CompleteSelect(
-                        select_id="bg-select",
-                        label="Background Color",
-                        initial=s.get("background_color"),
-                        options=s.get("background_color_options"),
+                    yield SettingsPalette(
+                        save_btn_id="save-settings-btn",
+                        restore_btn_id="restore-settings-btn",
+                        reset_btn_id="reset-settings-btn",
+                        label="Current Settings",
+                        id="settings-widget",
                     )
-                    yield DefaultsPalette(
-                        save_btn_id="save-defaults-btn",
-                        restore_btn_id="restore-defaults-btn",
-                        reset_btn_id="reset-defaults-btn",
-                        widget_id="defaults-widget",
-                        label="Default Values",
-                    )
+
             yield ChoicePalette(
                 name="File Selection Mode",
                 labels=["All Files in Dir", "Select Files"],
@@ -98,9 +136,21 @@ class HomeScreen(Screen[dict]):
         for input_id in ["#pad-left", "#pad-right", "#pad-top", "#pad-bottom"]:
             input_widget = self.query_one(input_id, Input)
             input_widget.validators.append(img_pad_validator)
+        self.query_one("#img-pad-uniform", Input).validators.append(img_pad_validator)
         self._update_path_display()
         self._update_padding_inputs()
+        current_layout = self.settings.get("layout")
+        self._refresh_layout_inputs(current_layout)
         await self._select_all_files()
+
+    def _refresh_layout_inputs(self, layout: str) -> None:
+        """Toggles visibility between the grid and the uniform input container."""
+        is_uniform = layout == "uniform"
+        self.query_one("#uniform-pad-container").set_class(not is_uniform, "hidden")
+        self.query_one("#uniform-orientation-wrapper").set_class(not is_uniform, "hidden")
+        self.query_one("#pad-grid").set_class(is_uniform, "hidden")
+        self.query_one("#ratio-select", NeonSelect).parent.parent.set_class(is_uniform, "hidden")
+        self.query_one("#ratio-wrapper").set_class(is_uniform, "hidden")
 
     def _get_all_files_in_dir_blocking(self) -> list[Path]:
         """A blocking method to get all allowed files in the selected directory."""
@@ -111,54 +161,87 @@ class HomeScreen(Screen[dict]):
         self.run_worker(self._select_dir_worker, exclusive=True)
 
     @on(NeonInput.Blurred)
-    async def input_blurred(self, event: Input.Submitted) -> None:
+    def input_blurred(self, event: Input.Submitted) -> None:
         mapping = {
             "pad-left": "img_pad_left",
             "pad-right": "img_pad_right",
             "pad-top": "img_pad_top",
             "pad-bottom": "img_pad_bottom",
+            "img-pad-uniform": "img-pad-uniform",
         }
+
         if event.input.id in mapping:
+            setting_key = mapping[event.input.id]
+            try:
+                old_val = int(self.settings.get(setting_key))
+            except ValueError:
+                old_val = 0
+
             try:
                 val = int(event.value)
             except ValueError:
-                self.notify(f"Invalid value for {event.input.id}", severity="error")
+                self.notify(f"Invalid value for {event.input.id}", title="Invalid Input", severity="error")
                 val = 0
+
             val = max(0, min(self.max_pad_percentage, val))
-            self.settings.set(mapping[event.input.id], val)
+
+            if val != old_val:
+                self.settings.set(setting_key, val)
+            event.input.value = str(val)
             self._update_padding_inputs()
 
     @on(Select.Changed, "#bg-select")
-    async def bg_select_changed(self, event: Select.Changed) -> None:
+    def bg_select_changed(self, event: Select.Changed) -> None:
         self.settings.set("background_color", str(event.value))
 
+    @on(Select.Changed, "#layout-select")
+    def layout_select_changed(self, event: Select.Changed) -> None:
+        new_layout = str(event.value)
+        self.settings.set("layout", new_layout)
+        self._refresh_layout_inputs(new_layout)
+
+    @on(Select.Changed, "#uniform-orientation-select")
+    def uniform_orientation_changed(self, event: Select.Changed) -> None:
+        self.settings.set("uniform_border_orientation", str(event.value))
+
+    @on(Select.Changed, "#height-select")
+    def height_select_changed(self, event: Select.Changed) -> None:
+        self.settings.set("canvas_height", str(event.value))
+
+    @on(Select.Changed, "#ratio-select")
+    def ratio_select_changed(self, event: Select.Changed) -> None:
+        self.settings.set("canvas_ratio", str(event.value))
+
     @on(Toggle.Changed, "#split-wide-toggle")
-    async def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
+    def split_wide_toggle_changed(self, event: Toggle.Changed) -> None:
         self.settings.set("split_wide_active", event.active)
 
     @on(Toggle.Changed, "#stack-landscape-toggle")
-    async def stack_landscape_toggle_changed(self, event: Toggle.Changed) -> None:
+    def stack_landscape_toggle_changed(self, event: Toggle.Changed) -> None:
         self.settings.set("stack_landscape_active", event.active)
 
-    @on(DefaultsButton.Pressed, "#save-defaults-btn")
+    @on(SettingsButton.Pressed, "#save-settings-btn")
     async def save_defaults_button_pressed(self) -> None:
         self.settings.set("start_dir", self._selected_dir.as_posix())
         self.settings.save()
-        self.notify("Preferences have been saved.", severity="information")
+        self.notify("Preferences have been saved.", title="Preferences Saved", severity="information")
 
-    @on(DefaultsButton.Pressed, "#restore-defaults-btn")
-    async def restore_defaults_button_pressed(self) -> None:
+    @on(SettingsButton.Pressed, "#restore-settings-btn")
+    def restore_defaults_button_pressed(self) -> None:
         self.settings.load()
         self._update_ui_from_preferences()
-        self.notify("Preferences have been restored.", severity="information")
+        self.notify("Preferences have been restored.", title="Preferences Restored", severity="information")
 
-    @on(DefaultsButton.Pressed, "#reset-defaults-btn")
-    async def reset_defaults_button_pressed(self) -> None:
+    @on(SettingsButton.Pressed, "#reset-defaults-btn")
+    def reset_defaults_button_pressed(self) -> None:
         self.settings.reset_all()
+        self.settings.save()
         self._update_ui_from_preferences()
         self.notify(
             "Preferences have been reset to factory defaults.\n"
-            "Click 'Save' to overwrite your settings with these values.", severity="warning"
+            "Click 'Save' to overwrite your settings with these values.",
+            title="Preferences Reset",
+            severity="warning"
         )
 
     @on(ChoiceButton.Selected)
@@ -172,7 +255,126 @@ class HomeScreen(Screen[dict]):
 
     @on(NeonButton.Pressed, "#start-btn")
     async def start_button_pressed(self) -> None:
-        self._handle_dismiss()
+        """
+        Triggered when the user clicks 'Start Processing'.
+        Replaces the old dismissed logic. Launches the worker.
+        """
+        self.run_worker(self._processing_workflow, exclusive=True)
+
+    @staticmethod
+    def _get_output_dir_name(parent_dir: Path) -> str:
+        """
+        Determines a safe output directory name.
+        - If 'panelizer_output' doesn't exist, use it.
+        - If 'panelizer_output' exists but is empty, use it.
+        - If 'panelizer_output' exists and has files, try '_2', '_3', etc.
+        """
+        base_name = "panelizer_output"
+        counter = 1
+
+        while True:
+            suffix = "" if counter == 1 else f"_{counter}"
+            candidate_name = f"{base_name}{suffix}"
+            candidate_path = parent_dir / candidate_name
+            if not candidate_path.exists():
+                return candidate_name
+            try:
+                if not any(candidate_path.iterdir()):
+                    return candidate_name
+            except (OSError, PermissionError):
+                pass
+
+            counter += 1
+
+    async def _processing_workflow(self) -> None:
+        """
+        The orchestrator method.
+        Validates settings, calculates a unique output directory, prepares the payload,
+        runs the loading screen, and finally shows the done screen.
+        """
+        # noinspection DuplicatedCode
+        if not self.selected_files:
+            self.notify(
+                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"
+                f"found in dir {self._selected_dir.as_posix()}",
+                title="No Files Selected",
+                severity="error"
+            )
+            return
+
+        s = self.settings
+        layout = s.get("layout")
+
+        if layout == "uniform":
+            padding = {
+                "uniform": s.get("img_pad_uniform"),
+                "orientation": s.get("uniform_border_orientation")
+            }
+            canvas_ratio = None
+        else:
+            padding = {
+                "left": s.get("img_pad_left"),
+                "right": s.get("img_pad_right"),
+                "top": s.get("img_pad_top"),
+                "bottom": s.get("img_pad_bottom"),
+            }
+            canvas_ratio = s.get("canvas_ratio")
+
+        # Calculate the unique output directory name ONCE for the whole batch
+        output_dir_name = self._get_output_dir_name(self._selected_dir)
+
+        settings_dict = {
+            "selected_dir": str(self._selected_dir),
+            "background_color": s.get("background_color"),
+            "layout": layout,
+            "canvas_height": int(s.get("canvas_height")),
+            "canvas_ratio": canvas_ratio,
+            "split_wide_images": s.get("split_wide_active"),
+            "stack_landscape_images": s.get("stack_landscape_active"),
+            "padding": padding,
+            "output_dir_name": output_dir_name,  # Passed to Toolkit
+        }
+
+        payload = Toolkit.prepare_queue(self.selected_files, settings_dict)
+        payload_names = Toolkit.get_queue_names(self.selected_files, settings_dict)
+
+        data = ScreenData(
+            source="home",
+            payload=payload,
+            payload_names=payload_names,
+            function=Toolkit.process_image,
+        )
+
+        status, results = await self.app.push_screen_wait(
+            LoadingScreen(
+                data,
+                title="Processing Images",
+                allow_failures=True,
+                allow_duplicates=True
+            )
+        )
+
+        if status == "cancel":
+            self.notify("Processing cancelled.", severity="warning")
+            return
+
+        success_count = 0
+        if results:
+            success_count = sum(1 for r in results if r is True)
+
+        total_count = len(payload)
+
+        done_msg = (
+            f"Processed {success_count} out of {total_count} items.\n"
+            f"Saved to folder: '{output_dir_name}'"
+        )
+
+        await self.app.push_screen(
+            DoneScreen(
+                text=done_msg,
+                go_back_screen=("Home", "home")
+            )
+        )
 
     async def _select_files_worker(self) -> None:
         """A screen-level worker that pushes a file select dialog and updates the UI."""
@@ -181,31 +383,32 @@ class HomeScreen(Screen[dict]):
 
         if not files:
             self.notify(
-                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"
+                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)}) "
                 f"found in dir {self._selected_dir.as_posix()}",
                 severity="warning"
             )
             self.query_one("#file-mode-palette", ChoicePalette).select(0)
             await self._select_all_files()
             return
-
-        dialog_title = f"Select Files ({", ".join(self.allowed_extensions)})"
+        dialog_title = f"Select Files ({', '.join(self.allowed_extensions)})"
         files_from_dialog = await self.app.push_screen_wait(
             ListSelectDialog(dialog_title, files)
         )
-        if files_from_dialog is not None:
-            self.selected_files = files_from_dialog
+        if files_from_dialog is None:
+            return
+        self.selected_files = files_from_dialog
         if not self.selected_files:
             await self._select_all_files()
-
         self.query_one("#file-mode-palette", ChoicePalette).refresh_disp_state()
 
     async def _select_dir_worker(self) -> None:
         """A screen-level worker that pushes a dir select dialog and updates the UI."""
         new_dir = await self.app.push_screen_wait(DirSelectDialog(location=self._selected_dir))
         if new_dir:
-            self._selected_dir = Path(new_dir)
-            self._update_path_display()
+            new_path = Path(new_dir)
+            if new_path != self._selected_dir:
+                self._selected_dir = new_path
+                self._update_path_display()
         await self._select_all_files()
 
     def _update_ui_from_preferences(self) -> None:
@@ -217,12 +420,12 @@ class HomeScreen(Screen[dict]):
         bg_select = self.query_one("#bg-select", Select)
         bg_select.set_options(s.get("background_color_options"))
         bg_select.value = s.get("background_color")
-        self.query_one("#split-wide-toggle", Toggle).value = s.get("split_wide_active")
-        self.query_one("#stack-landscape-toggle", Toggle).value = s.get("stack_landscape_active")
+        self.query_one("#split-wide-toggle", Toggle).is_active = s.get("split_wide_active")
+        self.query_one("#stack-landscape-toggle", Toggle).is_active = s.get("stack_landscape_active")
 
     def _update_path_display(self) -> None:
         """Updates the PathButton label from the internal _selected_dir state."""
-        path_btn = self.query_one("#path-btn", NeonButton)
+        path_btn = self.query_one("#path-btn", PathButton)
         path = self._selected_dir.as_posix()
         path_btn.label = path
 
@@ -233,6 +436,7 @@ class HomeScreen(Screen[dict]):
         self.query_one("#pad-right", Input).value = str(s.get("img_pad_right"))
         self.query_one("#pad-top", Input).value = str(s.get("img_pad_top"))
         self.query_one("#pad-bottom", Input).value = str(s.get("img_pad_bottom"))
+        self.query_one("#img-pad-uniform", Input).value = str(s.get("img_pad_uniform"))
 
     def _file_path_to_tuple(self, path: Path) -> tuple[str, str, bool]:
         """Formats a Path object into a tuple for the ListSelectDialog."""
@@ -264,28 +468,3 @@ class HomeScreen(Screen[dict]):
                 return f"{count} File Selected"
             case _:
                 return f"{count} Files Selected"
-
-    def _handle_dismiss(self) -> None:
-        """Validates file selection and bundles all settings into a dict to dismiss the screen."""
-        if not self.selected_files:
-            self.notify(
-                f"No files with the allowed extensions ({', '.join(self.allowed_extensions)})\n"
-                f"found in dir {self._selected_dir.as_posix()}",
-                severity="error"
-            )
-            return
-        s = self.settings
-        settings = {
-            "selected_dir": str(self._selected_dir),
-            "selected_files": self.selected_files,
-            "background_color": s.get("background_color"),
-            "split_wide_images": s.get("split_wide_active"),
-            "stack_landscape_images": s.get("stack_landscape_active"),
-            "padding": {
-                "left": s.get("img_pad_left"),
-                "right": s.get("img_pad_right"),
-                "top": s.get("img_pad_top"),
-                "bottom": s.get("img_pad_bottom"),
-            },
-        }
-        self.dismiss(settings)

@@ -2,32 +2,30 @@ from pathlib import Path
 
 from textual.theme import Theme
 
-from textual_neon import NeonApp, Settings, Paths, LoadingScreen, DoneScreen
-from .tui import HomeScreen
-from .tui import PanelizerLaunchScreen
+from panelizer.tui import HomeScreen
+from panelizer.tui import PanelizerLaunchScreen
+from textual_neon import NeonApp, Settings, Paths, ScreenData
 
 
 class Panelizer(NeonApp):
     """
-    The main app class for the Panelizer, a textual-based terminal user interface
-    for batch-fitting images onto single-color backgrounds.
-    Inherits from NeonApp and implements features from textual_neon, textual_fspicker.
+    The main app class for the Panelizer.
+    Migrated to Controller Pattern: Launch -> Home.
+    Home handles the Loading/Done cycle internally.
     """
     TITLE = "Panelizer"
     SUB_TITLE = "Batch-fit your images onto single-color backgrounds"
-    MIN_ROWS = 32
+    MIN_ROWS = 40
     MIN_COLS = 90
     SCREENS = {
         "launch": PanelizerLaunchScreen,
         "home": HomeScreen,
-        "loading": LoadingScreen,
-        "done": DoneScreen,
     }
     DEFAULT_THEME = Theme(
         name="default",
         primary="#36c8de",
         secondary="#98a1a5",
-        accent="#4d84f5",
+        accent="#009ef5",
         foreground="#c0c5cd",
         background="#1e1e1e",
         success="#63bd4a",
@@ -38,7 +36,6 @@ class Panelizer(NeonApp):
         dark=True,
         variables={
             "block-cursor-text-style": "none",
-            "footer-key-foreground": "#88c0d0",
         },
     )
 
@@ -56,50 +53,17 @@ class Panelizer(NeonApp):
             next_state="home",
             fallback=None,
             validate=lambda result: result is True,
+            data_from_result=lambda result: ScreenData(
+                source="launch",
+                payload=None
+            ),
         )
         self.state_machine.register(
             "home",
             screen_class=HomeScreen,
-            next_state="loading",
+            next_state=None,
             fallback=None,
-            validate=lambda result: bool(result),
-            args_from_result=lambda result: (
-                result["selected_files"],
-                list(map(lambda path: path.split("/")[-1], result["selected_files"])),
-                lambda file_path: f"{file_path.split('/')[-1]} processed"
-            ),
         )
-        self.state_machine.register(
-            "loading",
-            screen_class=LoadingScreen,
-            next_state=lambda result: "done" if result[0] == "continue" else "home",
-            fallback=None,
-            validate=lambda result: result in [("continue", True), ("cancel", False), ("cancel", True)],
-            args_from_result=lambda result: (),
-        )
-        self.state_machine.register(
-            "done",
-            screen_class=DoneScreen,
-            next_state=lambda result: result,
-            fallback=None,
-            validate=lambda result: result == "home" or result is None,
-        )
-
-    def _check_saved_theme(self) -> None:
-        if hasattr(self, "settings"):
-            theme = self.settings.get("theme")
-            if theme:
-                self.theme = self.settings.get("theme")
-                return
-        self.theme = "default"
-
-    def watch_theme(self, old_theme: str, new_theme: str) -> None:
-        if new_theme in self.available_themes:
-            if hasattr(self, "settings") and not new_theme == self.settings.get("theme"):
-                self.settings.set("theme", new_theme)
-                self.settings.save()
-        else:
-            self.theme = old_theme
 
     def _register_defaults(self) -> None:
         """
@@ -110,20 +74,64 @@ class Panelizer(NeonApp):
         s.register_default("theme", "default")
         s.register_default("start_dir", Paths.pictures().as_posix())
         s.register_default("allowed_extensions", ["jpg", "jpeg", "png"])
-        s.register_default("img_pad_left", 8)
-        s.register_default("img_pad_right", 8)
-        s.register_default("img_pad_top", 5)
-        s.register_default("img_pad_bottom", 5)
+        s.register_default("img_pad_left", 4)
+        s.register_default("img_pad_right", 4)
+        s.register_default("img_pad_top", 3)
+        s.register_default("img_pad_bottom", 3)
+        s.register_default("img_pad_uniform", 2)
+
+        s.register_default("canvas_height", "2500")
+        s.register_default(
+            "canvas_height_options",
+            [
+                ("2000px", "2000"),
+                ("2500px", "2500"),
+                ("3000px", "3000"),
+                ("4000px", "4000"),
+                ("5000px", "5000"),
+            ]
+        )
+
+        s.register_default("canvas_ratio", "4:5")
+        s.register_default(
+            "canvas_ratio_options",
+            [
+                ("Portrait (3:4)", "3:4"),
+                ("Portrait (4:5)", "4:5"),
+                ("Standard (2:3)", "2:3"),
+                ("Vertical (9:16)", "9:16"),
+            ]
+        )
+
+        s.register_default("background_color", "white")
         s.register_default(
             "background_color_options",
             [
                 ("White", "white"),
                 ("Light Gray", "lightgray"),
                 ("Dark Gray", "darkgray"),
-                ("Black", "black"),
-            ],
+                ("Black", "black")
+            ]
         )
-        s.register_default("background_color", "white")
+
+        s.register_default("layout", "framing")
+        s.register_default(
+            "layout_options",
+            [
+                ("Framing", "framing"),
+                ("Uniform Border", "uniform")
+            ]
+        )
+
+        s.register_default("uniform_border_orientation", "inward")
+        s.register_default(
+            "uniform_border_orientation_options",
+            [
+                ("Inward (Crop Edges)", "inward"),
+                ("Outward (Add Border)", "outward")
+            ]
+        )
+
         s.register_default("split_wide_active", False)
         s.register_default("stack_landscape_active", False)
 

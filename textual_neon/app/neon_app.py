@@ -7,9 +7,9 @@ from textual.app import App
 from textual.binding import Binding
 from textual.events import Resize
 from textual.theme import Theme
-from typing_extensions import override
 # noinspection PyProtectedMember
 from textual.widgets._toggle_button import ToggleButton
+from typing_extensions import override
 
 from textual_neon.app.state_machine import StateMachine
 from textual_neon.screens.too_small import TooSmallScreen
@@ -32,7 +32,7 @@ NOT_REGISTERED_MSG = """
 |               screen="launch",
 |               next_state="home",
 |               validate=lambda result: result is True,
-|               args_from_result=lambda result: (),
+|               data_from_result=lambda result: (),
 |           )
 |
 """
@@ -43,7 +43,7 @@ class NeonApp(App[Any]):
     and the absense of light themes.
     """
     CSS_PATH = [resources.files("textual_neon.css").joinpath("globals.tcss")]
-    MIN_ROWS: int = 30
+    MIN_ROWS: int = 32
     MIN_COLS: int = 90
     SCREENS = {}
     BINDINGS = [
@@ -98,13 +98,16 @@ class NeonApp(App[Any]):
         margin: 0;
         & > .option-list--option {
             padding: 0 1 0 1 !important;
+            color: $text !important;
         }
         & > .option-list--option-highlighted {
+            color: $text !important;
             background: $primary 50% !important;
         }
         &:focus {
             background-tint: $foreground 5%;
             & > .option-list--option-highlighted {
+                color: $text !important;
                 background: $primary 50% !important;
             }
         }
@@ -114,7 +117,7 @@ class NeonApp(App[Any]):
         name="default",
         primary="#26d889",
         secondary="#98a1a5",
-        accent="#26bdd6",
+        accent="#23d4c9",
         foreground="#c0c5cd",
         background="#1e1e1e",
         success="#5da643",
@@ -125,7 +128,6 @@ class NeonApp(App[Any]):
         dark=True,
         variables={
             "block-cursor-text-style": "none",
-            "footer-key-foreground": "#88c0d0",
         },
     )
 
@@ -142,6 +144,31 @@ class NeonApp(App[Any]):
         self.state_machine = StateMachine(app=self)
         # Overrides the default toggle button inner icon for more clarity
         ToggleButton.BUTTON_INNER = "●"
+
+    def _register_defaults(self) -> None:
+        """
+        Sets app-wide definitions for all default values for the app.
+        These are the "factory settings."
+
+        Usage:
+        ::
+            # Inside __init__
+            def __init__(self) -> None:
+                super().__init__()
+                self.settings = Settings(config_dir=Path("./settings"))
+                self._register_defaults()
+                self.settings.load()
+                self._check_saved_theme()
+            ...
+            # Lower down
+            @override
+            def _register_defaults(self) -> None:
+                s = self.settings
+                s.register_default("theme", "default")
+                s.register_default("start_dir", Paths.documents().as_posix())
+                s.register_default("allowed_extensions", ["xls", "xlsx", "xlsm", "csv"])
+        """
+        pass
 
     async def on_mount(self) -> None:
         """Handles the initial size check on app startup."""
@@ -194,6 +221,31 @@ class NeonApp(App[Any]):
         for light_theme in ("textual-light", "catppuccin-latte", "solarized-light"):
             self.unregister_theme(light_theme)
         self.register_theme(self.DEFAULT_THEME)
+        self.theme = "default"
+
+    def watch_theme(self, old_theme: str, new_theme: str) -> None:
+        """
+        Saves the theme to settings if they have been set up for the instance.
+        Use textual_neon.Settings to set up the settings object.
+        """
+        if new_theme in self.available_themes:
+            if hasattr(self, "settings"):
+                if not new_theme == self.settings.get("theme"):
+                    self.settings.set("theme", new_theme)
+                    self.settings.save()
+        else:
+            self.theme = old_theme
+
+    def _check_saved_theme(self) -> None:
+        """
+        An init helper that checks if the app has a saved theme.
+        If it does, that theme is set instead of the default.
+        """
+        if hasattr(self, "settings"):
+            theme = self.settings.get("theme")
+            if theme:
+                self.theme = self.settings.get("theme")
+                return
         self.theme = "default"
 
     @work

@@ -73,7 +73,7 @@ class CompleteInputGrid(Widget):
             yield CompleteInput(
                 label=self.labels[idx],
                 value=self.values[idx],
-                input_id=self.input_ids[idx],
+                id=self.input_ids[idx],
                 unit=self.units[idx],
                 type_=self.types[idx],
                 classes="grid-cell"

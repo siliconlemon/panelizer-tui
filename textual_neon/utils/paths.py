@@ -32,15 +32,13 @@ class Paths:
 
         - For packaged executables ('frozen'), this is the directory
           containing the executable.
-        - For standard .py execution, this is the directory containing
-          this Python file (e.g., the 'panelizer' directory).
+        - For standard .py execution, this relies on the app being
+          run from the project root (e.g., `python -m digger.app`).
         """
         if getattr(sys, 'frozen', False):
             return Path(sys.executable).parent.resolve()
-        try:
-            return Path(__file__).parent.resolve()
-        except NameError:
-            return Path.cwd()
+
+        return Path.cwd().resolve()
 
     @staticmethod
     def all_files_in_dir(dir_path: Path, *, extensions: Iterable[str] = None) -> Iterable[Path]:

@@ -16,7 +16,7 @@ class NeonSelect(Select, inherit_css=True):
         border: none !important;
         
         SelectCurrent {
-            color: $text;
+            color: $foreground;
             border: none !important;
             background: transparent;
             margin: 0;
@@ -25,58 +25,58 @@ class NeonSelect(Select, inherit_css=True):
         }
         
         & > SelectOverlay {
-            color: $text;
+            color: $foreground;
             padding: 0 0 0 1 !important;
         }
         
         OptionList {
-            color: $text;
+            color: $foreground;
             background: transparent;
             padding: 0;
             &:focus-within, &:hover {
                 border: round $foreground 70%;
             }
             & > .option-list--option-highlighted {
-                color: $block-cursor-blurred-foreground;
+                color: $background;
                 background: $accent;
-                text-style: $block-cursor-blurred-text-style;
+                text-style: bold;
             }
             &:focus {
                 background-tint: $foreground 5%;
                 & > .option-list--option-highlighted {
-                    color: $block-cursor-foreground;
+                    color: $background;
                     background: $accent;
-                    text-style: $block-cursor-text-style;
+                    text-style: bold;
                 }
             }
         }
         
         SelectCurrent > Static#label {
-            color: $text;
+            color: $foreground;
             border: round $foreground 70%;
             background: transparent;
             &:hover {
-                color: $text 70% !important; 
+                color: $foreground 70% !important; 
                 border: round $accent;
             }
         }
         
         SelectCurrent.-has-value > Static#label {
-            color: $text;
+            color: $foreground;
         }
         
         &:focus SelectCurrent > Static#label {
-            color: $text;
+            color: $foreground;
             border: round $accent;
             text-style: $button-focus-text-style;
             &:hover {
-                color: $text 70% !important; 
+                color: $foreground 70% !important; 
                 border: round $accent 60%;
             }
         }
         
         &:focus SelectCurrent.-has-value > Static#label {
-            color: $text;
+            color: $foreground;
         }
         
         SelectCurrent > .arrow {

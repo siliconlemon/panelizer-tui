@@ -27,7 +27,7 @@ class TooSmallScreen(ModalScreen[None]):
         }
 
         #msg_err {
-            color: $text-error;
+            color: $error-lighten-1;
             text-style: bold;
             margin: 0;
         }

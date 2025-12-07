@@ -1,7 +1,7 @@
 """
 --- TEXTUAL NEON ---
 
-An expansion framework based on textual and textual_fspicker.
+An opinionated superset of textual and textual_fspicker.
 Contains custom app setup, screens, dialogs, widgets and utils for making rapid development even faster.
 Only dark themes are currently supported.
 """

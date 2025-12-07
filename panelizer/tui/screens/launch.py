@@ -11,16 +11,16 @@ class PanelizerLaunchScreen(LaunchScreen):
         (28, 15, "icon-28-15.txt"),
         (30, 16, "icon-30-16.txt"),
         (40, 22, "icon-40-22.txt"),
-        (50, 27, "icon-50-27.txt"),
-        (60, 33, "icon-60-33.txt"),
-        (70, 38, "icon-70-38.txt"),
+        (50, 29, "icon-50-29.txt"),
+        (60, 37, "icon-60-37.txt"),
+        (70, 42, "icon-70-42.txt"),
     ]
     ASCII_PAINTER_COLORMAP = {
-        "*": "#b2b2b2",
+        "*": "#9b9b9b",
         "@": "#ffffff",
-        "%": "#a8d6e5",
-        "i": "#6b92bb",
-        ":": "#577f7e",
+        "%": "#abeff5",
+        "i": "#19689f",
+        ":": "#035e5e",
     }
 
     def __init__(self, *, enter_label: str = "Enter", exit_label: str = "Exit", **kwargs):

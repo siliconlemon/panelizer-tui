@@ -9,7 +9,12 @@ from textual_neon.widgets.inert_label import InertLabel
 
 
 class CompleteInput(Widget):
-    """A labeled input widget with an optional unit label to the right. Uses NeonInput."""
+    """
+    A labeled input widget with an optional unit label to the right. Uses NeonInput.
+
+    NOTE: If you're using a single CompleteInput in your layout and stuff starts disappearing,
+    wrap this in a Container or a Horizontal. This is a `textual` issue with the Input widget that I couldn't fix.
+    """
     DEFAULT_CSS = """
     CompleteInput {
         width: 100%;
@@ -35,17 +40,22 @@ class CompleteInput(Widget):
     def __init__(
         self,
         *,
-        input_id: Optional[str] = None,
         label: Optional[str] = None,
         value: int = 0,
         unit: Optional[str] = None,
         type_: Literal["integer", "number", "text"] = "integer",
         **kwargs,
     ):
+        input_id = None
+        if "id" in kwargs and kwargs["id"]:
+            input_id = kwargs["id"]
+            kwargs["id"] = f"comp-input-{kwargs['id']}"
+        else:
+            kwargs["id"] = "input"
         super().__init__(**kwargs)
+        self.input_id = input_id or "input"
         self.label = label
         self.value = value
-        self.input_id = input_id
         self.unit = unit
         self.type_ = type_
 

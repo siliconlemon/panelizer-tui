@@ -72,11 +72,11 @@ class NeonDialog(ModalScreen[Any]):
                 }
                 &.-active {
                     color: $text-accent 40%;
-                    border: round $accent 30%;
+                    border: round $accent 40%;
                 }
                 &:disabled {
                     color: $foreground 40%;
-                    border: round $foreground 30%;
+                    border: round $foreground 40%;
                 }
             }
         }

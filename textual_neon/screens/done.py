@@ -2,10 +2,11 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
-from textual.widgets import Header, Footer
 
 from textual_neon.widgets.inert_label import InertLabel
 from textual_neon.widgets.neon_button import NeonButton
+from textual_neon.widgets.neon_footer import NeonFooter
+from textual_neon.widgets.neon_header import NeonHeader
 
 DEFAULT_ART = """
  █████  ██     ██        ██████   ██████  ███   ██ ███████ ██
@@ -18,7 +19,8 @@ DEFAULT_ART = """
 
 class DoneScreen(Screen[str | None]):
     """
-    A simple screen to show a "Done" disclaimer and provide navigation options.
+    A simple screen to show a "Done" disclaimer and provide
+    basic navigation options.
     """
     DEFAULT_CSS = """
     DoneScreen {
@@ -45,31 +47,27 @@ class DoneScreen(Screen[str | None]):
             width: 100%;
             height: auto;
             text-align: center;
-            margin: 0 0 1 0;
+            margin: 0 0 2 0;
             color: $foreground 80%;
         }
-        Horizontal#buttons {
+
+        Horizontal.buttons-container {
             layout: horizontal;
             height: 3;
             min-height: 3;
             max-height: 3;
             width: 100%;
             align: center middle;
-            margin-bottom: 1;
+
+            NeonButton#home, NeonButton#quit {
+                width: auto;
+                min-width: 22;
+                margin: 0 2 0 2;
+            }   
         }
-        NeonButton {
-            width: auto;
-            min-width: 22;
-            margin: 0 2;
-        }
-        Footer {
-            background: transparent;
-            border: none !important;
+
+        Horizontal#back-and-quit-container {
             margin: 0 0 1 0;
-            padding: 0 1 0 1;
-            FooterKey.-command-palette {
-                border: none !important;
-            }
         }
     }
     """
@@ -78,25 +76,34 @@ class DoneScreen(Screen[str | None]):
     def __init__(
             self,
             *,
-            ascii_art: str | None = None,
             text: str | None = None,
             go_back_screen: tuple[str, str] | None = ("Home", "home"),
-            name: str | None = None,
-            id: str | None = None,
-            classes: str | None = None,
+            ascii_art: str | None = None,
+            **kwargs
     ):
-        super().__init__(name=name, id=id, classes=classes)
+        """
+        Initializes the simplified DoneScreen.
+
+        Args:
+            text: The text to display (e.g., "Process Complete").
+            go_back_screen: A tuple (label, screen_id) for the "Back" button.
+            ascii_art: Optional ASCII art to display.
+            **kwargs: Additional keyword arguments.
+        """
+        super().__init__(**kwargs)
+        self.go_back_screen = go_back_screen
         self.ascii_art = ascii_art or DEFAULT_ART
         self.text = text or "You can close the terminal now."
-        self.go_back_screen = go_back_screen
 
     def compose(self) -> ComposeResult:
-        yield Header(icon="●")
+        yield NeonHeader()
         with Container(id="wrapper"):
             with Container(id="art"):
                 yield InertLabel(self.ascii_art)
         yield InertLabel(self.text, id="text")
-        with Horizontal(id="buttons"):
+
+        # noinspection DuplicatedCode
+        with Horizontal(id="back-and-quit-container", classes="buttons-container"):
             if self.go_back_screen is not None:
                 yield NeonButton(
                     f"Back to {self.go_back_screen[0]}",
@@ -104,21 +111,16 @@ class DoneScreen(Screen[str | None]):
                     variant="primary",
                 )
             yield NeonButton(
-                "Quit to Terminal",
+                f"Quit {self.app.TITLE}",
                 id="quit",
                 variant="primary",
             )
-        yield Footer()
+        yield NeonFooter()
 
-    @on(NeonButton.Pressed, "#home")
-    def home_button_pressed(self) -> None:
-        self.dismiss(self.go_back_screen[1])
-
-    @on(NeonButton.Pressed, "#quit")
-    def quit_button_pressed(self) -> None:
-        self.dismiss(None)
-
-    @on(NeonButton.Pressed, "#close")
-    def close_button_pressed(self) -> None:
-        self.app.exit()
-
+    @on(NeonButton.Pressed)
+    def button_pressed(self, event: NeonButton.Pressed) -> None:
+        """Handle all button presses on this screen."""
+        if event.button.id == "home":
+            self.dismiss(self.go_back_screen[1])
+        elif event.button.id == "quit":
+            self.app.exit()
