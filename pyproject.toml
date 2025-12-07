@@ -30,5 +30,5 @@ build = [
 [project.scripts]
 panelizer = "panelizer.app:terminal_entry"
 
-[tool.setuptools.packages.find]
-where = ["./panelizer"]
+[tool.setuptools]
+packages = ["panelizer", "textual_neon"]
