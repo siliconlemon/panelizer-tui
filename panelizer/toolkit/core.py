@@ -23,8 +23,8 @@ class Toolkit:
     }
 
     MIN_SPLIT_ASPECT = 2 / 3
-    STACK_GAP_PCT = 0.05
     MAX_STACK_ASPECT = 2.2
+    FILENAME_SUFFIX = "_pan"
 
     @staticmethod
     def prepare_queue(files: List[str], settings: dict) -> List[Tuple[List[str], dict]]:
@@ -159,51 +159,99 @@ class Toolkit:
         Vertically stacks multiple images onto one panel.
         """
         layout = settings.get("layout")
-        canvas_h = int(settings.get("canvas_height") or 2500)
-        ratio_str = settings.get("canvas_ratio") or "4:5"
-        ratio_val = Toolkit.RATIO_MAP.get(ratio_str) or 4 / 5
-        canvas_w = int(canvas_h * ratio_val)
+        ref_h = int(settings.get("canvas_height") or 2500)
         bg_color_name = settings.get("background_color") or "white"
         bg_hex = Toolkit.COLOR_MAP.get(bg_color_name, "#FFFFFF")
 
         images = [Image.open(p) for p in paths]
+        max_w = max(img.width for img in images)
+        norm_images = []
+
+        for img in images:
+            if img.width != max_w:
+                scale = max_w / img.width
+                norm_images.append(img.resize((max_w, int(img.height * scale)), Image.Resampling.LANCZOS))
+            else:
+                norm_images.append(img)
+        images = norm_images
+
         if layout == "uniform":
             pad_data = settings.get("padding") or {}
             border_pct = pad_data.get("uniform") or 5
-            gap_px = int(canvas_h * (border_pct / 100))
+            orientation = pad_data.get("orientation") or "inward"
+
+            border_px = int(ref_h * (border_pct / 100))
+            gap_px = border_px
+            total_gaps = gap_px * (len(images) - 1)
+
+            if orientation == "outward":
+                final_images = images
+                stack_h = sum(img.height for img in final_images) + total_gaps
+                canvas_w = max_w + (2 * border_px)
+                canvas_h = stack_h + (2 * border_px)
+                start_x = border_px
+                start_y = border_px
+
+            else:
+                canvas_h = ref_h
+                available_h = canvas_h - (2 * border_px) - total_gaps
+                current_img_h = sum(img.height for img in images)
+                scale = available_h / current_img_h
+
+                final_images = []
+                for img in images:
+                    new_w = int(img.width * scale)
+                    new_h = int(img.height * scale)
+                    final_images.append(img.resize((new_w, new_h), Image.Resampling.LANCZOS))
+
+                canvas_w = final_images[0].width + (2 * border_px)
+                start_x = border_px
+                start_y = border_px
+
+            canvas = Image.new("RGB", (canvas_w, canvas_h), bg_hex)
+            curr_y = start_y
+            for img in final_images:
+                canvas.paste(img, (start_x, curr_y))
+                curr_y += img.height + gap_px
+
         else:
-            gap_px = int(canvas_h * Toolkit.STACK_GAP_PCT)
-        safe_w, safe_h = Toolkit._calculate_safe_area(canvas_w, canvas_h, settings)
+            ratio_str = settings.get("canvas_ratio") or "4:5"
+            ratio_val = Toolkit.RATIO_MAP.get(ratio_str) or 4 / 5
+            canvas_w = int(ref_h * ratio_val)
 
-        total_gaps = gap_px * (len(images) - 1)
-        available_h_for_images = safe_h - total_gaps
-        max_img_w = max(img.width for img in images)
-        total_original_h = sum(img.height for img in images)
-        scale_w = safe_w / max_img_w
-        scale_h = available_h_for_images / total_original_h
-        final_scale = min(scale_w, scale_h)
+            # Determine Padding first to set Gap
+            _, _, pad_t, _ = Toolkit._calculate_base_padding(canvas_w, ref_h, settings)
+            gap_px = pad_t
+            total_gaps = gap_px * (len(images) - 1)
 
-        resized_images = []
-        for img in images:
-            w = int(img.width * final_scale)
-            h = int(img.height * final_scale)
-            resized_images.append(img.resize((w, h), resample=Image.Resampling.LANCZOS))
+            safe_w, safe_h = Toolkit._calculate_safe_area(canvas_w, ref_h, settings)
+            available_h_for_images = safe_h - total_gaps
 
-        canvas = Image.new("RGB", (canvas_w, canvas_h), bg_hex)
-        stack_content_h = sum(img.height for img in resized_images) + total_gaps
+            max_img_w = max_w
+            total_original_h = sum(img.height for img in images)
 
-        _, _, pad_t, _ = Toolkit._calculate_base_padding(canvas_w, canvas_h, settings)
-        if layout == "uniform":
-            pad_data = settings.get("padding") or {}
-            pad_t = int(canvas_h * ((pad_data.get("uniform") or 5) / 100))
+            scale_w = safe_w / max_img_w
+            scale_h = available_h_for_images / total_original_h
+            final_scale = min(scale_w, scale_h)
 
-        local_y_offset = (safe_h - stack_content_h) // 2
-        current_y = pad_t + local_y_offset
+            resized_images = []
+            for img in images:
+                w = int(img.width * final_scale)
+                h = int(img.height * final_scale)
+                resized_images.append(img.resize((w, h), resample=Image.Resampling.LANCZOS))
 
-        for r_img in resized_images:
-            current_x = (canvas_w - r_img.width) // 2
-            canvas.paste(r_img, (current_x, current_y))
-            current_y += r_img.height + gap_px
+            canvas = Image.new("RGB", (canvas_w, ref_h), bg_hex)
+
+            stack_content_h = sum(img.height for img in resized_images) + total_gaps
+
+            # Re-use the pad_t we calculated earlier for vertical centering offset
+            local_y_offset = (safe_h - stack_content_h) // 2
+            current_y = pad_t + local_y_offset
+
+            for r_img in resized_images:
+                current_x = (canvas_w - r_img.width) // 2
+                canvas.paste(r_img, (current_x, current_y))
+                current_y += r_img.height + gap_px
 
         output_dir = paths[0].parent / "panelizer_output"
         output_dir.mkdir(exist_ok=True)
@@ -340,7 +388,7 @@ class Toolkit:
         canvas.paste(final_img, pos)
         output_dir = source_dir / "panelizer_output"
         output_dir.mkdir(exist_ok=True)
-        save_path = output_dir / f"{stem}_panel.jpg"
+        save_path = output_dir / f"{stem}{Toolkit.FILENAME_SUFFIX}.jpg"
 
         if canvas.mode in ("RGBA", "P"):
             canvas = canvas.convert("RGB")

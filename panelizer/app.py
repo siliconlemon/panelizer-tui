@@ -110,7 +110,7 @@ class Panelizer(NeonApp):
         s.register_default("img_pad_right", 4)
         s.register_default("img_pad_top", 3)
         s.register_default("img_pad_bottom", 3)
-        s.register_default("img_pad_uniform", 3)
+        s.register_default("img_pad_uniform", 2)
 
         s.register_default("canvas_height", "2500")
         s.register_default(
