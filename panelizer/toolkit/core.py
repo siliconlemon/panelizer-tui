@@ -21,8 +21,10 @@ class Toolkit:
         "lightgray": "#D3D3D3",
         "darkgray": "#333333",
     }
+
     MIN_SPLIT_ASPECT = 2 / 3
     STACK_GAP_PCT = 0.05
+    MAX_STACK_ASPECT = 2.2
 
     @staticmethod
     def prepare_queue(files: List[str], settings: dict) -> List[Tuple[List[str], dict]]:
@@ -77,11 +79,12 @@ class Toolkit:
 
     @staticmethod
     def _is_stackable(file_path: str) -> bool:
-        """Checks if an image is suitable for stacking (Wide > 16:9)."""
+        """Checks if an image is suitable for stacking (Wide > 16:9 BUT < 2.2)."""
         try:
             with Image.open(file_path) as img:
                 ratio = img.width / img.height
-                return ratio > 1.77
+                # Must be wide enough (1.77) but not SO wide that it should be a panorama (2.2)
+                return 1.77 < ratio < Toolkit.MAX_STACK_ASPECT
         except (OSError, UnidentifiedImageError):
             return False
 
@@ -89,20 +92,20 @@ class Toolkit:
     def _are_compatible(file1: str, file2: str) -> bool:
         """
         Checks if two images should be stacked together.
-        1. Both must be wide.
+        1. Both must be wide (within stackable range).
         2. Ratios must be similar (within tolerance).
         """
         try:
             with Image.open(file1) as img1, Image.open(file2) as img2:
                 r1 = img1.width / img1.height
                 r2 = img2.width / img2.height
-                # Is the second image also wide?
-                if r2 <= 1.77:
+
+                if not (1.77 < r2 < Toolkit.MAX_STACK_ASPECT):
                     return False
-                # Are ratios similar? (don't stack a 16:9 with a 32:9 etc.)
                 # Allow 5% deviation
                 if abs(r1 - r2) / r1 > 0.05:
                     return False
+
                 return True
         except (OSError, UnidentifiedImageError):
             return False
@@ -120,15 +123,11 @@ class Toolkit:
 
         path = valid_paths[0]
         try:
-            # BRANCH: STACK PROCESSING
             if len(valid_paths) > 1:
                 Toolkit._render_stack(valid_paths, settings)
                 return True
-
-            # BRANCH: SINGLE IMAGE PROCESSING
             with Image.open(path) as img:
                 is_wide = (img.width / img.height) > 1.5
-
                 if settings.get("split_wide_images") and is_wide:
                     Toolkit._process_panorama(img, settings, path)
                 else:
@@ -141,7 +140,6 @@ class Toolkit:
                     )
             return True
 
-        # Catch specific PIL/OS errors to allow the batch to continue
         except (OSError, UnidentifiedImageError, ValueError, TypeError) as e:
             output_dir = path.parent / "panelizer_output"
             output_dir.mkdir(exist_ok=True)
@@ -152,7 +150,6 @@ class Toolkit:
                 with open(fail_file, "w", encoding="utf-8") as f:
                     f.write(error_msg)
             except OSError:
-                # If we can't write to disk (read-only, etc.), just fail silently
                 pass
             return False
 
@@ -169,72 +166,45 @@ class Toolkit:
         bg_color_name = settings.get("background_color") or "white"
         bg_hex = Toolkit.COLOR_MAP.get(bg_color_name, "#FFFFFF")
 
-        # Load all images
         images = [Image.open(p) for p in paths]
-
-        # Calculate Gap (Pixels)
         if layout == "uniform":
             pad_data = settings.get("padding") or {}
             border_pct = pad_data.get("uniform") or 5
             gap_px = int(canvas_h * (border_pct / 100))
         else:
-            # Framing: Fixed 5% of height
             gap_px = int(canvas_h * Toolkit.STACK_GAP_PCT)
-
-        # Determine available area
-        # For stacking, we treat the Safe Area as the container for the *entire stack*.
         safe_w, safe_h = Toolkit._calculate_safe_area(canvas_w, canvas_h, settings)
 
-        # --- Stack Geometry Calculation ---
         total_gaps = gap_px * (len(images) - 1)
         available_h_for_images = safe_h - total_gaps
-
-        # Sum of original heights
         max_img_w = max(img.width for img in images)
         total_original_h = sum(img.height for img in images)
-
-        # 1. Scale based on Width constraint
         scale_w = safe_w / max_img_w
-
-        # 2. Scale based on Height constraint
         scale_h = available_h_for_images / total_original_h
-
-        # Choose the smaller scale (Contain)
         final_scale = min(scale_w, scale_h)
 
-        # Resize images
         resized_images = []
         for img in images:
             w = int(img.width * final_scale)
             h = int(img.height * final_scale)
             resized_images.append(img.resize((w, h), resample=Image.Resampling.LANCZOS))
 
-        # Create Canvas
         canvas = Image.new("RGB", (canvas_w, canvas_h), bg_hex)
-
-        # Calculate Y Start (Vertically Center the whole stack)
         stack_content_h = sum(img.height for img in resized_images) + total_gaps
 
-        # Get top offset from settings
         _, _, pad_t, _ = Toolkit._calculate_base_padding(canvas_w, canvas_h, settings)
         if layout == "uniform":
-            # For Uniform, safe area logic handled the border, but we need absolute pos
             pad_data = settings.get("padding") or {}
             pad_t = int(canvas_h * ((pad_data.get("uniform") or 5) / 100))
 
-        # The Safe Area Top starts at pad_t.
-        # We center the stack *within* the Safe Height.
         local_y_offset = (safe_h - stack_content_h) // 2
         current_y = pad_t + local_y_offset
 
-        # Draw
         for r_img in resized_images:
-            # Center horizontally
             current_x = (canvas_w - r_img.width) // 2
             canvas.paste(r_img, (current_x, current_y))
             current_y += r_img.height + gap_px
 
-        # Save
         output_dir = paths[0].parent / "panelizer_output"
         output_dir.mkdir(exist_ok=True)
         stem = paths[0].stem + "_stacked"
@@ -243,8 +213,6 @@ class Toolkit:
         if canvas.mode in ("RGBA", "P"):
             canvas = canvas.convert("RGB")
         canvas.save(save_path, quality=95, subsampling=0)
-
-    # --- HELPERS ---
 
     @staticmethod
     def _process_panorama(img: Image.Image, settings: dict, path: Path) -> None:
