@@ -1,12 +1,11 @@
-import asyncio
 from pathlib import Path
 
 from textual.theme import Theme
 
-from textual_neon import NeonApp, Settings, Paths, LoadingScreen, DoneScreen, ScreenData
 from panelizer.tui import HomeScreen
 from panelizer.tui import PanelizerLaunchScreen
-from toolkit import Toolkit
+from panelizer.toolkit import Toolkit
+from textual_neon import NeonApp, Settings, Paths, LoadingScreen, DoneScreen, ScreenData
 
 
 class Panelizer(NeonApp):
@@ -70,8 +69,8 @@ class Panelizer(NeonApp):
             validate=lambda result: bool(result),
             data_from_result=lambda result: ScreenData(
                 source="home",
-                payload=[(f, result) for f in result["selected_files"]],
-                payload_names=list(map(lambda path: Path(path).name, result["selected_files"])),
+                payload=Toolkit.prepare_queue(result["selected_files"], result),
+                payload_names=Toolkit.get_queue_names(result["selected_files"], result),
                 function=Toolkit.process_image,
             ),
         )
