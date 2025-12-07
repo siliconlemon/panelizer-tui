@@ -6,6 +6,7 @@ from textual.theme import Theme
 from textual_neon import NeonApp, Settings, Paths, LoadingScreen, DoneScreen, ScreenData
 from panelizer.tui import HomeScreen
 from panelizer.tui import PanelizerLaunchScreen
+from toolkit import Toolkit
 
 
 class Panelizer(NeonApp):
@@ -61,10 +62,6 @@ class Panelizer(NeonApp):
                 payload=None
             ),
         )
-        # noinspection PyUnusedLocal
-        async def process_file_demo(file_path: str) -> bool:
-            await asyncio.sleep(0.01)
-            return True
         self.state_machine.register(
             "home",
             screen_class=HomeScreen,
@@ -73,9 +70,9 @@ class Panelizer(NeonApp):
             validate=lambda result: bool(result),
             data_from_result=lambda result: ScreenData(
                 source="home",
-                payload=result["selected_files"],
-                payload_names=list(map(lambda path: path.split("/")[-1], result["selected_files"])),
-                function=process_file_demo,
+                payload=[(f, result) for f in result["selected_files"]],
+                payload_names=list(map(lambda path: Path(path).name, result["selected_files"])),
+                function=Toolkit.process_image,
             ),
         )
         self.state_machine.register(
