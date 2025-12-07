@@ -56,17 +56,17 @@ HomeScreen {
     height: 4;
 }
 
+#img-pad-uniform {
+    margin: 0 2 0 0;
+    height: auto;
+}
+
 .hidden {
     display: none;
 }
 
 CompleteInputGrid {
     margin: 0;
-}
-
-#img-pad-uniform {
-    margin: 0 2 0 0;
-    height: auto;
 }
 
 CompleteSelect {
