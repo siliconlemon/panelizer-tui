@@ -1,4 +1,3 @@
-import math
 from pathlib import Path
 from typing import Tuple, Literal, List
 
@@ -268,16 +267,65 @@ class Toolkit:
     @staticmethod
     def _process_panorama(img: Image.Image, settings: dict, path: Path) -> None:
         canvas_h = int(settings.get("canvas_height") or 2500)
-        ratio_val = Toolkit.RATIO_MAP.get(settings.get("canvas_ratio") or "4:5", 4 / 5)
-        canvas_w = int(canvas_h * ratio_val)
 
         layout = settings.get("layout")
+        pad_data = settings.get("padding") or {}
+        enforcement = pad_data.get("enforcement", "none")
+
+        if layout == "uniform" and enforcement != "none":
+            ratio_val = Toolkit.RATIO_MAP.get(enforcement) or 4 / 5
+        else:
+            ratio_val = Toolkit.RATIO_MAP.get(settings.get("canvas_ratio") or "4:5", 4 / 5)
+
+        canvas_w = int(canvas_h * ratio_val)
 
         if layout == "uniform":
-            pad_data = settings.get("padding") or {}
             border_pct = pad_data.get("uniform") or 5
             orientation = pad_data.get("orientation") or "inward"
             border_px = int(canvas_h * (border_pct / 100))
+
+            if enforcement != "none":
+                scale = canvas_h / img.height
+                natural_width = img.width * scale
+
+                num_panels = int(natural_width / canvas_w)
+                if num_panels < 1:
+                    num_panels = 1
+
+                total_target_w = num_panels * canvas_w
+
+                work_img = ImageOps.fit(
+                    img,
+                    (total_target_w, canvas_h),
+                    method=Image.Resampling.LANCZOS,
+                    centering=(0.5, 0.5)
+                )
+
+                current_x = 0
+                for i in range(num_panels):
+                    slice_img = work_img.crop((current_x, 0, current_x + canvas_w, canvas_h))
+                    current_x += canvas_w
+                    suffix = f"_{i + 1}"
+
+                    pad_overrides = {}
+                    if num_panels > 1:
+                        if i == 0:
+                            pad_overrides = {"right": 0}
+                        elif i == num_panels - 1:
+                            pad_overrides = {"left": 0}
+                        else:
+                            pad_overrides = {"left": 0, "right": 0}
+
+                    Toolkit._render_panel(
+                        slice_img,
+                        settings,
+                        path.stem + suffix,
+                        path.parent,
+                        align="center",
+                        pad_overrides=pad_overrides,
+                        bypass_resize=True
+                    )
+                return
 
             if orientation == "inward":
                 pad_l = 0
@@ -286,6 +334,7 @@ class Toolkit:
                 pad_l = border_px
                 pad_r = border_px
         else:
+            # Framing Logic
             pad_l, pad_r, _, _ = Toolkit._calculate_base_padding(canvas_w, canvas_h, settings)
 
         _, safe_h = Toolkit._calculate_safe_area(canvas_w, canvas_h, settings)
@@ -301,11 +350,9 @@ class Toolkit:
 
         if remaining_for_middle <= 0:
             if natural_width > width_first:
-                num_middle = 0
                 total_target_w = width_first + width_last
                 layout_map = ["first", "last"]
             else:
-                num_middle = 0
                 total_target_w = width_first
                 layout_map = ["first"]
         else:
@@ -339,7 +386,6 @@ class Toolkit:
             x_end = current_x + slice_w
             slice_img = work_img.crop((current_x, 0, x_end, safe_h))
             current_x = x_end
-
             suffix = f"_{i + 1}"
 
             Toolkit._render_panel(
@@ -478,6 +524,8 @@ class Toolkit:
         pad_data = settings.get("padding") or {}
         border_pct = pad_data.get("uniform") or 5
         orientation = pad_data.get("orientation") or "inward"
+        enforcement = pad_data.get("enforcement") or "none"
+
         base_border = int(target_h * (border_pct / 100))
 
         b_left = 0 if "left" in pad_overrides else base_border
@@ -485,32 +533,96 @@ class Toolkit:
         b_top = base_border
         b_bottom = base_border
 
-        if bypass_resize:
-            new_w, new_h = img.size
-            base_img = img
+        # HANDLE ENFORCEMENT
+        if enforcement != "none":
+            ratio_val = Toolkit.RATIO_MAP.get(enforcement) or 4 / 5
+
+            if orientation == "inward":
+                target_w = int(target_h * ratio_val)
+
+                if bypass_resize:
+                    base_img = img
+                else:
+                    base_img = ImageOps.fit(
+                        img,
+                        (target_w, target_h),
+                        method=Image.Resampling.LANCZOS,
+                        centering=(0.5, 0.5)
+                    )
+
+                new_w, new_h = base_img.size
+                # noinspection DuplicatedCode
+                canvas_w = new_w
+                canvas_h = new_h
+
+                crop_box = (b_left, b_top, new_w - b_right, new_h - b_bottom)
+                # Safety
+                if crop_box[2] <= crop_box[0] or crop_box[3] <= crop_box[1]:
+                    mid_x, mid_y = new_w // 2, new_h // 2
+                    crop_box = (mid_x, mid_y, mid_x + 1, mid_y + 1)
+
+                resized_img = base_img.crop(crop_box)
+                pos = (b_left, b_top)
+
+            else:
+                # noinspection DuplicatedCode
+                if bypass_resize:
+                    new_w, new_h = img.size
+                    base_img = img
+                else:
+                    new_h = target_h
+                    scale = new_h / img.height if img.height else 1.0
+                    new_w = int(img.width * scale)
+                    base_img = img.resize((new_w, new_h), resample=Image.Resampling.LANCZOS)
+
+                min_w = new_w + b_left + b_right
+                min_h = new_h + b_top + b_bottom
+                current_ratio = min_w / min_h
+
+                if current_ratio < ratio_val:
+                    final_h = min_h
+                    final_w = int(min_h * ratio_val)
+                else:
+                    final_w = min_w
+                    final_h = int(min_w / ratio_val)
+
+                canvas_w = final_w
+                canvas_h = final_h
+                resized_img = base_img
+
+                pos_x = (canvas_w - new_w) // 2
+                pos_y = (canvas_h - new_h) // 2
+                pos = (pos_x, pos_y)
+
         else:
-            new_h = target_h
-            scale = new_h / img.height if img.height else 1.0
-            new_w = int(img.width * scale)
-            base_img = img.resize((new_w, new_h), resample=Image.Resampling.LANCZOS)
+            # noinspection DuplicatedCode
+            if bypass_resize:
+                new_w, new_h = img.size
+                base_img = img
+            else:
+                new_h = target_h
+                scale = new_h / img.height if img.height else 1.0
+                new_w = int(img.width * scale)
+                base_img = img.resize((new_w, new_h), resample=Image.Resampling.LANCZOS)
 
-        if orientation == "outward" or bypass_resize:
-            canvas_w = new_w + b_left + b_right
-            canvas_h = new_h + b_top + b_bottom
-            resized_img = base_img
-            pos = (b_left, b_top)
-        else:
-            canvas_w = new_w
-            canvas_h = new_h
-            crop_box = (b_left, b_top, new_w - b_right, new_h - b_bottom)
+            if orientation == "outward" or bypass_resize:
+                canvas_w = new_w + b_left + b_right
+                canvas_h = new_h + b_top + b_bottom
+                resized_img = base_img
+                pos = (b_left, b_top)
+            else:
+                # noinspection DuplicatedCode
+                canvas_w = new_w
+                canvas_h = new_h
+                crop_box = (b_left, b_top, new_w - b_right, new_h - b_bottom)
 
-            # Safety Check
-            if crop_box[2] <= crop_box[0] or crop_box[3] <= crop_box[1]:
-                mid_x, mid_y = new_w // 2, new_h // 2
-                crop_box = (mid_x, mid_y, mid_x + 1, mid_y + 1)
+                # Safety Check
+                if crop_box[2] <= crop_box[0] or crop_box[3] <= crop_box[1]:
+                    mid_x, mid_y = new_w // 2, new_h // 2
+                    crop_box = (mid_x, mid_y, mid_x + 1, mid_y + 1)
 
-            resized_img = base_img.crop(crop_box)
-            pos = (b_left, b_top)
+                resized_img = base_img.crop(crop_box)
+                pos = (b_left, b_top)
 
         canvas = Image.new("RGB", (canvas_w, canvas_h), bg_color)
         return canvas, resized_img, pos

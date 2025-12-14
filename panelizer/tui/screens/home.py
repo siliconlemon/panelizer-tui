@@ -7,12 +7,12 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.validation import Integer
-from textual.widgets import Input, Select
+from textual.widgets import Select
 
 from panelizer.toolkit import Toolkit
 from textual_neon import SettingsPalette, CompleteInputGrid, CompleteSelect, \
     Toggle, NeonButton, DirSelectDialog, ChoicePalette, ListSelectDialog, \
-    PathButton, Settings, ChoiceButton, SettingsButton, Paths, NeonInput, ScreenData, \
+    PathButton, Settings, ChoiceButton, SettingsButton, Paths, ScreenData, \
     NeonHeader, NeonSelect, LoadingScreen, DoneScreen, CompleteInput
 
 
@@ -94,6 +94,13 @@ class HomeScreen(Screen[dict]):
                         initial=s.get("background_color"),
                         options=s.get("background_color_options"),
                     )
+                    yield CompleteSelect(
+                        select_id="uniform-enforcement-select",
+                        label="Aspect Ratio Enforcement",
+                        initial=s.get("uniform_border_enforcement"),
+                        options=s.get("uniform_border_enforcement_options"),
+                        id="uniform-enforcement-wrapper"
+                    )
                     yield Toggle(
                         switch_id="split-wide-toggle-switch",
                         text="Split Wide Images",
@@ -134,9 +141,8 @@ class HomeScreen(Screen[dict]):
             maximum=self.max_pad_percentage,
         )
         for input_id in ["#pad-left", "#pad-right", "#pad-top", "#pad-bottom"]:
-            input_widget = self.query_one(input_id, Input)
-            input_widget.validators.append(img_pad_validator)
-        self.query_one("#img-pad-uniform", Input).validators.append(img_pad_validator)
+            self.query_one(input_id, CompleteInput).validators.append(img_pad_validator)
+        self.query_one("#img-pad-uniform", CompleteInput).validators.append(img_pad_validator)
         self._update_path_display()
         self._update_padding_inputs()
         current_layout = self.settings.get("layout")
@@ -148,6 +154,7 @@ class HomeScreen(Screen[dict]):
         is_uniform = layout == "uniform"
         self.query_one("#uniform-pad-container").set_class(not is_uniform, "hidden")
         self.query_one("#uniform-orientation-wrapper").set_class(not is_uniform, "hidden")
+        self.query_one("#uniform-enforcement-wrapper").set_class(not is_uniform, "hidden")
         self.query_one("#pad-grid").set_class(is_uniform, "hidden")
         self.query_one("#ratio-select", NeonSelect).parent.parent.set_class(is_uniform, "hidden")
         self.query_one("#ratio-wrapper").set_class(is_uniform, "hidden")
@@ -160,14 +167,14 @@ class HomeScreen(Screen[dict]):
     async def path_button_pressed(self) -> None:
         self.run_worker(self._select_dir_worker, exclusive=True)
 
-    @on(NeonInput.Blurred)
-    def input_blurred(self, event: Input.Submitted) -> None:
+    @on(CompleteInput.Blurred)
+    def input_blurred(self, event: CompleteInput.Blurred) -> None:
         mapping = {
             "pad-left": "img_pad_left",
             "pad-right": "img_pad_right",
             "pad-top": "img_pad_top",
             "pad-bottom": "img_pad_bottom",
-            "img-pad-uniform": "img-pad-uniform",
+            "img-pad-uniform": "img_pad_uniform",
         }
 
         if event.input.id in mapping:
@@ -187,6 +194,7 @@ class HomeScreen(Screen[dict]):
 
             if val != old_val:
                 self.settings.set(setting_key, val)
+
             event.input.value = str(val)
             self._update_padding_inputs()
 
@@ -199,6 +207,10 @@ class HomeScreen(Screen[dict]):
         new_layout = str(event.value)
         self.settings.set("layout", new_layout)
         self._refresh_layout_inputs(new_layout)
+
+    @on(Select.Changed, "#uniform-enforcement-select")
+    def uniform_enforcement_changed(self, event: Select.Changed) -> None:
+        self.settings.set("uniform_border_enforcement", str(event.value))
 
     @on(Select.Changed, "#uniform-orientation-select")
     def uniform_orientation_changed(self, event: Select.Changed) -> None:
@@ -308,7 +320,8 @@ class HomeScreen(Screen[dict]):
         if layout == "uniform":
             padding = {
                 "uniform": s.get("img_pad_uniform"),
-                "orientation": s.get("uniform_border_orientation")
+                "orientation": s.get("uniform_border_orientation"),
+                "enforcement": s.get("uniform_border_enforcement"),
             }
             canvas_ratio = None
         else:
@@ -376,6 +389,15 @@ class HomeScreen(Screen[dict]):
             )
         )
 
+    def _update_padding_inputs(self) -> None:
+        """Updates padding input values by reading directly from settings."""
+        s = self.settings
+        self.query_one("#pad-left", CompleteInput).value = str(s.get("img_pad_left"))
+        self.query_one("#pad-right", CompleteInput).value = str(s.get("img_pad_right"))
+        self.query_one("#pad-top", CompleteInput).value = str(s.get("img_pad_top"))
+        self.query_one("#pad-bottom", CompleteInput).value = str(s.get("img_pad_bottom"))
+        self.query_one("#img-pad-uniform", CompleteInput).value = str(s.get("img_pad_uniform"))
+
     async def _select_files_worker(self) -> None:
         """A screen-level worker that pushes a file select dialog and updates the UI."""
         all_matching_files = await asyncio.to_thread(self._get_all_files_in_dir_blocking)
@@ -428,15 +450,6 @@ class HomeScreen(Screen[dict]):
         path_btn = self.query_one("#path-btn", PathButton)
         path = self._selected_dir.as_posix()
         path_btn.label = path
-
-    def _update_padding_inputs(self) -> None:
-        """Updates padding input values by reading directly from settings."""
-        s = self.settings
-        self.query_one("#pad-left", Input).value = str(s.get("img_pad_left"))
-        self.query_one("#pad-right", Input).value = str(s.get("img_pad_right"))
-        self.query_one("#pad-top", Input).value = str(s.get("img_pad_top"))
-        self.query_one("#pad-bottom", Input).value = str(s.get("img_pad_bottom"))
-        self.query_one("#img-pad-uniform", Input).value = str(s.get("img_pad_uniform"))
 
     def _file_path_to_tuple(self, path: Path) -> tuple[str, str, bool]:
         """Formats a Path object into a tuple for the ListSelectDialog."""
