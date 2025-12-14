@@ -267,46 +267,39 @@ class Toolkit:
 
     @staticmethod
     def _process_panorama(img: Image.Image, settings: dict, path: Path) -> None:
-        """Standard Panorama logic."""
+        """
+        Calculates the nearest integer number of panels, fits the image to that
+        exact aspect ratio (cropping excess evenly), and slices it.
+        """
         canvas_h = int(settings.get("canvas_height") or 2500)
-        ratio = Toolkit.RATIO_MAP.get(settings.get("canvas_ratio") or "4:5", 4 / 5)
-        canvas_w = int(canvas_h * ratio)
+        ratio_val = Toolkit.RATIO_MAP.get(settings.get("canvas_ratio") or "4:5", 4 / 5)
 
+        canvas_w = int(canvas_h * ratio_val)
         safe_w, safe_h = Toolkit._calculate_safe_area(canvas_w, canvas_h, settings)
-        safe_aspect = safe_w / safe_h
 
-        if safe_aspect < Toolkit.MIN_SPLIT_ASPECT:
-            threshold_aspect = safe_aspect * 0.25
-        else:
-            threshold_aspect = Toolkit.MIN_SPLIT_ASPECT
+        img_ratio = img.width / img.height
+        panel_ratio = safe_w / safe_h
+        exact_panels = img_ratio / panel_ratio
 
-        scale = safe_h / img.height
-        proj_w = int(img.width * scale)
-        proj_h = int(img.height * scale)
+        num_panels = round(exact_panels)
+        if num_panels < 1:
+            num_panels = 1
 
-        exact_panels = proj_w / safe_w
-        num_panels = math.ceil(exact_panels)
+        target_total_w = num_panels * safe_w
+        target_total_h = safe_h
 
-        remainder_w = proj_w - ((num_panels - 1) * safe_w)
-        if remainder_w <= 0: remainder_w = safe_w
-
-        remainder_aspect = remainder_w / safe_h
-
-        if num_panels > 1 and remainder_aspect < threshold_aspect:
-            target_total_w = (num_panels - 1) * safe_w
-            scale = target_total_w / img.width
-            proj_w = int(img.width * scale)
-            proj_h = int(img.height * scale)
-            num_panels = num_panels - 1
-
-        work_img = img.resize((proj_w, proj_h), resample=Image.Resampling.LANCZOS)
+        work_img = ImageOps.fit(
+            img,
+            (target_total_w, target_total_h),
+            method=Image.Resampling.LANCZOS,
+            centering=(0.5, 0.5)
+        )
 
         for i in range(num_panels):
             x_start = i * safe_w
             x_end = x_start + safe_w
-            if x_end > proj_w:
-                x_end = proj_w
-            slice_img = work_img.crop((x_start, 0, x_end, proj_h))
+
+            slice_img = work_img.crop((x_start, 0, x_end, target_total_h))
 
             pad_overrides = {}
             is_first = (i == 0)
