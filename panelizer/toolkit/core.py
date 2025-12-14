@@ -267,50 +267,79 @@ class Toolkit:
 
     @staticmethod
     def _process_panorama(img: Image.Image, settings: dict, path: Path) -> None:
-        """
-        Calculates the nearest integer number of panels, fits the image to that
-        exact aspect ratio (cropping excess evenly), and slices it.
-        """
         canvas_h = int(settings.get("canvas_height") or 2500)
         ratio_val = Toolkit.RATIO_MAP.get(settings.get("canvas_ratio") or "4:5", 4 / 5)
-
         canvas_w = int(canvas_h * ratio_val)
-        safe_w, safe_h = Toolkit._calculate_safe_area(canvas_w, canvas_h, settings)
 
-        img_ratio = img.width / img.height
-        panel_ratio = safe_w / safe_h
-        exact_panels = img_ratio / panel_ratio
+        layout = settings.get("layout")
 
-        num_panels = round(exact_panels)
-        if num_panels < 1:
-            num_panels = 1
+        if layout == "uniform":
+            pad_data = settings.get("padding") or {}
+            border_pct = pad_data.get("uniform") or 5
+            orientation = pad_data.get("orientation") or "inward"
+            border_px = int(canvas_h * (border_pct / 100))
 
-        target_total_w = num_panels * safe_w
-        target_total_h = safe_h
+            if orientation == "inward":
+                pad_l = 0
+                pad_r = 0
+            else:
+                pad_l = border_px
+                pad_r = border_px
+        else:
+            pad_l, pad_r, _, _ = Toolkit._calculate_base_padding(canvas_w, canvas_h, settings)
+
+        _, safe_h = Toolkit._calculate_safe_area(canvas_w, canvas_h, settings)
+
+        width_first = canvas_w - pad_l
+        width_last = canvas_w - pad_r
+        width_middle = canvas_w
+
+        scale = safe_h / img.height
+        natural_width = img.width * scale
+
+        remaining_for_middle = natural_width - width_first - width_last
+
+        if remaining_for_middle <= 0:
+            if natural_width > width_first:
+                num_middle = 0
+                total_target_w = width_first + width_last
+                layout_map = ["first", "last"]
+            else:
+                num_middle = 0
+                total_target_w = width_first
+                layout_map = ["first"]
+        else:
+            num_middle = round(remaining_for_middle / width_middle)
+            layout_map = ["first"] + ["middle"] * num_middle + ["last"]
+            total_target_w = width_first + width_last + (num_middle * width_middle)
 
         work_img = ImageOps.fit(
             img,
-            (target_total_w, target_total_h),
+            (total_target_w, safe_h),
             method=Image.Resampling.LANCZOS,
             centering=(0.5, 0.5)
         )
 
-        for i in range(num_panels):
-            x_start = i * safe_w
-            x_end = x_start + safe_w
+        current_x = 0
+        align: Literal["center", "left", "right"]
+        for i, p_type in enumerate(layout_map):
+            if p_type == "first":
+                slice_w = width_first
+                align = "right"
+                pad_overrides = {"right": 0}
+            elif p_type == "last":
+                slice_w = width_last
+                align = "left"
+                pad_overrides = {"left": 0}
+            else:
+                slice_w = width_middle
+                align = "center"
+                pad_overrides = {"left": 0, "right": 0}
 
-            slice_img = work_img.crop((x_start, 0, x_end, target_total_h))
+            x_end = current_x + slice_w
+            slice_img = work_img.crop((current_x, 0, x_end, safe_h))
+            current_x = x_end
 
-            pad_overrides = {}
-            is_first = (i == 0)
-            is_last = (i == num_panels - 1)
-
-            if not is_last:
-                pad_overrides["right"] = 0
-            if not is_first:
-                pad_overrides["left"] = 0
-
-            align: Literal["center", "left", "right"] = "left" if not is_first else "right"
             suffix = f"_{i + 1}"
 
             Toolkit._render_panel(
