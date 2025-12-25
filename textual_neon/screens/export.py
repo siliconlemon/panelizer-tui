@@ -217,10 +217,21 @@ class ExportScreen(Screen[str | None]):
                 return new_path
             counter += 1
 
+    def _get_extensions_display(self) -> str:
+        """Format a display string of file types being exported (e.g., 'CSV, JSON')."""
+        if not self.export_payloads:
+            return ""
+        extensions = {Path(name).suffix[1:].upper() for name, _ in self.export_payloads}
+        valid_extensions = sorted([f"{e}" for e in extensions if e])
+        return ", ".join(valid_extensions)
+
     async def _handle_export(self) -> None:
         """Handle the directory select dialog and writing all export files."""
         if not self.export_payloads or self.has_exported:
             return
+
+        file_names_list = [f[0] for f in self.export_payloads]
+        file_names_display = ", ".join(file_names_list)
 
         try:
             export_btn = self.query_one("#export-to-dir", NeonButton)
@@ -232,7 +243,10 @@ class ExportScreen(Screen[str | None]):
 
         dialog_title = self.dialog_title
         base_dirname = self.base_dirname
-        dialog_title += f" (subdir '{base_dirname}/' will be created)"
+        types_str = self._get_extensions_display()
+
+        dialog_title += f" (saving {types_str} to subdir '{base_dirname}/')"
+
         export_dir: str | None = await self.app.push_screen_wait(
             DirSelectDialog(location=self.export_path, title=dialog_title)
         )
@@ -245,9 +259,10 @@ class ExportScreen(Screen[str | None]):
         try:
             export_base_path = Path(export_dir)
             base_target_dir = export_base_path / base_dirname
-            filenames_to_write = {filename for filename, _ in self.export_payloads}
-            target_dir = self._get_unique_path(base_target_dir, filenames_to_write)
 
+            filenames_to_write = set(file_names_list)
+
+            target_dir = self._get_unique_path(base_target_dir, filenames_to_write)
             target_dir.mkdir(parents=True, exist_ok=True)
 
             for filename, content in self.export_payloads:
@@ -259,9 +274,8 @@ class ExportScreen(Screen[str | None]):
                     with target_file_path.open("wb") as f:
                         f.write(content)
 
-            s = "s" if len(self.export_payloads) > 1 else ""
             self.notify(
-                f"Exported {len(self.export_payloads)} file{s} to: {target_dir.as_posix()}",
+                f"Successfully exported files: {file_names_display}\nLocation: {target_dir.as_posix()}",
                 title="Export Complete",
                 severity="information"
             )
