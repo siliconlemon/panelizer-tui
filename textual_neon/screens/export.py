@@ -75,12 +75,12 @@ class ExportScreen(Screen[str | None]):
 
             NeonButton#export-to-dir {
                 width: auto;
-                min-width: 46; 
+                min-width: 54; 
                 margin: 0 2 0 2;
             }
             NeonButton#home, NeonButton#quit {
                 width: auto;
-                min-width: 22;
+                min-width: 26;
                 margin: 0 2 0 2;
             }   
         }
@@ -182,33 +182,38 @@ class ExportScreen(Screen[str | None]):
                 pass
 
     @staticmethod
-    def _get_unique_path(target_path: Path) -> Path:
+    def _get_unique_path(target_path: Path, conflict_filenames: set[str] | None = None) -> Path:
         """
-        Checks if a path exists. If so, appends (2), (3), etc.
-        Works for both files and directories.
-
-        Example:
-        ::
-            .../_export.csv -> .../_export(2).csv
-            .../export/ -> .../export(2)/
+        Finds a safe path.
+        If the path exists, it checks if any 'conflict_filenames' are present inside.
+        If safe (no conflicts), returns the existing path (merging).
+        If unsafe (conflicts found), increments to (2), (3), etc. until a safe path is found.
         """
         if not target_path.exists():
             return target_path
 
-        parent = target_path.parent
-        is_dir = target_path.is_dir() or not target_path.suffix
+        def is_safe_dir(path_to_check: Path) -> bool:
+            if not path_to_check.exists():
+                return True
+            if not path_to_check.is_dir() or not conflict_filenames:
+                return False
 
+            for existing_file in path_to_check.iterdir():
+                if existing_file.name in conflict_filenames:
+                    return False
+            return True
+
+        if is_safe_dir(target_path):
+            return target_path
+
+        parent = target_path.parent
         stem = target_path.name
-        suffix = ""
-        if not is_dir:
-            stem = target_path.stem
-            suffix = target_path.suffix
 
         counter = 2
         while True:
-            new_name = f"{stem}({counter}){suffix}"
+            new_name = f"{stem}({counter})"
             new_path = parent / new_name
-            if not new_path.exists():
+            if is_safe_dir(new_path):
                 return new_path
             counter += 1
 
@@ -240,18 +245,9 @@ class ExportScreen(Screen[str | None]):
         try:
             export_base_path = Path(export_dir)
             base_target_dir = export_base_path / base_dirname
-            final_target_dir = base_target_dir
-            if base_target_dir.exists():
-                filenames_to_write = {filename for filename, _ in self.export_payloads}
-                has_overlap = False
-                for existing_file in base_target_dir.iterdir():
-                    if existing_file.is_file() and existing_file.name in filenames_to_write:
-                        has_overlap = True
-                        break
-                if has_overlap:
-                    final_target_dir = self._get_unique_path(base_target_dir)
+            filenames_to_write = {filename for filename, _ in self.export_payloads}
+            target_dir = self._get_unique_path(base_target_dir, filenames_to_write)
 
-            target_dir = final_target_dir
             target_dir.mkdir(parents=True, exist_ok=True)
 
             for filename, content in self.export_payloads:
