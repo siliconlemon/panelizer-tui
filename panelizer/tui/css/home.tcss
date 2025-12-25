@@ -69,6 +69,10 @@ CompleteInputGrid {
     margin: 0;
 }
 
+CompleteInput {
+    margin: 0 1 0 0;
+}
+
 CompleteSelect {
     margin: 0 3 0 0;
 }

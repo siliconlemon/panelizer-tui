@@ -75,12 +75,12 @@ class ExportScreen(Screen[str | None]):
 
             NeonButton#export-to-dir {
                 width: auto;
-                min-width: 46; 
+                min-width: 54; 
                 margin: 0 2 0 2;
             }
             NeonButton#home, NeonButton#quit {
                 width: auto;
-                min-width: 22;
+                min-width: 26;
                 margin: 0 2 0 2;
             }   
         }
@@ -182,40 +182,56 @@ class ExportScreen(Screen[str | None]):
                 pass
 
     @staticmethod
-    def _get_unique_path(target_path: Path) -> Path:
+    def _get_unique_path(target_path: Path, conflict_filenames: set[str] | None = None) -> Path:
         """
-        Checks if a path exists. If so, appends (2), (3), etc.
-        Works for both files and directories.
-
-        Example:
-        ::
-            .../_export.csv -> .../_export(2).csv
-            .../export/ -> .../export(2)/
+        Finds a safe path.
+        If the path exists, it checks if any 'conflict_filenames' are present inside.
+        If safe (no conflicts), returns the existing path (merging).
+        If unsafe (conflicts found), increments to (2), (3), etc. until a safe path is found.
         """
         if not target_path.exists():
             return target_path
 
-        parent = target_path.parent
-        is_dir = target_path.is_dir() or not target_path.suffix
+        def is_safe_dir(path_to_check: Path) -> bool:
+            if not path_to_check.exists():
+                return True
+            if not path_to_check.is_dir() or not conflict_filenames:
+                return False
 
+            for existing_file in path_to_check.iterdir():
+                if existing_file.name in conflict_filenames:
+                    return False
+            return True
+
+        if is_safe_dir(target_path):
+            return target_path
+
+        parent = target_path.parent
         stem = target_path.name
-        suffix = ""
-        if not is_dir:
-            stem = target_path.stem
-            suffix = target_path.suffix
 
         counter = 2
         while True:
-            new_name = f"{stem}({counter}){suffix}"
+            new_name = f"{stem}({counter})"
             new_path = parent / new_name
-            if not new_path.exists():
+            if is_safe_dir(new_path):
                 return new_path
             counter += 1
+
+    def _get_extensions_display(self) -> str:
+        """Format a display string of file types being exported (e.g., 'CSV, JSON')."""
+        if not self.export_payloads:
+            return ""
+        extensions = {Path(name).suffix[1:].upper() for name, _ in self.export_payloads}
+        valid_extensions = sorted([f"{e}" for e in extensions if e])
+        return ", ".join(valid_extensions)
 
     async def _handle_export(self) -> None:
         """Handle the directory select dialog and writing all export files."""
         if not self.export_payloads or self.has_exported:
             return
+
+        file_names_list = [f[0] for f in self.export_payloads]
+        file_names_display = ", ".join(file_names_list)
 
         try:
             export_btn = self.query_one("#export-to-dir", NeonButton)
@@ -227,7 +243,10 @@ class ExportScreen(Screen[str | None]):
 
         dialog_title = self.dialog_title
         base_dirname = self.base_dirname
-        dialog_title += f" (subdir '{base_dirname}/' will be created)"
+        types_str = self._get_extensions_display()
+
+        dialog_title += f" (saving {types_str} to subdir '{base_dirname}/')"
+
         export_dir: str | None = await self.app.push_screen_wait(
             DirSelectDialog(location=self.export_path, title=dialog_title)
         )
@@ -240,18 +259,10 @@ class ExportScreen(Screen[str | None]):
         try:
             export_base_path = Path(export_dir)
             base_target_dir = export_base_path / base_dirname
-            final_target_dir = base_target_dir
-            if base_target_dir.exists():
-                filenames_to_write = {filename for filename, _ in self.export_payloads}
-                has_overlap = False
-                for existing_file in base_target_dir.iterdir():
-                    if existing_file.is_file() and existing_file.name in filenames_to_write:
-                        has_overlap = True
-                        break
-                if has_overlap:
-                    final_target_dir = self._get_unique_path(base_target_dir)
 
-            target_dir = final_target_dir
+            filenames_to_write = set(file_names_list)
+
+            target_dir = self._get_unique_path(base_target_dir, filenames_to_write)
             target_dir.mkdir(parents=True, exist_ok=True)
 
             for filename, content in self.export_payloads:
@@ -263,9 +274,8 @@ class ExportScreen(Screen[str | None]):
                     with target_file_path.open("wb") as f:
                         f.write(content)
 
-            s = "s" if len(self.export_payloads) > 1 else ""
             self.notify(
-                f"Exported {len(self.export_payloads)} file{s} to: {target_dir.as_posix()}",
+                f"Successfully exported files: {file_names_display}\nLocation: {target_dir.as_posix()}",
                 title="Export Complete",
                 severity="information"
             )

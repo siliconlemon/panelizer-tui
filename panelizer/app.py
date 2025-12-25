@@ -92,7 +92,7 @@ class Panelizer(NeonApp):
             ]
         )
 
-        s.register_default("canvas_ratio", "4:5")
+        s.register_default("canvas_ratio", "3:4")
         s.register_default(
             "canvas_ratio_options",
             [
@@ -132,9 +132,18 @@ class Panelizer(NeonApp):
             ]
         )
 
+        s.register_default("uniform_border_enforcement", "3:4")
+        s.register_default(
+            "uniform_border_enforcement_options",
+            [
+                ("No size enforcement", "none"),
+                ("Portrait (3:4)", "3:4"),
+                ("Portrait (4:5)", "4:5"),
+            ]
+        )
+
         s.register_default("split_wide_active", False)
         s.register_default("stack_landscape_active", False)
-
 
 def terminal_entry():
     """
